@@ -1,5 +1,9 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), using the [Redux](https://redux.js.org/) and [Redux Toolkit](https://redux-toolkit.js.org/) template.
 
+We build the UI with [React Bootstrap](https://react-bootstrap.github.io/) and [React Bootstrap Icons](https://github.com/ismamz/react-bootstrap-icons). 
+
+For routing we use [React Router Dom](https://v5.reactrouter.com/web/guides/quick-start). 
+
 ## Available Scripts
 
 In the project directory, you can run:
