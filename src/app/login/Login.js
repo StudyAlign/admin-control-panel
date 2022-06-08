@@ -35,15 +35,15 @@ export default class Login extends React.Component {
                 <label style={{"fontWeight":"bold", "fontSize":"24px"}}>StudyAlign</label>
                 <Container className="login-container">
                     <form onSubmit={this.handleSubmit}>
-                        <Row> 
+                        <Row className="m-1"> 
                             E-Mail
-                            <input type="text" value={this.state.email} onChange={this.handleMail}/>      
+                            <input type="text" name="email" value={this.state.email} onChange={this.handleMail}/>      
                         </Row>
-                        <Row className="mt-2"> 
+                        <Row className="m-1"> 
                             Password 
                             <input type="password" value={this.state.password} onChange={this.handlePW}/>      
                         </Row>
-                        <Row className="mt-3"> 
+                        <Row className="m-1 mt-3"> 
                             <input type="submit" value="Login" /> 
                         </Row>
                     </form>

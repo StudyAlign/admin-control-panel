@@ -30,15 +30,15 @@ export default class ForgotPW extends React.Component {
                 <label style={{"fontWeight":"bold", "fontSize":"24px"}}>StudyAlign</label>
                 <Container className="login-container">
                     <form onSubmit={this.handleSubmit}>
-                        <Row>
+                        <Row className="m-1">
                             <label style={{"fontWeight":"bold"}}> Reset Password</label>
                             <p> We will send you an email to reset your password. If you cannot remember your email  please contact an administrator.</p>
                         </Row>
-                        <Row> 
+                        <Row className="m-1"> 
                             E-Mail
                             <input type="text" name="email" value={this.state.email} onChange={this.handleMail}/>      
                         </Row>
-                        <Row className="mt-3"> 
+                        <Row className="mt-3 m-1"> 
                             <input type="submit" value="Reset Password" /> 
                         </Row>
                     </form>
