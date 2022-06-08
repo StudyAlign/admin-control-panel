@@ -11,6 +11,15 @@
 
 }
 
+#wrapper {
+  padding: 4rem;
+}
+
+.top-bar {
+  background-color: #c4c4c4;
+}
+
+
 .App {
   text-align: center;
 }

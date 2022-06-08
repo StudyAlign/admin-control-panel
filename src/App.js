@@ -1,10 +1,13 @@
 import React from 'react';
 import logo from './logo.svg';
 import { Counter } from './features/counter/Counter';
+import Topbar from "./components/Topbar";
 import './App.css';
 
 function App() {
   return (
+    <div>
+    <Topbar/>
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
@@ -51,6 +54,7 @@ function App() {
           </a>
         </span>
       </header>
+    </div>
     </div>
   );
 }
