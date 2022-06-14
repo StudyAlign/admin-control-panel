@@ -1,0 +1,91 @@
+.sidebar {
+    left: 0;
+    min-height: 100vh !important;
+    padding: 10px 10px 0 10px;
+    background-color: #ececec;
+    color: red;
+}
+
+#sidebar-wrapper{
+    min-height: 100vh !important;
+    margin-left: -1rem;
+    -webkit-transition: margin .25s ease-out;
+    -moz-transition: margin .25s ease-out;
+    -o-transition: margin .25s ease-out;
+    transition: margin .25s ease-out;
+    width: 18%;
+}
+
+#page-content-wrapper {
+    width: 82%;
+    position: relative;
+}
+
+.sidebar-item {
+    color: black;
+    font-size: 16pt;
+    margin-bottom: 5px;
+}
+
+.sidebar-item:hover {
+    color: #224396;
+}
+
+.study-title {
+    color: #494949;
+    font-size: 32pt;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.small-title {
+    color: #494949;
+    font-weight: bold;
+    font-size: 22pt;
+}
+
+.small-button {
+    text-align: center;
+    color: white;
+    background-color: #224396;
+    border-radius: 20px;
+    border-style: solid;
+    border-color: transparent;
+    padding: 1px 20px 1px 20px;
+    margin-left: 5px;
+    margin-top: -5px;
+}
+
+.big-button {
+    text-align: center;
+    color: white;
+    background-color: #224396;
+    border-radius: 5px;
+    border-style: solid;
+    border-color: transparent;
+    padding: 5px 30px 5px 30px;
+    position: absolute;
+    bottom: 10px;
+    left: 0px;
+}
+
+table {
+    margin-top: 20px;
+    font-size: 14pt;
+}
+
+tr {
+    height: 60px;
+    vertical-align: top;
+}
+
+.content-name {
+    padding-right: 40px;
+    color: #494949;
+}
+
+li {
+    margin-top: 5px;
+    color: black;
+    font-size: 14pt;
+}

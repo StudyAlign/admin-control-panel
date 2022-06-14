@@ -1,5 +1,6 @@
 import {Container, Nav, NavDropdown, Navbar} from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.css";
+import "../App.css"
 import React from "react";
 
 export default function Topbar(props) {
