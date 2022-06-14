@@ -1,16 +1,16 @@
 import {Container, Nav, NavDropdown, Navbar} from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.css";
-import "../App.css"
+import "./Components.css"
 import React from "react";
 
-export default function Topbar(props) {
+export default function Topbar() {
     return(
-        <Navbar className="top-bar" variant="light">
+        <Navbar className="top-bar">
             <Container fluid>
-                <Navbar.Brand href="#home">StudyAlign</Navbar.Brand>
+                <Navbar.Brand href="#home" className="top-bar-logo">StudyAlign</Navbar.Brand>
                 <Nav className="ml-auto">
-                    <Nav.Link href="#users">Users</Nav.Link>
-                    <NavDropdown title="My Name" menuVariant="light">
+                    <Nav.Link href="#users" className="top-bar-item">Users</Nav.Link>
+                    <NavDropdown title="My Name" id="top-bar-dropdown" >
                         <NavDropdown.Item href="#profile">Profile</NavDropdown.Item>
                         <NavDropdown.Item href="#logout">Logout</NavDropdown.Item>
                     </NavDropdown>
