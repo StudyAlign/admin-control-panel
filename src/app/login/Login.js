@@ -1,7 +1,7 @@
 import React from "react";
 import {Container, Row} from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.css";
-import "../../App.css"
+import "./Login.css";
 
 export default class Login extends React.Component {
     constructor(props) {
@@ -35,9 +35,9 @@ export default class Login extends React.Component {
                 <label style={{"fontWeight":"bold", "fontSize":"24px"}}>StudyAlign</label>
                 <Container className="login-container">
                     <form onSubmit={this.handleSubmit}>
-                        <Row className="m-1"> 
+                        <Row className="m-1">
                             E-Mail
-                            <input type="text" name="email" value={this.state.email} onChange={this.handleMail}/>      
+                            <input type="email" name="email" value={this.state.email} onChange={this.handleMail}/>
                         </Row>
                         <Row className="m-1"> 
                             Password 

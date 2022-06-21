@@ -2,7 +2,7 @@ import React from "react";
 import {Container, Row} from "react-bootstrap";
 import { ArrowLeft } from 'react-bootstrap-icons';
 import "bootstrap/dist/css/bootstrap.css";
-import "../../App.css"
+import "./Login.css";
 
 export default class ForgotPW extends React.Component {
     constructor(props) {
@@ -36,7 +36,7 @@ export default class ForgotPW extends React.Component {
                         </Row>
                         <Row className="m-1"> 
                             E-Mail
-                            <input type="text" name="email" value={this.state.email} onChange={this.handleMail}/>      
+                            <input type="email" name="email" value={this.state.email} onChange={this.handleMail}/>
                         </Row>
                         <Row className="mt-3 m-1"> 
                             <input type="submit" value="Reset Password" /> 
