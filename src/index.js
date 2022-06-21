@@ -1,8 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-//import App from './App';
-import StudyOverviewLayout from "./app/study_overview/StudyOverviewLayout";
+import App from './App';
 import { store } from './app/store';
 import { Provider } from 'react-redux';
 import * as serviceWorker from './serviceWorker';
@@ -10,7 +9,7 @@ import * as serviceWorker from './serviceWorker';
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      <StudyOverviewLayout content={'overview'}/>
+      <App/>
     </Provider>
   </React.StrictMode>,
   document.getElementById('root')
