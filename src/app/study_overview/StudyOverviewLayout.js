@@ -4,17 +4,20 @@ import SidebarLayout from "./SidebarLayout";
 import Overview from "./Overview";
 import Procedure from "./Procedure";
 import InteractionData from "./InteractionData";
+import { useParams } from "react-router";
 
-export default function StudyOverviewLayout(props) {
+export default function StudyOverviewLayout() {
+
+    const { page } = useParams()
 
     let content
-    if(props.content === 'overview') {
+    if(page === 'overview') {
         content = <Overview/>
     }
-    else if(props.content === 'procedure') {
+    else if(page === 'procedure') {
         content = <Procedure/>
     }
-    else if(props.content === 'data') {
+    else if(page === 'data') {
         content = <InteractionData/>
     }
     else {
