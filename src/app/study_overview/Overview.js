@@ -6,16 +6,23 @@ import "./StudyOverview.css"
 export default function Overview() {
     const { study_id } = useParams()
 
-    // TODO fetch informations from backend with the given study_id
+    const study = {
+        name: "Collaborative writing with AI - Pilot",
+        startDate: "2022-04-21T07:15:07.446Z",
+        endDate: "2022-05-21T07:15:07.446Z",
+        isActive: true,
+        id: study_id,
+        description: "This is a first pilot study for collaborative writing with AI. ......",
+        consent: "string"
+    } // TODO fetch information from backend with the given study_id
+
         return(
             <>
-                <h1 className="study-title"> Collaborative writing with AI - Pilot (#{study_id}) </h1>
-
                 <table>
                     <tbody>
                     <tr>
                         <td className="content-name"> Description: </td>
-                        <td> This is a first pilot study for collaborative writing with AI. ...... </td>
+                        <td> {study.description} </td>
                     </tr>
                     <tr>
                         <td className="content-name"> Start Date: </td>

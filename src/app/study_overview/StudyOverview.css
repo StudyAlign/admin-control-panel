@@ -1,6 +1,6 @@
 .sidebar {
     left: 0;
-    min-height: 100vh !important;
+    min-height: 100%;
     padding: 10px 10px 0 10px;
     background-color: #ececec;
     color: red;
@@ -27,6 +27,11 @@
     margin-bottom: 5px;
 }
 
+.sidebar-item-selected {
+    color: #224396;
+    font-weight: bold;
+}
+
 .sidebar-item:hover {
     color: #224396;
 }
@@ -36,6 +41,12 @@
     font-size: 32pt;
     font-weight: bold;
     margin-top: 10px;
+}
+
+.study-id {
+    font-size: 26pt;
+    font-weight: normal;
+    color: #585858;
 }
 
 .small-title {
@@ -89,3 +100,53 @@ li {
     color: black;
     font-size: 14pt;
 }
+
+.procedure-object {
+    text-align: center;
+    padding: 7px;
+    background-color: #224396;
+    color: white;
+    border-radius: 20px;
+    margin-bottom: 8px;
+}
+
+.procedure-box {
+    border-color: #494949;
+    border-style: solid;
+    border-width: 1px;
+    height: 80%;
+    margin-top: 20px;
+}
+
+.box-header {
+    text-align: center;
+    font-weight: bold;
+    padding: 10px;
+    color: black;
+    background-color: #ECECEC;
+}
+
+.box-content {
+    padding: 10px;
+}
+
+.data-table {
+    border: solid 1px black;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.data-table-header {
+    border-bottom: solid 1px black;
+    border-right: solid 1px black;
+    background-color: #ECECEC;
+    font-weight: bold;
+    padding-top: 12px;
+    padding-left: 15px;
+}
+
+.data-table-content {
+    border: solid 1px black;
+    padding-left: 15px;
+}
+
