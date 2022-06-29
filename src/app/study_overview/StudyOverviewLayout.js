@@ -6,6 +6,7 @@ import Procedure from "./Procedure";
 import InteractionData from "./InteractionData";
 import { useParams } from "react-router";
 
+
 export default function StudyOverviewLayout() {
 
     const { study_id, page } = useParams()
@@ -31,11 +32,11 @@ export default function StudyOverviewLayout() {
 
     return (
         <>
-        <Topbar/>
-        <SidebarLayout>
-            <h1 className="study-title"> {study.name} <label className="study-id">(#{study_id})</label> </h1>
-            {content}
-        </SidebarLayout>
+            <Topbar/>
+            <SidebarLayout>
+                <h1 className="study-title"> {study.name} <label className="study-id">(#{study_id})</label> </h1>
+                {content}
+            </SidebarLayout>
         </>
     )
 }

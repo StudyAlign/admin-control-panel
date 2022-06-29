@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-    BrowserRouter as Router,
+    BrowserRouter,
     Routes,
     Route
 } from "react-router-dom";
@@ -13,14 +13,14 @@ import StudyOverviewLayout from "./app/study_overview/StudyOverviewLayout";
 
 export default function App() {
     return (
-        <Router>
+        <BrowserRouter>
             <Routes>
-                <Route path="/"             element={<Dashboard/>} /> 
-                <Route path="/login"        element={<Login/>} />
-                <Route path="/login/forgot" element={<ForgotPW/>} /> 
-                <Route path="/login/reset"  element={<ResetPW/>} />
-                <Route path="/study/:study_id/:page"  element={<StudyOverviewLayout/>} />
+                <Route path="/"                         element={<Dashboard/>} />
+                <Route path="/login"                    element={<Login/>} />
+                <Route path="/login/forgot"             element={<ForgotPW/>} />
+                <Route path="/login/reset"              element={<ResetPW/>} />
+                <Route path="/study/:study_id/:page"    element={<StudyOverviewLayout/>} />
             </Routes>
-        </Router>
+        </BrowserRouter>
     );
 }

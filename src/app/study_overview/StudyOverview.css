@@ -7,17 +7,16 @@
 }
 
 #sidebar-wrapper{
-    min-height: 100vh !important;
+    height: 93vh;
     margin-left: -1rem;
     -webkit-transition: margin .25s ease-out;
     -moz-transition: margin .25s ease-out;
     -o-transition: margin .25s ease-out;
     transition: margin .25s ease-out;
-    width: 18%;
+    width: 250px;
 }
 
 #page-content-wrapper {
-    width: 82%;
     position: relative;
 }
 
@@ -74,7 +73,6 @@
     border-radius: 5px;
     border-style: solid;
     border-color: transparent;
-    padding: 5px 30px 5px 30px;
     position: absolute;
     bottom: 10px;
     left: 0px;
@@ -105,9 +103,17 @@ li {
     text-align: center;
     padding: 7px;
     background-color: #224396;
+    border-color: #224396;
+    border-style: solid;
+    border-width: 2px;
     color: white;
     border-radius: 20px;
     margin-bottom: 8px;
+}
+
+.toggled {
+    height: 100px;
+    background-color: rgba(34, 67, 150, 0.55);
 }
 
 .procedure-box {

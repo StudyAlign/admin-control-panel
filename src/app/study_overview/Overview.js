@@ -13,7 +13,8 @@ export default function Overview() {
         isActive: true,
         id: study_id,
         description: "This is a first pilot study for collaborative writing with AI. ......",
-        consent: "string"
+        consent: "string",
+        link: "https://www.studyalign.com/invite/0374011473910"
     } // TODO fetch information from backend with the given study_id
 
         return(
@@ -38,7 +39,7 @@ export default function Overview() {
                     </tr>
                     <tr>
                         <td className="content-name"> Invite Link: </td>
-                        <td> https://www.studyalign.com/invite/0374011473910 </td>
+                        <td> <a href={study.link}>{study.link}</a> </td>
                     </tr>
                     </tbody>
                 </table>
@@ -47,7 +48,7 @@ export default function Overview() {
 
                 <h1 className="small-title"> Collaborators </h1>
                 <ul>
-                    <li> Max Mustermann (Your) </li>
+                    <li> Max Mustermann (You) </li>
                     <li> Jonas Jäger </li>
                 </ul>
                 <button type="button" className="small-button"> + Add </button>

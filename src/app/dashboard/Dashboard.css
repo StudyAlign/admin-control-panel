@@ -1,0 +1,88 @@
+.emptyDashboard {
+    text-align: center;
+    height: 90vh;
+    position: relative;
+}
+
+.center {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
+.text-button-box {
+    margin-bottom: 80px;
+}
+
+.headline {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 10px
+}
+
+.button1 {
+    text-align: center;
+    color: white;
+    background-color: #224396;
+    border-radius: 0px;
+    border-style: solid;
+    border-color: transparent;
+    padding: 5px 20px 5px 20px;
+}
+
+.curr-studies {
+    margin-top: 20px;
+    margin-left: 2vw;
+    margin-right: 2vw;
+    width: 96vw;
+}
+
+.study-box {
+    background-color: #ECECEC;
+    box-shadow: 1px 4px 4px rgba(0,0,0, 0.25);
+    height: auto;
+    width: 400px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-right: 5px;
+    margin-bottom: 15px;
+}
+
+.status-label {
+    border-radius: 30px;
+    width: 100px;
+    padding: 5px 10px 5px 10px;
+    text-align: center;
+    color: white;
+}
+
+.running {
+    background-color: #71BE4D;
+}
+
+.finished {
+    background-color: #7DB7ED;
+}
+
+.created {
+    background-color: #efbb76;
+}
+
+.participants-label {
+    margin-top: 5px;
+    text-align: right;
+    width: 100%;
+}
+
+.study-name-label {
+    margin-top: 15px;
+    font-size: 26px;
+    line-height: 30px;
+}
+
+.date-label {
+    margin-top: 12px;
+}

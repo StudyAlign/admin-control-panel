@@ -5,7 +5,7 @@ import "./StudyOverview.css"
 import "bootstrap/dist/css/bootstrap.css";
 
 export default function SidebarLayout(props){
-    const { study_id, page } = useParams() // TODO use page to highlight the currently selected link
+    const { study_id, page } = useParams()
 
     let classOverview = 'sidebar-item'
     let classProcedure = 'sidebar-item'
@@ -27,13 +27,13 @@ export default function SidebarLayout(props){
                     <Col xs={"auto"} id="sidebar-wrapper">
                         <Nav className="col-md-12 d-none d-md-block sidebar">
                             <Nav.Item>
-                                <Nav.Link className={classOverview} href={"/study/"+study_id+"/overview"}>Overview</Nav.Link>
+                                <Nav.Link className={classOverview} href={"./overview"}>Overview</Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link className={classProcedure} href={"/study/"+study_id+"/procedure"}>Procedure</Nav.Link>
+                                <Nav.Link className={classProcedure} href={"./procedure"}>Procedure</Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link className={classData} href={"/study/"+study_id+"/data"}>Interaction Data</Nav.Link>
+                                <Nav.Link className={classData} href={"./data"}>Interaction Data</Nav.Link>
                             </Nav.Item>
                         </Nav>
                     </Col>

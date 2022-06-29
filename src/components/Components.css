@@ -1,5 +1,7 @@
 .top-bar {
     background-color: #c4c4c4;
+    height: 7vh;
+    min-height: 45px;
 }
 
 .top-bar-logo {
