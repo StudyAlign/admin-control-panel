@@ -1,8 +1,6 @@
 import React from "react";
 import {Container, Row} from "react-bootstrap";
 import { ArrowLeft } from 'react-bootstrap-icons';
-import "bootstrap/dist/css/bootstrap.css";
-import "../../App.css"
 
 export default class ForgotPW extends React.Component {
     constructor(props) {

@@ -1,7 +1,5 @@
 import React from "react";
 import {Container, Row} from "react-bootstrap";
-import "bootstrap/dist/css/bootstrap.css";
-import "../../App.css"
 
 export default class ResetPW extends React.Component {
     constructor(props) {
