@@ -35,18 +35,18 @@ export default class ResetPW extends React.Component {
                 <label style={{"fontWeight":"bold", "fontSize":"24px"}}>StudyAlign</label>
                 <Container className="login-container">
                     <form onSubmit={this.handleSubmit}>
-                        <Row>
-                            <div style={{"fontWeight":"bold"}}>Enter new Password</div>
+                        <Row className="m-1" style={{"fontWeight":"bold"}}>
+                            Enter new password
                         </Row>
-                        <Row className="mt-2"> 
+                        <Row className="mt-2 m-1"> 
                             Password
                             <input type="password" value={this.state.password} onChange={this.handlePW} />      
                         </Row>
-                        <Row className="mt-2"> 
+                        <Row className="mt-2 m-1"> 
                             Repeat Password
                             <input type="password" value={this.state.passwordRepeat} onChange={this.handlePWRep} />      
                         </Row>
-                        <Row className="mt-3"> 
+                        <Row className="mt-3 m-1"> 
                             <input type="submit" value="Confirm Password" /> 
                         </Row>
                     </form>
