@@ -1,4 +1,4 @@
-import React, {createContext, useEffect} from 'react';
+import React, {createContext, useEffect, useState} from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -12,26 +12,43 @@ import Login from './app/login/Login';
 import ForgotPW from './app/login/ForgotPW';
 import ResetPW from './app/login/ResetPW';
 import Dashboard from './app/dashboard/Dashboard';
-import RequireAuth, {AuthRoute, AuthProvider} from "./components/Auth";
-import {useDispatch} from "react-redux";
-import {userSlice} from "./redux/reducers/userSlice";
+import RequireAuth, {AuthRoute, AuthProvider, useAuth} from "./components/Auth";
+import {useDispatch, useSelector, useStore} from "react-redux";
+import {
+    me,
+    refreshToken,
+    selectUser,
+    selectUserTokens,
+    authSlice,
+    selectIsAuthenticated
+} from "./redux/reducers/authSlice";
+import {unwrapResult} from "@reduxjs/toolkit";
 
 export default function App() {
-    const dispatch = useDispatch()
+    const dispatch = useDispatch();
+    const store = useStore();
 
-    useEffect(( ) => {
-        dispatch(userSlice.actions.initApi())
-    }, [])
+    const [init, setInit] = useState(false);
+    if (!init) {
+        //Init StudyAlignApi and read tokens
+        dispatch(authSlice.actions.initApi())
+        //TODO: Do we need to read tokens into redux store?
+        dispatch(authSlice.actions.readTokens())
+        setInit(true)
+    }
 
     return (
         <AuthProvider>
             <BrowserRouter>
                 <Routes>
-                    <Route path="/"             element={<Dashboard/>} />
-                    <Route path="/login"        element={<Login/>} />
+                    <Route element={<RequireAuth />}>
+                        <Route path="/" element={<Dashboard/>} />
+                        <Route path="/login/reset" element={<ResetPW/>} />
+                    </Route>
+
+                    <Route path="/login" element={<Login/>} />
                     <Route path="/login/forgot" element={<ForgotPW/>} />
-                    <Route path="/login/reset"  element={<ResetPW/>} />
-                    <Route path="/authtest"     element={<RequireAuth><Dashboard /></RequireAuth>} />
+                    <Route path="/login/reset" element={<ResetPW/>} />
                 </Routes>
             </BrowserRouter>
         </AuthProvider>

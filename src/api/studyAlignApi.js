@@ -1,4 +1,5 @@
 import studyAlignLib from "./study-align-lib";
+import {authSlice} from "../redux/reducers/authSlice";
 
 const STUDY_ALIGN_URL = process.env.REACT_APP_STUDY_ALIGN_URL || "http://localhost:8000";
 
@@ -6,8 +7,31 @@ let sal;
 
 export function initApi(studyId) {
     if (!sal) {
-        console.log("INITIALIZING study align api...")
+        console.log("Init StudyAlign api...")
         sal = new studyAlignLib(STUDY_ALIGN_URL, studyId);
+    }
+}
+
+export async function apiWithAuth(apiMethod, args, dispatch) {
+    try {
+        const response = await apiMethod(args)
+        return Promise.resolve(response)
+    } catch (err) {
+        if (err.status === 401 || err.status === 403) { //unauthorized or forbidden
+            try {
+                console.log("Refreshing access token...")
+                const tokenResponse = await userRefreshTokenApi()
+                updateAccessTokenApi(tokenResponse.body);
+                const response = await apiMethod(args)
+                return Promise.resolve(response)
+            } catch (err) {
+                console.log("refreshing failed, logout")
+                dispatch(authSlice.actions.logout())
+                return Promise.reject(err)
+            }
+        }
+        dispatch(authSlice.actions.logout())
+        return Promise.reject(err)
     }
 }
 
@@ -43,6 +67,10 @@ export function readTokensApi(tokenType) {
         return sal.readTokens(tokenType);
     }
     return sal.readTokens();
+}
+
+export function userRefreshTokenApi() {
+    return sal.userRefreshToken();
 }
 
 export function refreshTokenApi() {

@@ -1,17 +1,14 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {
     deleteTokensApi,
-    getStudyApi,
-    meApi,
-    getParticipantApi,
-    participateApi,
     readTokensApi,
     refreshTokenApi,
-    storeTokensApi, updateAccessTokenApi, userLoginApi, userMeApi, initApi
+    storeTokensApi, userLoginApi, userMeApi, initApi, apiWithAuth
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
 
 const initialState = {
+    isAuthenticated: false,
     user: null,
     tokens: null,
     api: IDLE,
@@ -24,7 +21,7 @@ const initialState = {
 export const userLogin = createAsyncThunk(
     'userLogin',
     async (data, { getState, rejectWithValue, requestId}) => {
-        const { api, currentRequestId } = getState().user
+        const { api, currentRequestId } = getState().auth
         if (api !== LOADING || requestId !== currentRequestId) {
             return
         }
@@ -39,13 +36,13 @@ export const userLogin = createAsyncThunk(
 
 export const me = createAsyncThunk(
     'me',
-    async (arg, { getState, rejectWithValue, requestId}) => {
-        const { api, currentRequestId } = getState().user
+    async (arg, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().auth
         if (api !== LOADING || requestId !== currentRequestId) {
             return
         }
         try {
-            const response = await userMeApi()
+            const response = await apiWithAuth(userMeApi, arg, dispatch)
             return response
         } catch (err) {
             return rejectWithValue(err)
@@ -53,22 +50,49 @@ export const me = createAsyncThunk(
     }
 );
 
+export const refreshToken = createAsyncThunk(
+    'refreshToken',
+    async (arg, { getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().auth
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await refreshTokenApi()
+            return response
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
+
 // reducers
-export const userSlice = createSlice({
-    name: 'user',
+export const authSlice = createSlice({
+    name: 'auth',
     initialState,
     reducers: {
         initApi(state, action) {
             initApi(action.payload);
         },
         readTokens(state, action) {
-            console.log("read tokens")
+            console.log("Read tokens from localstorage")
             state.tokens = readTokensApi()
         },
         deleteTokens(state, action) {
-            console.log("delete tokens")
+            console.log("Delete tokens from localstorage")
             deleteTokensApi()
             state.tokens = null
+        },
+        setIsAuthenticated(state, action) {
+            state.isAuthenticated = true;
+        },
+        logout(state, action) {
+            console.log("Logging out")
+            deleteTokensApi()
+            state.tokens = null
+            state.user = null
+            state.isAuthenticated = false
         }
     },
     extraReducers: (builder) => {
@@ -83,9 +107,9 @@ export const userSlice = createSlice({
                     state.api = IDLE
                     const tokens = action.payload.body;
                     state.tokens = tokens;
-                    console.log("save tokens to storage")
                     storeTokensApi(tokens);
                     state.status = action.payload.status
+                    state.isAuthenticated = true
                     state.currentRequestId = undefined
                 }
             })
@@ -99,6 +123,7 @@ export const userSlice = createSlice({
                     state.api = IDLE
                     state.user = action.payload.body
                     state.status = action.payload.status
+                    state.isAuthenticated = true
                     state.currentRequestId = undefined
                 }
             })
@@ -108,9 +133,29 @@ export const userSlice = createSlice({
 
 // selectors
 
+export const selectIsAuthenticated = (state) => {
+    return state.auth.isAuthenticated;
+}
+
+export const selectUserTokens = (state) => {
+    return state.auth.tokens;
+}
+
 export const selectUser = (state) => {
-    return state.user.user;
+    return state.auth.user;
+}
+
+export const selectUserApi = (state) => {
+    return state.auth.api;
+}
+
+export const selectUserError = (state) => {
+    return state.auth.error;
+}
+
+export const selectUserStatus = (state) => {
+    return state.auth.status;
 }
 
 
-export default userSlice.reducer;
+export default authSlice.reducer;
