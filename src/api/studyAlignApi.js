@@ -3,6 +3,8 @@ import {authSlice} from "../redux/reducers/authSlice";
 
 const STUDY_ALIGN_URL = process.env.REACT_APP_STUDY_ALIGN_URL || "http://localhost:8000";
 
+console.log(process.env)
+
 let sal;
 
 export function initApi(studyId) {
