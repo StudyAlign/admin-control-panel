@@ -1,20 +1,30 @@
 import React, {useEffect, useState} from "react";
 import {Button, Card, Form} from "react-bootstrap";
 import "./login.css";
-import {Link} from "react-router-dom";
+import {Link, Navigate} from "react-router-dom";
 import {useDispatch} from "react-redux";
 import {authSlice, me, userLogin} from "../../redux/reducers/authSlice";
+import {useAuth} from "../../components/Auth";
 
 export default function Login(props) {
     //useDispatch to dispatch redux actions
     const dispatch = useDispatch()
+    const auth = useAuth()
 
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
 
+    const logoutUser = props.logout;
+
     useEffect(( ) => {
         console.log("login use effect")
     }, [])
+
+    useEffect(() => {
+        if (logoutUser) {
+            dispatch(authSlice.actions.logout())
+        }
+    }, [logoutUser])
 
     const handleUsername = (event) => {
         setUsername(event.target.value)
@@ -40,6 +50,10 @@ export default function Login(props) {
         dispatch(authSlice.actions.logout())
     }
 
+    if (auth.isAuthenticated) {
+        return <Navigate to="/" replace />
+    }
+
     return <div className="login-box">
         <Card>
             <Card.Body>
@@ -60,9 +74,6 @@ export default function Login(props) {
                             </Form.Text>
                         </div>
                     </Form>
-                <Button onClick={handleClick}>Me</Button>
-                <Button onClick={handleLogout}>Logout</Button>
-                <Link to="/">Dashboard</Link>
             </Card.Body>
         </Card>
     </div>

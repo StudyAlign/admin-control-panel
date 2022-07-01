@@ -1,48 +1,50 @@
-import React from "react";
-import {Container, Row} from "react-bootstrap";
+import React, {useState} from "react";
+import {Button, Card, Container, Form, Row} from "react-bootstrap";
 import { ArrowLeft } from 'react-bootstrap-icons';
+import {Link} from "react-router-dom";
+import "./login.css";
 
-export default class ForgotPW extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            email: '',  
-        }
+export default function ForgotPW(props) {
 
-        this.handleMail = this.handleMail.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
+    const [email, setEmail] = useState("")
+
+    const handleMail = (event) => {
+        setEmail(event.target.value)
     }
 
-    handleMail(event) {
-        this.setState({email: event.target.value})
-    }
-
-    handleSubmit(event) {
+    const handleSubmit = (event) => {
         event.preventDefault();
         console.log("[Reset Password] " + this.state.email)
     }
 
-    render() {
-        return (
-            <div className="login-box">
-                <label style={{"fontWeight":"bold", "fontSize":"24px"}}>StudyAlign</label>
-                <Container className="login-container">
-                    <form onSubmit={this.handleSubmit}>
-                        <Row className="m-1">
-                            <label style={{"fontWeight":"bold"}}> Reset Password</label>
-                            <p> We will send you an email to reset your password. If you cannot remember your email  please contact an administrator.</p>
-                        </Row>
-                        <Row className="m-1"> 
-                            E-Mail
-                            <input type="text" name="email" value={this.state.email} onChange={this.handleMail}/>      
-                        </Row>
-                        <Row className="mt-3 m-1"> 
-                            <input type="submit" value="Reset Password" /> 
-                        </Row>
-                    </form>
-                </Container>
-                <div style={{"textAlign":"left"}}> <ArrowLeft/> Back to Login </div>
-            </div>
-        )
-    }
+    return (
+        <div className="login-box">
+            <Card>
+                <Card.Body>
+                    <Card.Title>StudyAlign</Card.Title>
+                    <Form onSubmit={handleSubmit}>
+                        <Form.Group className="mb-3">
+                            <div className="d-grid">
+                                <Form.Label>Reset Password</Form.Label>
+                                <Form.Text>
+                                    We will send you an email to reset your password. If you cannot remember your email  please contact an administrator.
+                                </Form.Text>
+                            </div>
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="formEmail">
+                            <Form.Label>Email</Form.Label>
+                            <Form.Control required type="text" placeholder="Email" value={email} onChange={handleMail}/>
+                        </Form.Group>
+                        <div className="d-grid">
+                            <Button type="submit" size="lg">Reset Password</Button>
+                            <Form.Text>
+                                <Link to="/login"><ArrowLeft /> Back to Login</Link>
+                            </Form.Text>
+                        </div>
+                    </Form>
+                </Card.Body>
+            </Card>
+        </div>
+    )
+
 }

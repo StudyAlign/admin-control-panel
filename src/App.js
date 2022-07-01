@@ -43,10 +43,10 @@ export default function App() {
                 <Routes>
                     <Route element={<RequireAuth />}>
                         <Route path="/" element={<Dashboard/>} />
-                        <Route path="/login/reset" element={<ResetPW/>} />
                     </Route>
 
                     <Route path="/login" element={<Login/>} />
+                    <Route path="/logout" element={<Login logout/>} />
                     <Route path="/login/forgot" element={<ForgotPW/>} />
                     <Route path="/login/reset" element={<ResetPW/>} />
                 </Routes>
