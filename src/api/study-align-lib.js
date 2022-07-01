@@ -37,7 +37,7 @@ class StudyAlignLib {
             return Object.keys(data).map((key) => {
                 return encodeURIComponent(key) + '=' + encodeURIComponent(data[key]);
             }).join('&');
-        }
+        };
         return new Promise((resolve, reject) => {
             let url = this.apiUrl + "/" + options.path;
             let xhr = new XMLHttpRequest();
@@ -86,35 +86,58 @@ class StudyAlignLib {
                 let params = options.params;
                 let encodedParams = "";
                 if (params && typeof params === 'object') {
-                    encodedParams = encodeParams(params)
+                    encodedParams = encodeParams(params);
                 }
                 xhr.send(encodedParams);
             }
-            if (options.method === "POST") {
+            if (options.method === "POST" || options.method === "PATCH") {
                 xhr.send(options.formData ? encodeParams(options.body) : JSON.stringify(options.body));
             }
         });
+    }
+    basicCreate(path, data) {
+        const options = {
+            method: "PATCH",
+            path: path,
+            headers: {}
+        };
+        this.setHeaders(options);
+        options.body = data;
+        return this.request(options);
+    }
+    basicRead(path) {
+        const options = {
+            method: "GET",
+            path: path,
+            headers: {}
+        };
+        this.setHeaders(options);
+        return this.request(options);
+    }
+    basicUpdate(path, data) {
+        const options = {
+            method: "PATCH",
+            path: path,
+            headers: {}
+        };
+        this.setHeaders(options);
+        options.body = data;
+        return this.request(options);
     }
     // Admin related functions
     userLogin(username, password) {
         const options = {
             method: "POST",
             path: "users/login",
-            headers: {}
+            headers: {},
+            body: { username: username, password: password },
+            formData: true
         };
-        options.body = {username: username, password: password};
-        options.formData = true;
         options.headers["Content-type"] = "application/x-www-form-urlencoded";
         return this.request(options);
     }
     userMe() {
-        const options = {
-            method: "GET",
-            path: "users/me",
-            headers: {}
-        };
-        this.setHeaders(options);
-        return this.request(options);
+        return this.basicRead("users/me");
     }
     userRefreshToken() {
         const options = {
@@ -126,44 +149,157 @@ class StudyAlignLib {
         return this.request(options);
     }
     getUsers() {
-        const options = {
-            method: "GET",
-            path: "users",
-            headers: {}
-        };
-        this.setHeaders(options);
-        return this.request(options);
+        return this.basicRead("users");
     }
-    getUser(user_id) {
-        const options = {
-            method: "GET",
-            path: "users/" + user_id,
-            headers: {}
-        };
-        this.setHeaders(options);
-        return this.request(options);
+    getUser(userId) {
+        return this.basicRead("users/" + userId);
     }
     createUser(user) {
+        return this.basicCreate("users", user);
+    }
+    updateUser(userId, user) {
+        return this.basicUpdate("users/" + userId, user);
+    }
+    // ---- MAINLY FOR USE IN ADMIN FRONTEND ---- //
+    // Studies
+    getStudies() {
+        return this.basicRead("studies");
+    }
+    createStudy(study) {
+        return this.basicCreate("studies", study);
+    }
+    updateStudy(studyId, study) {
+        return this.basicUpdate("studies/" + studyId, study);
+    }
+    generateProcedureWithSteps(studyId, procedure_scheme) {
+        this.basicCreate("studies/" + studyId + "/procedures", procedure_scheme);
+    }
+    getParticipants(studyId) {
+        return this.basicRead("studies/" + studyId + "/participants");
+    }
+    generateParticipants(studyId, amount) {
         const options = {
             method: "POST",
-            path: "users",
-            headers: {}
+            path: "studies/" + studyId + "/participants",
+            headers: {},
+            body: { amount: amount },
+            formData: true,
         };
         this.setHeaders(options);
-        options.body = user;
         return this.request(options);
     }
-    updateUser(user_id, user) {
+    populateSurveyParticipants(studyId) {
+        return this.basicRead("studies/" + studyId + "/survey-participants");
+    }
+    // Conditions
+    getConditionIds(studyId) {
         const options = {
-            method: "POST",
-            path: "users/" + user_id,
-            headers: {}
+            method: "GET",
+            path: "conditions/ids",
+            headers: {},
+            body: { study_id: studyId },
+            formData: true,
         };
         this.setHeaders(options);
-        options.body = user;
         return this.request(options);
     }
-    //Study related functions
+    getCondition(conditionId) {
+        return this.basicRead("conditions/" + conditionId);
+    }
+    createCondition(condition) {
+        return this.basicCreate("conditions", condition);
+    }
+    updateCondition(conditionId, condition) {
+        return this.basicUpdate("conditions/" + conditionId, condition);
+    }
+    getConditions() {
+        return this.basicRead("conditions");
+    }
+    // Procedures
+    getProcedures(studyId) {
+        const options = {
+            method: "GET",
+            path: "procedures",
+            headers: {},
+            body: { study_id: studyId },
+            formData: true,
+        };
+        this.setHeaders(options);
+        return this.request(options);
+    }
+    // Participants
+    getParticipantsByProcedure(procedureId) {
+        const options = {
+            method: "GET",
+            path: "participants",
+            headers: {},
+            body: { procedure_id: procedureId },
+            formData: true,
+        };
+        this.setHeaders(options);
+        return this.request(options);
+    }
+    getParticipantById(participantId) {
+        return this.basicRead("participants/" + participantId);
+    }
+    endParticipantPause(participantToken) {
+        return this.basicRead("participants/" + participantToken + "/end-pause");
+    }
+    //Tasks
+    createTask(task) {
+        return this.basicCreate("tasks", task);
+    }
+    getTask(taskId) {
+        return this.basicRead("tasks/" + taskId);
+    }
+    updateTask(taskId, task) {
+        return this.basicUpdate("tasks/" + taskId, task);
+    }
+    getTasks() {
+        return this.basicRead("tasks");
+    }
+    //Texts
+    createText(text) {
+        return this.basicCreate("texts", text);
+    }
+    getText(textId) {
+        return this.basicRead("texts/" + textId);
+    }
+    updateText(textId, text) {
+        return this.basicUpdate("texts/" + textId, text);
+    }
+    getTexts() {
+        return this.basicRead("texts");
+    }
+    //Questionnaires
+    createQuestionnaire(questionnaire) {
+        return this.basicCreate("questionnaires", questionnaire);
+    }
+    getQuestionnaire(questionnaireId) {
+        return this.basicRead("questionnaires/" + questionnaireId);
+    }
+    updateQuestionnaire(questionnaireId, questionnaire) {
+        return this.basicUpdate("questionnaires/" + questionnaireId, questionnaire);
+    }
+    getQuestionnaires() {
+        return this.basicRead("questionnaires");
+    }
+    //Pauses
+    createPause(pause) {
+        return this.basicCreate("pauses", pause);
+    }
+    getPause(pauseId) {
+        return this.basicRead("pauses/" + pauseId);
+    }
+    updatePause(pauseId, pause) {
+        return this.basicUpdate("pauses/" + pauseId, pause);
+    }
+    getPauses() {
+        return this.basicRead("pauses");
+    }
+    // ---- MAINLY FOR USE IN STUDY FRONTEND ---- //
+    //TODO: read condition config
+    //Study Frontend related functions
     getStudy() {
         const options = {
             method: "GET",
