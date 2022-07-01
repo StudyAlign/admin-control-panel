@@ -1,55 +1,80 @@
-import React from "react";
-import {Container, Row} from "react-bootstrap";
-import "bootstrap/dist/css/bootstrap.css";
-import "../../App.css"
+import React, {useEffect, useState} from "react";
+import {Button, Card, Form} from "react-bootstrap";
+import "./login.css";
+import {Link, Navigate} from "react-router-dom";
+import {useDispatch} from "react-redux";
+import {authSlice, me, userLogin} from "../../redux/reducers/authSlice";
+import {useAuth} from "../../components/Auth";
 
-export default class Login extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            email: '',
-            password: ''    
+export default function Login(props) {
+    //useDispatch to dispatch redux actions
+    const dispatch = useDispatch()
+    const auth = useAuth()
+
+    const [username, setUsername] = useState('')
+    const [password, setPassword] = useState('')
+
+    const logoutUser = props.logout;
+
+    useEffect(( ) => {
+        console.log("login use effect")
+    }, [])
+
+    useEffect(() => {
+        if (logoutUser) {
+            dispatch(authSlice.actions.logout())
         }
+    }, [logoutUser])
 
-        this.handleMail = this.handleMail.bind(this);
-        this.handlePW = this.handlePW.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
+    const handleUsername = (event) => {
+        setUsername(event.target.value)
     }
 
-    handleMail(event) {
-        this.setState({email: event.target.value})
+    const handlePassword = (event) => {
+        setPassword(event.target.value)
     }
 
-    handlePW(event) {
-        this.setState({password: event.target.value})
-    }
-
-    handleSubmit(event) {
+    const handleSubmit = (event) => {
         event.preventDefault();
-        console.log("[Login] " + this.state.email + " - " + this.state.password)
+        console.log("[Login] " + username + " - " + password)
+        dispatch(userLogin({username: username, password: password}));
     }
 
-    render() {
-        return (
-            <div className="login-box">
-                <label style={{"fontWeight":"bold", "fontSize":"24px"}}>StudyAlign</label>
-                <Container className="login-container">
-                    <form onSubmit={this.handleSubmit}>
-                        <Row className="m-1"> 
-                            E-Mail
-                            <input type="text" name="email" value={this.state.email} onChange={this.handleMail}/>      
-                        </Row>
-                        <Row className="m-1"> 
-                            Password 
-                            <input type="password" value={this.state.password} onChange={this.handlePW}/>      
-                        </Row>
-                        <Row className="m-1 mt-3"> 
-                            <input type="submit" value="Login" /> 
-                        </Row>
-                    </form>
-                </Container>
-                <div style={{"textAlign":"right"}}> Forgot Password </div>
-            </div>
-        )
+    const handleClick = (event) => {
+        event.preventDefault();
+        dispatch(me())
     }
+
+    const handleLogout = (event) => {
+        event.preventDefault();
+        dispatch(authSlice.actions.logout())
+    }
+
+    if (auth.isAuthenticated) {
+        return <Navigate to="/" replace />
+    }
+
+    return <div className="login-box">
+        <Card>
+            <Card.Body>
+                <Card.Title>StudyAlign</Card.Title>
+                    <Form onSubmit={handleSubmit}>
+                        <Form.Group className="mb-3" controlId="formEmail">
+                            <Form.Label>Username</Form.Label>
+                            <Form.Control required type="text" placeholder="Username" value={username} onChange={handleUsername}/>
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="formPassword">
+                            <Form.Label>Password</Form.Label>
+                            <Form.Control required type="password" placeholder="Password" value={password} onChange={handlePassword}/>
+                        </Form.Group>
+                        <div className="d-grid">
+                            <Button type="submit" size="lg">Login</Button>
+                            <Form.Text>
+                                <Link to="/login/forgot">Forgot Password</Link>
+                            </Form.Text>
+                        </div>
+                    </Form>
+            </Card.Body>
+        </Card>
+    </div>
 }
