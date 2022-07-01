@@ -1,12 +1,10 @@
 import React, {useEffect, useState} from "react";
 import {
-    Navigate, Outlet,
-    Route, Routes, useLocation, useNavigate
+    Navigate, Outlet, useLocation,
 } from "react-router-dom";
-import {useDispatch, useSelector, useStore} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {
     me,
-    refreshToken,
     selectUser,
     selectUserApi,
     selectUserTokens,

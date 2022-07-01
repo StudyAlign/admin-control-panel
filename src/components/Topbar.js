@@ -1,7 +1,6 @@
 import {Container, Nav, NavDropdown, Navbar} from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.css";
 import React from "react";
-import {Link} from "react-router-dom";
 
 export default function Topbar(props) {
     return(

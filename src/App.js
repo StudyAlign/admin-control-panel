@@ -15,14 +15,8 @@ import Dashboard from './app/dashboard/Dashboard';
 import RequireAuth, {AuthRoute, AuthProvider, useAuth} from "./components/Auth";
 import {useDispatch, useSelector, useStore} from "react-redux";
 import {
-    me,
-    refreshToken,
-    selectUser,
-    selectUserTokens,
     authSlice,
-    selectIsAuthenticated
 } from "./redux/reducers/authSlice";
-import {unwrapResult} from "@reduxjs/toolkit";
 
 export default function App() {
     const dispatch = useDispatch();

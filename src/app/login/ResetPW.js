@@ -1,7 +1,5 @@
 import React, {useState} from "react";
-import {Button, Card, Container, Form, Row} from "react-bootstrap";
-import {Link} from "react-router-dom";
-import {ArrowLeft} from "react-bootstrap-icons";
+import {Button, Card, Form} from "react-bootstrap";
 
 export default function ResetPW(props) {
 

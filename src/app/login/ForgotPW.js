@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {Button, Card, Container, Form, Row} from "react-bootstrap";
+import {Button, Card, Form} from "react-bootstrap";
 import { ArrowLeft } from 'react-bootstrap-icons';
 import {Link} from "react-router-dom";
 import "./login.css";
