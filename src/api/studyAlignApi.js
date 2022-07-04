@@ -15,6 +15,7 @@ export function initApi(studyId) {
 export async function apiWithAuth(apiMethod, args, dispatch) {
     try {
         const response = await apiMethod(args)
+        console.log("apiWithAuth:", apiMethod, args)
         return Promise.resolve(response)
     } catch (err) {
         if (err.status === 401 || err.status === 403) { //unauthorized or forbidden

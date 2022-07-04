@@ -17,6 +17,7 @@ import {useDispatch, useSelector, useStore} from "react-redux";
 import {
     authSlice,
 } from "./redux/reducers/authSlice";
+import Studies from "./app/studies/Studies";
 
 export default function App() {
     const dispatch = useDispatch();
@@ -37,6 +38,7 @@ export default function App() {
                 <Routes>
                     <Route element={<RequireAuth />}>
                         <Route path="/" element={<Dashboard/>} />
+                        <Route path="/studies" element={<Studies/>} />
                     </Route>
 
                     <Route path="/login" element={<Login/>} />
