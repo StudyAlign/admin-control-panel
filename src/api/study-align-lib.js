@@ -1,4 +1,5 @@
 import { DragInteraction, GenericInteraction, KeyboardInteraction, MouseInteraction, TouchInteraction } from "./interactions";
+import "./interfaces";
 class StudyAlignLib {
     constructor(url = "http://localhost:8080", studyId) {
         // Interaction Lists (Web Events only), needed for bulk saving
@@ -96,8 +97,8 @@ class StudyAlignLib {
         });
     }
     basicCreate(path, data) {
-        const options = {
-            method: "PATCH",
+        let options = {
+            method: "POST",
             path: path,
             headers: {}
         };
@@ -115,7 +116,7 @@ class StudyAlignLib {
         return this.request(options);
     }
     basicUpdate(path, data) {
-        const options = {
+        let options = {
             method: "PATCH",
             path: path,
             headers: {}
@@ -171,8 +172,8 @@ class StudyAlignLib {
     updateStudy(studyId, study) {
         return this.basicUpdate("studies/" + studyId, study);
     }
-    generateProcedureWithSteps(studyId, procedure_scheme) {
-        this.basicCreate("studies/" + studyId + "/procedures", procedure_scheme);
+    generateProcedureWithSteps(studyId, procedureScheme) {
+        this.basicCreate("studies/" + studyId + "/procedures", procedureScheme);
     }
     getParticipants(studyId) {
         return this.basicRead("studies/" + studyId + "/participants");
@@ -212,8 +213,20 @@ class StudyAlignLib {
     updateCondition(conditionId, condition) {
         return this.basicUpdate("conditions/" + conditionId, condition);
     }
-    getConditions() {
-        return this.basicRead("conditions");
+    getConditions(studyId) {
+        return this.basicRead("studies/" + studyId + "/conditions");
+    }
+    getTasks(studyId) {
+        return this.basicRead("studies/" + studyId + "/tasks");
+    }
+    getTexts(studyId) {
+        return this.basicRead("studies/" + studyId + "/texts");
+    }
+    getQuestionnaires(studyId) {
+        return this.basicRead("studies/" + studyId + "/questionnaires");
+    }
+    getPauses(studyId) {
+        return this.basicRead("studies/" + studyId + "/pauses");
     }
     // Procedures
     getProcedures(studyId) {
@@ -255,9 +268,6 @@ class StudyAlignLib {
     updateTask(taskId, task) {
         return this.basicUpdate("tasks/" + taskId, task);
     }
-    getTasks() {
-        return this.basicRead("tasks");
-    }
     //Texts
     createText(text) {
         return this.basicCreate("texts", text);
@@ -267,9 +277,6 @@ class StudyAlignLib {
     }
     updateText(textId, text) {
         return this.basicUpdate("texts/" + textId, text);
-    }
-    getTexts() {
-        return this.basicRead("texts");
     }
     //Questionnaires
     createQuestionnaire(questionnaire) {
@@ -281,9 +288,6 @@ class StudyAlignLib {
     updateQuestionnaire(questionnaireId, questionnaire) {
         return this.basicUpdate("questionnaires/" + questionnaireId, questionnaire);
     }
-    getQuestionnaires() {
-        return this.basicRead("questionnaires");
-    }
     //Pauses
     createPause(pause) {
         return this.basicCreate("pauses", pause);
@@ -294,16 +298,13 @@ class StudyAlignLib {
     updatePause(pauseId, pause) {
         return this.basicUpdate("pauses/" + pauseId, pause);
     }
-    getPauses() {
-        return this.basicRead("pauses");
-    }
     // ---- MAINLY FOR USE IN STUDY FRONTEND ---- //
     //TODO: read condition config
     //Study Frontend related functions
-    getStudy() {
+    getStudy(studyId) {
         const options = {
             method: "GET",
-            path: "studies/" + this.studyId,
+            path: "studies/" + (studyId || this.studyId),
         };
         return this.request(options);
     }

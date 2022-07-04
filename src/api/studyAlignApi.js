@@ -35,6 +35,8 @@ export async function apiWithAuth(apiMethod, args, dispatch) {
     }
 }
 
+// Users
+
 export function userLoginApi(username, password) {
     return sal.userLogin(username, password);
 }
@@ -42,12 +44,177 @@ export function userLoginApi(username, password) {
 export function userMeApi() {
     return sal.userMe();
 }
+
+export function userRefreshTokenApi() {
+    return sal.userRefreshToken();
+}
+
+export function getUsersApi() {
+    return sal.getUsers();
+}
+
+export function getUserApi(userId) {
+    return sal.getUser(userId);
+}
+
+export function createUserApi(user) {
+    return sal.createUser(user);
+}
+
+export function updateUserApi(userId, user) {
+    return sal.updateUser(userId, user);
+}
+
+// Studies
+
+export function getStudiesApi() {
+    return sal.getStudies();
+}
+
+export function getStudyApi(studyId) {
+    return sal.getStudy(studyId);
+}
+
+export function createStudyApi(study) {
+    return sal.createStudy(study);
+}
+
+export function updateStudyApi(studyId, study) {
+    return sal.updateStudy(studyId, study);
+}
+
+export function generateProcedureWithSteps(studyId, procedureScheme) {
+    return sal.generateProcedureWithSteps(studyId, procedureScheme);
+}
+
+export function populateSurveyParticipantsApi(studyId) {
+    return sal.populateSurveyParticipants(studyId);
+}
+
+export function generateParticipantsApi(studyId, amount) {
+    return sal.generateParticipants(studyId, amount);
+}
+
+// Participants
+
 export function getParticipantApi(token) {
     return sal.getParticipant(token);
 }
 
-export function participateApi(token) {
-    return sal.participate(token);
+export function getParticipantByIdApi(participantId) {
+    return sal.getParticipantById(participantId);
+}
+
+export function getParticipantsApi(studyId) {
+    return sal.getParticipants(studyId);
+}
+
+export function endParticipantPauseApi(participantToken) {
+    return sal.endParticipantPause(participantToken);
+}
+
+export function getParticipantsByProcedureApi(procedureId) {
+    return sal.getParticipantsByProcedure(procedureId);
+}
+
+// Conditions
+
+export function getConditionIdsApi(studyId) {
+    return sal.getConditionIds(studyId);
+}
+
+export function getConditionsApi(studyId) {
+    return sal.getConditions(studyId);
+}
+
+export function getConditionApi(conditionId) {
+    return sal.getCondition(conditionId);
+}
+
+export function createConditionApi(condition) {
+    return sal.createCondition(condition);
+}
+
+export function updateConditionApi(conditionId, condition) {
+    return sal.updateCondition(conditionId, condition);
+}
+
+// Procedures
+
+export function getProceduresApi(studyId) {
+    return sal.getProcedures(studyId);
+}
+
+// Tasks
+
+export function getTasksApi(studyId) {
+    return sal.getTasks(studyId);
+}
+
+export function getTaskApi(taskId) {
+    return sal.getTask(taskId);
+}
+
+export function createTaskApi(task) {
+    return sal.createTask(task);
+}
+
+export function updateTaskApi(taskId, task) {
+    return sal.updateTask(taskId, task);
+}
+
+// Texts
+
+export function getTextsApi(studyId) {
+    return sal.getTexts(studyId);
+}
+
+export function getTextApi(textId) {
+    return sal.getText(textId);
+}
+
+export function createTextApi(text) {
+    return sal.createText(text);
+}
+
+export function updateTextApi(textId, text) {
+    return sal.updateText(textId, text);
+}
+
+// Questionnaires
+
+export function getQuestionnairesApi(studyId) {
+    return sal.getQuestionnaires(studyId);
+}
+
+export function getQuestionnaireApi(questionnaireId) {
+    return sal.getQuestionnaire(questionnaireId);
+}
+
+export function createQuestionnaireApi(questionnaire) {
+    return sal.createQuestionnaire(questionnaire);
+}
+
+export function updateQuestionnaireApi(questionnaireId, questionnaire) {
+    return sal.updateQuestionnaire(questionnaireId, questionnaireId);
+}
+
+// Pauses
+
+export function getPausesApi(studyId) {
+    return sal.getPauses(studyId);
+}
+
+export function getPauseApi(pauseId) {
+    return sal.getPause(pauseId);
+}
+
+export function createPauseApi(pause) {
+    return sal.createPause(pause);
+}
+
+export function updatePauseApi(pauseId, pause) {
+    return sal.updatePause(pauseId, pause);
 }
 
 export function storeTokensApi(tokens) {
@@ -69,20 +236,12 @@ export function readTokensApi(tokenType) {
     return sal.readTokens();
 }
 
-export function userRefreshTokenApi() {
-    return sal.userRefreshToken();
-}
-
 export function refreshTokenApi() {
     return sal.refreshToken();
 }
 
 export function meApi() {
      return sal.me();
-}
-
-export function getStudyApi() {
-    return sal.getStudy();
 }
 
 export function readAccessTokenApi() {
@@ -93,39 +252,8 @@ export function getProcedureApi(procedureId) {
     return sal.getProcedure(procedureId);
 }
 
-export function startProcedureApi() {
-    return sal.startProcedure();
-}
-
-export function nextProcedureApi() {
-    return sal.nextProcedure();
-}
-
-export function endProcedureApi() {
-    return sal.endProcedure();
-}
-
-export function currentProcedureStepApi() {
-    return sal.currentProcedureStep();
-}
-
 export function checkSurveyResultsApi() {
     return sal.checkSurveyResult();
 }
 
-export function startNavigatorApi() {
-    return sal.startNavigator();
-}
-
-export function getNavigatorApi() {
-    return sal.getNavigator();
-}
-
-export function closeNavigatorApi() {
-    return sal.closeNavigator();
-}
-
-export function reconnectNavigatorApi() {
-    return sal.reconnectNavigator();
-}
 
