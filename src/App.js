@@ -1,6 +1,6 @@
 import React, {createContext, useEffect, useState} from 'react';
 import './App.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/css/bootstrap.css';
 
 import {
     BrowserRouter,
@@ -38,9 +38,11 @@ export default function App() {
             <BrowserRouter>
                 <Routes>
                     <Route element={<RequireAuth />}>
-                        <Route path="/" element={<Dashboard/>} />
-                        <Route path="/study/:study_id/:page"    element={<StudyOverviewLayout/>} />
+
                     </Route>
+                    <Route path="/" element={<Dashboard/>} />
+                    <Route path="/study/:study_id/:page"    element={<StudyOverviewLayout/>} />
+
 
                     <Route path="/login"                    element={<Login/>} />
                     <Route path="/logout"                   element={<Login logout/>} />

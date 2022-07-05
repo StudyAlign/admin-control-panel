@@ -2,7 +2,6 @@ import React from "react";
 import {Container, Row, Col, Nav } from "react-bootstrap";
 import { useParams } from "react-router";
 import "./StudyOverview.css"
-import "bootstrap/dist/css/bootstrap.css";
 
 export default function SidebarLayout(props){
     const { study_id, page } = useParams()

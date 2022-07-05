@@ -1,4 +1,5 @@
 import React from "react";
+import {Button} from "react-bootstrap";
 import { useParams } from "react-router";
 import "./StudyOverview.css"
 
@@ -51,8 +52,8 @@ export default function Overview() {
                     <li> Max Mustermann (You) </li>
                     <li> Jonas Jäger </li>
                 </ul>
-                <button type="button" className="small-button"> + Add </button>
-                <button type="button" className="big-button"> Close Study </button>
+                <Button type="button" className="small-button"> + Add </Button>
+                <Button type="button" className="big-button"> Close Study </Button>
             </>
         )
 }

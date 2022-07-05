@@ -1,7 +1,6 @@
 import React from "react";
-import {Container, Row, Col} from "react-bootstrap";
+import {Container, Row, Col, Button} from "react-bootstrap";
 import {PeopleFill} from "react-bootstrap-icons";
-import "bootstrap/dist/css/bootstrap.css";
 import "./Dashboard.css"
 
 export default function StudyBox(props) {
@@ -10,13 +9,13 @@ export default function StudyBox(props) {
     function getButton2(status) {
         let button
         if (status === "Running") {
-           button = <button className="button1"> Interaction Logs </button>
+           button = <Button className="button1"> Interaction Logs </Button>
         }
         else if (status === "Finished") {
-            button = <button className="button1"> Export Data </button>
+            button = <Button className="button1"> Export Data </Button>
         }
         else if (status === "Created") {
-            button = <button className="button1"> Edit Procedure </button>
+            button = <Button className="button1"> Edit Procedure </Button>
         }
         else {
             button = <></>
@@ -38,7 +37,7 @@ export default function StudyBox(props) {
                     <Col> <label className="date-label"> {study.startDate + " - " + study.endDate} </label> </Col>
                 </Row>
                 <Row style={{"marginTop": "15px"}}>
-                    <Col xs="auto"> <button className="button1"> Overview </button> </Col>
+                    <Col xs="auto"> <Button className="button1"> Overview </Button> </Col>
                     <Col> { getButton2(study.status) } </Col>
                 </Row>
             </Container>

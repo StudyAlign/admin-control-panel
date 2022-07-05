@@ -1,6 +1,5 @@
 import React from "react";
 import {Container, Row, Col} from "react-bootstrap";
-import "bootstrap/dist/css/bootstrap.css";
 import "./Dashboard.css";
 import StudyBox from "./StudyBox";
 

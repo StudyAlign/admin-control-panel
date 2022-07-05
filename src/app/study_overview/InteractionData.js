@@ -1,7 +1,8 @@
 import React from "react";
-import "./StudyOverview.css"
+import { Button } from "react-bootstrap";
 import { useParams } from "react-router";
 import { useTable } from "react-table";
+import "./StudyOverview.css"
 
 export default function InteractionData() {
     const { study_id } = useParams()
@@ -93,7 +94,7 @@ export default function InteractionData() {
                 </tbody>
             </table>
 
-            <button type="button" className="big-button"> Export Data </button>
+            <Button type="button" className="big-button"> Export Data </Button>
         </>
     )
 }
