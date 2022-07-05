@@ -1,57 +1,53 @@
-import React from "react";
-import {Container, Row} from "react-bootstrap";
-import "bootstrap/dist/css/bootstrap.css";
-import "./Login.css";
+import React, {useState} from "react";
+import {Button, Card, Form} from "react-bootstrap";
 
-export default class ResetPW extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            password: '',
-            passwordRepeat: ''    
-        }
+export default function ResetPW(props) {
 
-        this.handlePW = this.handlePW.bind(this);
-        this.handlePWRep = this.handlePWRep.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
+    const [password, setPassword] = useState("")
+    const [passwordRepeat, setPasswordRepeat] = useState("")
+
+    //TODO: check for reset token!
+    const resetToken = props.resetToken
+
+    const handlePassword = (event) => {
+        setPassword(event.target.value)
     }
 
-    handlePW(event) {
-        this.setState({password: event.target.value})
+    const handleRepeatedPassword = (event) => {
+        setPasswordRepeat(event.target.value)
     }
 
-    handlePWRep(event) {
-        this.setState({passwordRepeat: event.target.value})
-    }
-
-    handleSubmit(event) {
+    const handleSubmit = (event) => {
         event.preventDefault();
-        console.log("[Confirm Password] " + this.state.password + " - " + this.state.passwordRepeat)
+        console.log("[Confirm Password] " + password + " - " + passwordRepeat)
     }
 
-    render() {
-        return (
-            <div className="login-box">
-                <label style={{"fontWeight":"bold", "fontSize":"24px"}}>StudyAlign</label>
-                <Container className="login-container">
-                    <form onSubmit={this.handleSubmit}>
-                        <Row className="m-1" style={{"fontWeight":"bold"}}>
-                            Enter new password
-                        </Row>
-                        <Row className="mt-2 m-1"> 
-                            Password
-                            <input type="password" value={this.state.password} onChange={this.handlePW} />      
-                        </Row>
-                        <Row className="mt-2 m-1"> 
-                            Repeat Password
-                            <input type="password" value={this.state.passwordRepeat} onChange={this.handlePWRep} />      
-                        </Row>
-                        <Row className="mt-3 m-1"> 
-                            <input type="submit" value="Confirm Password" /> 
-                        </Row>
-                    </form>
-                </Container>
-            </div>
-        )
-    }
+    return (
+        <div className="login-box">
+            <Card>
+                <Card.Body>
+                    <Card.Title>StudyAlign</Card.Title>
+                    <Form onSubmit={handleSubmit}>
+                        <Form.Group className="mb-3">
+                            <div className="d-grid">
+                                <Form.Label>Enter new password</Form.Label>
+                            </div>
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="formPassword">
+                            <Form.Label>Password</Form.Label>
+                            <Form.Control required type="password" placeholder="Password" value={password} onChange={handlePassword}/>
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="formRepeatPassword">
+                            <Form.Label>Repeat Password</Form.Label>
+                            <Form.Control required type="password" placeholder="Repeat Password" value={passwordRepeat} onChange={handleRepeatedPassword}/>
+                        </Form.Group>
+                        <div className="d-grid">
+                            <Button type="submit" size="lg">Confirm Password</Button>
+                        </div>
+                    </Form>
+                </Card.Body>
+            </Card>
+        </div>
+    )
+
 }

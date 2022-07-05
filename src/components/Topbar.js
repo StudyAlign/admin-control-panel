@@ -12,7 +12,7 @@ export default function Topbar() {
                     <Nav.Link href="#users" className="top-bar-item">Users</Nav.Link>
                     <NavDropdown title="Max Mustermann" id="top-bar-dropdown" >
                         <NavDropdown.Item href="#profile">Profile</NavDropdown.Item>
-                        <NavDropdown.Item href="#logout">Logout</NavDropdown.Item>
+                        <NavDropdown.Item href="/logout">Logout</NavDropdown.Item>
                     </NavDropdown>
                 </Nav>
             </Container>
