@@ -39,13 +39,14 @@ export default function App() {
                 <Routes>
                     <Route element={<RequireAuth />}>
                         <Route path="/" element={<Dashboard/>} />
+                        <Route path="/study/:study_id/:page"    element={<StudyOverviewLayout/>} />
                     </Route>
 
                     <Route path="/login"                    element={<Login/>} />
                     <Route path="/logout"                   element={<Login logout/>} />
                     <Route path="/login/forgot"             element={<ForgotPW/>} />
                     <Route path="/login/reset"              element={<ResetPW/>} />
-                    <Route path="/study/:study_id/:page"    element={<StudyOverviewLayout/>} />
+
                 </Routes>
             </BrowserRouter>
         </AuthProvider>
