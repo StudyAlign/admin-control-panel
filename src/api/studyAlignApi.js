@@ -1,14 +1,14 @@
-import studyAlignLib from "./study-align-lib";
+import StudyAlignLib from "./study-align-lib";
 import {authSlice} from "../redux/reducers/authSlice";
 
-const STUDY_ALIGN_URL = process.env.REACT_APP_STUDY_ALIGN_URL || "http://localhost:8000";
+const STUDY_ALIGN_URL = process.env.REACT_APP_STUDY_ALIGN_URL || "https://hciaitools.uni-bayreuth.de/study-align-dev";  //"http://localhost:8000";
 
 let sal;
 
 export function initApi(studyId) {
     if (!sal) {
         console.log("Init StudyAlign api...")
-        sal = new studyAlignLib(STUDY_ALIGN_URL, studyId);
+        sal = new StudyAlignLib(STUDY_ALIGN_URL, studyId);
     }
 }
 

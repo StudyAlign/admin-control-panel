@@ -38,11 +38,9 @@ export default function App() {
             <BrowserRouter>
                 <Routes>
                     <Route element={<RequireAuth />}>
-
+                        <Route path="/" element={<Dashboard/>} />
+                        <Route path="/study/:study_id/:page"    element={<StudyOverviewLayout/>} />
                     </Route>
-                    <Route path="/" element={<Dashboard/>} />
-                    <Route path="/study/:study_id/:page"    element={<StudyOverviewLayout/>} />
-
 
                     <Route path="/login"                    element={<Login/>} />
                     <Route path="/logout"                   element={<Login logout/>} />

@@ -44,7 +44,7 @@ export default function FilledDashboard() {
                     </Row>
                     <Row>
                         {curr_studies.map((s) => (
-                            <Col xs="auto"> <StudyBox study={s}/> </Col>
+                            <Col key={s.id} xs="auto"> <StudyBox study={s}/> </Col>
                         ))}
                     </Row>
                 </Container>
