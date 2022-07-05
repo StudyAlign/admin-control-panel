@@ -2,7 +2,7 @@ import React, {useEffect} from "react";
 import Topbar from "../../components/Topbar";
 import {useDispatch, useSelector} from "react-redux";
 import {selectUserTokens} from "../../redux/reducers/authSlice";
-import {createStudy, getStudies, selectStudies} from "../../redux/reducers/studySlice";
+import {createStudy, getStudies, getStudy, selectStudies, selectStudy} from "../../redux/reducers/studySlice";
 import {Bucket} from "react-bootstrap-icons";
 import {Button} from "react-bootstrap";
 import {useAuth} from "../../components/Auth";
@@ -13,6 +13,7 @@ export default function Studies() {
 
     // With selectors we read the data from the central redux store
     const studies = useSelector(selectStudies)
+    const study = useSelector(selectStudy)
 
     // For dummy purpose: Sending a data object to our backend via the createStudy Action
     const handleClick = async () => {
@@ -29,17 +30,24 @@ export default function Studies() {
         await dispatch(createStudy(dummyStudy));
     }
 
+    const handleGetStudy = async () => {
+        await dispatch(getStudy(1));
+    }
+
     // Currently, this effect is only called after the initial rendering
     useEffect(( ) => {
         dispatch(getStudies()); //Dispatching getStudies Action from studySlice
     }, [])
 
     console.log("Studies", studies);
+    console.log("Study", study);
 
     // If studies exist, we are going to generate an array of list elements (visual representation of the API's response)
     const studyList = studies && studies.map((study) =>
         <li key={study.id}>{study.name}; Consent: {study.consent}</li>
     );
+
+    const firstStudy = study && <strong>{study.id} - {study.name}</strong>
 
     return (
         <div>
@@ -53,6 +61,12 @@ export default function Studies() {
 
             Create Study
             <Button type="submit" size="lg" onClick={handleClick}>Create Dummy Study</Button>
+
+            <hr />
+
+            Get Study with id 1:
+            <Button type="submit" size="lg" onClick={handleGetStudy}>Get Study with ID 1</Button>
+            {firstStudy}
         </div>
     )
 }
