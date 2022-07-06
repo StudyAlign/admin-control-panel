@@ -39,9 +39,9 @@ export default function App() {
             <BrowserRouter>
                 <Routes>
                     <Route element={<RequireAuth />}>
-                        <Route path="/" element={<Dashboard/>} />
+                        <Route path="/"                         element={<Dashboard/>} />
                         <Route path="/study/:study_id/:page"    element={<StudyOverviewLayout/>} />
-                        <Route path="/create" element={<CreateInformation/>} />
+                        <Route path="/create"                   element={<CreateInformation/>} />
                     </Route>
 
 

@@ -1,14 +1,13 @@
 import React from "react";
 import {Container, Row, Col, Nav } from "react-bootstrap";
-import {useNavigate, useParams} from "react-router";
 import "./CreateStudyFlow.css"
+import {CreationSteps} from "./StudyCreationLayout";
 
 export default function SidebarLayout(props){
-    const page = "study" // mock -> change this
 
-    const getClassName = (section) => {
+    const getClassName = (step) => {
         let className = 'sidebar-item'
-        if (section === page) {
+        if (step === props.step) {
             className += ' sidebar-item-selected'
         }
         return className
@@ -21,16 +20,16 @@ export default function SidebarLayout(props){
                     <Col xs={"auto"} id="sidebar-wrapper">
                         <Nav className="col-md-12 d-none d-md-block sidebar">
                             <Nav.Item>
-                                <Nav.Link className={getClassName("study")}> (1) Study </Nav.Link>
+                                <Nav.Link className={getClassName(CreationSteps.Information)}> (1) Study </Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link className={getClassName("procedure")}> (2) Procedure </Nav.Link>
+                                <Nav.Link className={getClassName(CreationSteps.Procedure)}> (2) Procedure </Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link className={getClassName("Integrations")}> (3) Integrations </Nav.Link>
+                                <Nav.Link className={getClassName(CreationSteps.Integrations)}> (3) Integrations </Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link className={getClassName("Check")}> (4) Check </Nav.Link>
+                                <Nav.Link className={getClassName(CreationSteps.Check)}> (4) Check </Nav.Link>
                             </Nav.Item>
                         </Nav>
                     </Col>

@@ -61,7 +61,7 @@ export default function StudyBox(props) {
                 </Row>
                 <Row style={{"marginTop": "15px"}}>
                     <Col xs="auto"> <Button className="button1" onClick={handleClickOverview}> Overview </Button> </Col>
-                    <Col> { getButton2(study.status) } </Col>
+                    <Col> { getButton2(study.is_active) } </Col>
                 </Row>
             </Container>
         </div>

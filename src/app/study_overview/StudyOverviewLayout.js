@@ -8,7 +8,7 @@ import { useParams } from "react-router";
 import {useDispatch, useSelector} from "react-redux";
 import {getStudy, selectStudy} from "../../redux/reducers/studySlice";
 
-
+// TODO Maybe refactor layout so that the use is similar to the CreateStudyLayout
 export default function StudyOverviewLayout() {
     const dispatch = useDispatch() // Dispatch is needed to fire redux actions
     const { study_id, page } = useParams()

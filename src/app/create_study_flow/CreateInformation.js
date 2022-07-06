@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import StudyCreationLayout from "./StudyCreationLayout";
+import StudyCreationLayout, {CreationSteps} from "./StudyCreationLayout";
 import {Button, Col, Row, Container, Form} from "react-bootstrap";
 import {useDispatch} from "react-redux";
 import {useAuth} from "../../components/Auth";
@@ -60,7 +60,7 @@ export default function CreateInformation() {
     }
 
     return(
-        <StudyCreationLayout>
+        <StudyCreationLayout step={CreationSteps.Information}>
 
             <Container>
                 <Form onSubmit={handleSubmit}>
