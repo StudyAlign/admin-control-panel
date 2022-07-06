@@ -1,37 +1,37 @@
-import React from "react";
+import React, {useEffect} from "react";
 import {Container, Row, Col} from "react-bootstrap";
 import "./Dashboard.css";
 import StudyBox from "./StudyBox";
 
-export default function FilledDashboard() {
+export default function FilledDashboard(props) {
 
-    const curr_studies = [
+    const mock_studies = [
         {
             name: "Collaborative writing with AI - Pilot",
             id: 0,
-            status: "Running",
-            startDate: "21.04.2022",
-            endDate: "21.05.2022",
-            participants: 9,
-            max_participants: 10,
+            is_active: true,
+            startDate: "2022-04-21T15:08:50.161000",
+            endDate: "2022-05-21T15:08:50.161000",
+            owner_id: 1,
+            invite_only: false,
         },
         {
             name: "Writing with generative models on mobile devices",
             id: 1,
-            status: "Finished",
-            startDate: "01.11.2021",
-            endDate: "10.11.2021",
-            participants: 20,
-            max_participants: 20,
+            is_active: true,
+            startDate: "2021-11-01T15:08:50.161000",
+            endDate: "2021-11-10T15:08:50.161000",
+            owner_id: 1,
+            invite_only: false,
         },
         {
             name: "Quantitative Study on collaborative writing with AI",
             id: 2,
-            status: "Created",
-            startDate: "30.05.2022",
-            endDate: "30.06.2022",
-            participants: 0,
-            max_participants: 100,
+            is_active: false,
+            startDate: "2022-05-30T15:08:50.161000",
+            endDate: "2022-06-30T15:08:50.161000",
+            owner_id: 1,
+            invite_only: false,
         }
     ]
 
@@ -43,7 +43,7 @@ export default function FilledDashboard() {
                         <label className="headline"> Currently Selected Studies </label>
                     </Row>
                     <Row>
-                        {curr_studies.map((s) => (
+                        {props.studies.map((s) => (
                             <Col key={s.id} xs="auto"> <StudyBox study={s}/> </Col>
                         ))}
                     </Row>
@@ -52,17 +52,4 @@ export default function FilledDashboard() {
         </>
     )
 }
-// TODO Continue view
-/*
-<Row>
-                        <Col>
-                            Running Studies
-                        </Col>
-                        <Col>
-                            Finished Studies
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col> <button className="button1"> Create new Study </button> </Col>
-                    </Row>
- */
+// TODO Continue view, if there are to many studies for displaying as boxes

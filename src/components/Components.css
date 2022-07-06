@@ -11,6 +11,10 @@
     color: green;
 }
 
+.top-bar-logo:hover {
+    cursor: pointer;
+}
+
 #top-bar-dropdown,
 .top-bar-item {
     color: black !important;

@@ -1,41 +1,61 @@
-import React from "react";
+import React, {useEffect} from "react";
 import Topbar from "../../components/Topbar";
 import SidebarLayout from "./SidebarLayout";
 import Overview from "./Overview";
 import Procedure from "./Procedure";
 import InteractionData from "./InteractionData";
 import { useParams } from "react-router";
+import {useDispatch, useSelector} from "react-redux";
+import {getStudy, selectStudy} from "../../redux/reducers/studySlice";
 
 
 export default function StudyOverviewLayout() {
-
+    const dispatch = useDispatch() // Dispatch is needed to fire redux actions
     const { study_id, page } = useParams()
 
-    const study = {
+    const mock_study = {
         name: "Collaborative writing with AI - Pilot",
+        startDate: "2022-04-21T07:15:07.446Z",
+        endDate: "2022-05-21T07:15:07.446Z",
+        is_active: true,
         id: study_id,
-    } // TODO fetch information from backend with the given study_id
-
-    let content
-    if(page === 'overview') {
-        content = <Overview/>
-    }
-    else if(page === 'procedure') {
-        content = <Procedure/>
-    }
-    else if(page === 'data') {
-        content = <InteractionData/>
-    }
-    else {
-        content = "Error - Page not found"
+        description: "This is a first pilot study for collaborative writing with AI. ......",
+        consent: "string",
+        link: "https://www.studyalign.com/invite/0374011473910"
     }
 
+    const study = useSelector(selectStudy)
+    useEffect(( ) => {
+        dispatch(getStudy(study_id));
+    }, [])
+
+    // Somehow you just get out logged when you enter an invalid study id
+    if(study == null) {
+        return (<h3> Study not found </h3>)
+    }
+
+    const getContent = (page) => {
+        let content
+        if(page === 'overview') {
+            content = <Overview study={study}/>
+        }
+        else if(page === 'procedure') {
+            content = <Procedure/>
+        }
+        else if(page === 'data') {
+            content = <InteractionData/>
+        }
+        else {
+            content = "Error - Page not found"
+        }
+        return content
+    }
     return (
         <>
             <Topbar/>
             <SidebarLayout>
                 <h1 className="study-title"> {study.name} <label className="study-id">(#{study_id})</label> </h1>
-                {content}
+                {getContent(page)}
             </SidebarLayout>
         </>
     )

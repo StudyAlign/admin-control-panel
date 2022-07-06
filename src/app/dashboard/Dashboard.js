@@ -1,27 +1,27 @@
-import React from "react";
+import React, {useEffect} from "react";
 import Topbar from "../../components/Topbar";
 import EmptyDashboard from "./EmptyDashboard";
 import FilledDashboard from "./FilledDashboard";
-import {useDispatch} from "react-redux";
-import {authSlice, me, userLogin} from "../../redux/reducers/authSlice";
+import {useDispatch, useSelector} from "react-redux";
+import {getStudies, selectStudies} from "../../redux/reducers/studySlice";
 
 
 export default function Dashboard() {
     const dispatch = useDispatch()
+    const studies = useSelector(selectStudies)
 
-    const amountStudies = 1
-    // TODO Request Studies
+    // Currently, this effect is only called after the initial rendering
+    useEffect(( ) => {
+        dispatch(getStudies()); //Dispatching getStudies Action from studySlice
+    }, [])
 
     let dashboard
-    if(amountStudies > 0) {
-        dashboard = <FilledDashboard/>
+    if(studies != null && studies.length > 0) {
+        dashboard = <FilledDashboard studies={studies}/>
     }
     else {
         dashboard = <EmptyDashboard/>
     }
-
-    let response = dispatch(me())
-    console.log(response)
 
     return (
         <>

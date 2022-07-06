@@ -1,22 +1,33 @@
 import React from "react";
 import {Container, Row, Col, Nav } from "react-bootstrap";
-import { useParams } from "react-router";
+import {useNavigate, useParams} from "react-router";
 import "./StudyOverview.css"
 
 export default function SidebarLayout(props){
+    const navigate = useNavigate();
     const { study_id, page } = useParams()
 
-    let classOverview = 'sidebar-item'
-    let classProcedure = 'sidebar-item'
-    let classData = 'sidebar-item'
-    if (page === 'overview') {
-        classOverview += ' sidebar-item-selected'
+    const getClassName = (section) => {
+        let className = 'sidebar-item'
+        if (section === page) {
+            className += ' sidebar-item-selected'
+        }
+        return className
     }
-    else if (page === 'procedure') {
-        classProcedure += ' sidebar-item-selected'
+
+    const handleClickOverview = (event) => {
+        event.preventDefault()
+        navigate("/study/"+study_id+"/overview")
     }
-    else if (page === 'data') {
-        classData += ' sidebar-item-selected'
+
+    const handleClickProcedure = (event) => {
+        event.preventDefault()
+        navigate("/study/"+study_id+"/procedure")
+    }
+
+    const handleClickData = (event) => {
+        event.preventDefault()
+        navigate("/study/"+study_id+"/data")
     }
 
     return (
@@ -26,13 +37,13 @@ export default function SidebarLayout(props){
                     <Col xs={"auto"} id="sidebar-wrapper">
                         <Nav className="col-md-12 d-none d-md-block sidebar">
                             <Nav.Item>
-                                <Nav.Link className={classOverview} href={"./overview"}>Overview</Nav.Link>
+                                <Nav.Link className={getClassName("overview")} onClick={handleClickOverview}>Overview</Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link className={classProcedure} href={"./procedure"}>Procedure</Nav.Link>
+                                <Nav.Link className={getClassName("procedure")} onClick={handleClickProcedure}>Procedure</Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link className={classData} href={"./data"}>Interaction Data</Nav.Link>
+                                <Nav.Link className={getClassName("data")} onClick={handleClickData}>Interaction Data</Nav.Link>
                             </Nav.Item>
                         </Nav>
                     </Col>

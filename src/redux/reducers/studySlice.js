@@ -3,7 +3,15 @@ import {
     deleteTokensApi,
     readTokensApi,
     refreshTokenApi,
-    storeTokensApi, userLoginApi, userMeApi, initApi, apiWithAuth, getStudiesApi, createStudyApi, getStudyApi
+    storeTokensApi,
+    userLoginApi,
+    userMeApi,
+    initApi,
+    apiWithAuth,
+    getStudiesApi,
+    createStudyApi,
+    getStudyApi,
+    updateStudyApi
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
 
@@ -59,6 +67,22 @@ export const createStudy = createAsyncThunk(
         try {
             const response = await apiWithAuth(createStudyApi, arg, dispatch)
             return response
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
+export const updateStudy = createAsyncThunk(
+    'updateStudy',
+    async (arg, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(updateStudyApi, arg, dispatch)
+            return response;
         } catch (err) {
             return rejectWithValue(err)
         }

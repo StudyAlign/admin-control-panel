@@ -42,10 +42,10 @@ export default function App() {
                         <Route path="/study/:study_id/:page"    element={<StudyOverviewLayout/>} />
                     </Route>
 
-                    <Route path="/login"                    element={<Login/>} />
-                    <Route path="/logout"                   element={<Login logout/>} />
-                    <Route path="/login/forgot"             element={<ForgotPW/>} />
-                    <Route path="/login/reset"              element={<ResetPW/>} />
+                    <Route path="/login"            element={<Login/>} />
+                    <Route path="/logout"           element={<Login logout/>} />
+                    <Route path="/login/forgot"     element={<ForgotPW/>} />
+                    <Route path="/login/reset"      element={<ResetPW/>} />
 
                 </Routes>
             </BrowserRouter>

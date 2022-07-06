@@ -1,6 +1,6 @@
 import React from "react";
 import {Spinner} from "react-bootstrap";
-import "./loadingscreen.css";
+import "./Loadingscreen.css";
 
 export default function LoadingScreen(props) {
     const text = props.text || "Loading ...";
