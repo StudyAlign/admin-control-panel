@@ -9,20 +9,31 @@ export default function Topbar() {
     const auth = useAuth() // the useAuth hook returns the currently logged in user
     const navigate = useNavigate();
 
-    const handleClick = (event) => {
+    const handleClickStudyAlign = (event) => {
         event.preventDefault()
         navigate("/")
+    }
+
+    const handleClickLogout = (event) => {
+        event.preventDefault()
+        navigate("/logout")
+    }
+
+    const handleClickProfile = (event) => {
+        event.preventDefault()
+        console.log(auth.user)
+        navigate("/profile")
     }
 
     return(
         <Navbar className="top-bar">
             <Container fluid>
-                <Navbar.Brand onClick={handleClick} className="top-bar-logo">StudyAlign</Navbar.Brand>
+                <Navbar.Brand onClick={handleClickStudyAlign} className="top-bar-logo">StudyAlign</Navbar.Brand>
                 <Nav className="ml-auto">
                     <Nav.Link href="#users" className="top-bar-item">Users</Nav.Link>
                     <NavDropdown title={auth.user.name} id="top-bar-dropdown" >
-                        <NavDropdown.Item href="#profile">Profile</NavDropdown.Item>
-                        <NavDropdown.Item href="/logout">Logout</NavDropdown.Item>
+                        <NavDropdown.Item onClick={handleClickProfile}>Profile</NavDropdown.Item>
+                        <NavDropdown.Item onClick={handleClickLogout}>Logout</NavDropdown.Item>
                     </NavDropdown>
                 </Nav>
             </Container>

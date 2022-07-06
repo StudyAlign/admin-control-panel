@@ -10,8 +10,23 @@ export default function FilledDashboard(props) {
 
     const handleClickStudyLink = (event, study_id) => {
         event.preventDefault()
-        console.log("Clicked")
         navigate("/study/"+study_id+"/overview")
+    }
+
+    const handleClickCreateStudy = (event) => {
+        event.preventDefault()
+        navigate("/create")
+    }
+
+    // TODO how to declare which (and how many) studies are shown as boxes
+    let recent_studies = []
+    for(let s of props.studies) {
+        recent_studies.push(
+            <Col key={s.id} xs="auto"> <StudyBox study={s}/> </Col>
+        )
+        if(recent_studies.length === max_amount_boxes) {
+            break
+        }
     }
 
     let running_studies = []
@@ -24,18 +39,8 @@ export default function FilledDashboard(props) {
         }
         else {
             finished_studies.push(
-                <Row> <NavLink onClick={(event) => handleClickStudyLink(event, s.id)} key={s.id}> {s.name} </NavLink> </Row>
+                <Row key={s.id}> <NavLink onClick={(event) => handleClickStudyLink(event, s.id)}> {s.name} </NavLink> </Row>
             )
-        }
-    }
-
-    let recent_studies = []
-    for(let s of props.studies) {
-        recent_studies.push(
-            <Col key={s.id} xs="auto"> <StudyBox study={s}/> </Col>
-        )
-        if(recent_studies.length === max_amount_boxes) {
-            break
         }
     }
 
@@ -59,10 +64,11 @@ export default function FilledDashboard(props) {
                             {finished_studies}
                         </Col>
                     </Row>
-                    <Row className="justify-content-center"> <Button className="button1"> Create Study</Button></Row>
+                    <Row className="justify-content-center">
+                        <Button className="button1" onClick={handleClickCreateStudy}> Create Study </Button>
+                    </Row>
                 </Container>
             </div>
         </>
     )
 }
-// TODO Continue view, if there are to many studies for displaying as boxes

@@ -1,8 +1,15 @@
 import React, {useState} from "react";
 import StudyCreationLayout from "./StudyCreationLayout";
 import {Button, Col, Row, Container, Form} from "react-bootstrap";
+import {useDispatch} from "react-redux";
+import {useAuth} from "../../components/Auth";
+import {createStudy} from "../../redux/reducers/studySlice";
+import {useNavigate} from "react-router";
 
 export default function CreateInformation() {
+    const dispatch = useDispatch()
+    const auth = useAuth()
+    const navigate = useNavigate()
 
     const [title, setTitle] = useState('')
     const [startDate, setStartDate] = useState('')
@@ -35,9 +42,21 @@ export default function CreateInformation() {
         setConsent(event.target.value)
     }
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        console.log("[Submit]")
+    const handleSubmit = async (event) => {
+        event.preventDefault()
+        const study = {
+            "name": title,
+            "startDate": startDate + "T15:08:50.161Z",
+            "endDate": endDate  + "T15:08:50.161Z",
+            "is_active": false, // TODO how to initialize study? As active or not active
+            "owner_id": auth.user.id,
+            "invite_only": false, // TODO how to indicate if invite_only or not? Checkbox?
+            "description": description,
+            "consent": consent,
+        }
+        await dispatch(createStudy(study))
+        // TODO what to do with the entered amount of participants?
+        navigate("/")  // TODO get id of created study and navigate to procedure creating
     }
 
     return(
