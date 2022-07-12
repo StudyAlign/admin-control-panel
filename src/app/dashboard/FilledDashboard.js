@@ -18,29 +18,27 @@ export default function FilledDashboard(props) {
         navigate("/create")
     }
 
-    // TODO how to declare which (and how many) studies are shown as boxes
-    let recent_studies = []
-    for(let s of props.studies) {
-        recent_studies.push(
-            <Col key={s.id} xs="auto"> <StudyBox study={s}/> </Col>
-        )
-        if(recent_studies.length === max_amount_boxes) {
-            break
-        }
-    }
-
     let running_studies = []
     let finished_studies = []
+    let recent_studies = []
     for(let s of props.studies) {
-        if(s.is_active) {
-            running_studies.push(
-                <Row key={s.id}> <NavLink onClick={(event) => handleClickStudyLink(event, s.id)}> {s.name} </NavLink> </Row>
+        // TODO how to declare which (and how many) studies are shown as boxes
+        if(recent_studies.length < max_amount_boxes) {
+            recent_studies.push(
+                <Col key={s.id} xs="auto"> <StudyBox study={s}/> </Col>
             )
         }
         else {
-            finished_studies.push(
-                <Row key={s.id}> <NavLink onClick={(event) => handleClickStudyLink(event, s.id)}> {s.name} </NavLink> </Row>
-            )
+            if(s.is_active) {
+                running_studies.push(
+                    <Row key={s.id}> <NavLink onClick={(event) => handleClickStudyLink(event, s.id)}> {s.name} </NavLink> </Row>
+                )
+            }
+            else {
+                finished_studies.push(
+                    <Row key={s.id}> <NavLink onClick={(event) => handleClickStudyLink(event, s.id)}> {s.name} </NavLink> </Row>
+                )
+            }
         }
     }
 

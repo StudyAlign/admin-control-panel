@@ -1,9 +1,9 @@
 import React, {useState} from "react";
 import StudyCreationLayout, {CreationSteps} from "./StudyCreationLayout";
 import {Button, Col, Row, Container, Form} from "react-bootstrap";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {useAuth} from "../../components/Auth";
-import {createStudy} from "../../redux/reducers/studySlice";
+import {createStudy, selectStudy} from "../../redux/reducers/studySlice";
 import {useNavigate} from "react-router";
 
 export default function CreateInformation() {
@@ -48,7 +48,7 @@ export default function CreateInformation() {
             "name": title,
             "startDate": startDate + "T15:08:50.161Z",
             "endDate": endDate  + "T15:08:50.161Z",
-            "is_active": false, // TODO how to initialize study? As active or not active
+            "is_active": true, // TODO how to initialize study? As active or not active
             "owner_id": auth.user.id,
             "invite_only": false, // TODO how to indicate if invite_only or not? Checkbox?
             "description": description,
@@ -56,7 +56,7 @@ export default function CreateInformation() {
         }
         await dispatch(createStudy(study))
         // TODO what to do with the entered amount of participants?
-        navigate("/")  // TODO get id of created study and navigate to procedure creating
+        navigate("/create/7/procedure")
     }
 
     return(

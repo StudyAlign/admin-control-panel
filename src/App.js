@@ -19,6 +19,7 @@ import {
     authSlice,
 } from "./redux/reducers/authSlice";
 import CreateInformation from "./app/create_study_flow/CreateInformation";
+import CreateProcedure from "./app/create_study_flow/CreateProcedure";
 
 
 export default function App() {
@@ -41,7 +42,9 @@ export default function App() {
                     <Route element={<RequireAuth />}>
                         <Route path="/"                         element={<Dashboard/>} />
                         <Route path="/study/:study_id/:page"    element={<StudyOverviewLayout/>} />
+
                         <Route path="/create"                   element={<CreateInformation/>} />
+                        <Route path="/create/:study_id/procedure" element={<CreateProcedure/>} />
                     </Route>
 
 
