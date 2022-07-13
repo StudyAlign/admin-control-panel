@@ -53,9 +53,11 @@ export default function CreateInformation() {
             "invite_only": false, // TODO how to indicate if invite_only or not? Checkbox?
             "description": description,
             "consent": consent,
+            "planned_amount_participants": amountParticipants,
+            "current_setup_step": "study",
         }
         await dispatch(createStudy(study))
-        // TODO what to do with the entered amount of participants?
+
         navigate("/create/7/procedure")
     }
 
