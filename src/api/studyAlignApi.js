@@ -76,6 +76,10 @@ export function getStudyApi(studyId) {
     return sal.getStudy(studyId);
 }
 
+export function getStudySetupInfoApi(studyId) {
+    return sal.getStudySetupInfo(studyId)
+}
+
 export function createStudyApi(study) {
     return sal.createStudy(study);
 }

@@ -308,6 +308,9 @@ class StudyAlignLib {
         };
         return this.request(options);
     }
+    getStudySetupInfo(studyId) {
+        return this.basicRead("studies/"+studyId+"/setup-info")
+    }
     // Participation related methods
     getParticipant(participantToken) {
         const options = {

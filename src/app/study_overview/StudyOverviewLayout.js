@@ -10,7 +10,7 @@ import {getStudy, selectStudy} from "../../redux/reducers/studySlice";
 
 // TODO Maybe refactor layout so that the use is similar to the CreateStudyLayout
 export default function StudyOverviewLayout() {
-    const dispatch = useDispatch() // Dispatch is needed to fire redux actions
+    const dispatch = useDispatch()
     const { study_id, page } = useParams()
 
     const mock_study = {
@@ -25,7 +25,7 @@ export default function StudyOverviewLayout() {
     }
 
     const study = useSelector(selectStudy)
-    useEffect(( ) => {
+    useEffect(() => {
         dispatch(getStudy(study_id));
     }, [])
 

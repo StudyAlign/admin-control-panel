@@ -11,6 +11,7 @@ import {
     getStudiesApi,
     createStudyApi,
     getStudyApi,
+    getStudySetupInfoApi,
     updateStudyApi
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
@@ -18,6 +19,7 @@ import { LOADING, IDLE } from "../apiStates";
 const initialState = {
     studies: null,
     study: null,
+    studySetupInfo: null,
     api: IDLE,
     error: null,
     status: null,
@@ -50,6 +52,22 @@ export const getStudy = createAsyncThunk(
         }
         try {
             const response = await apiWithAuth(getStudyApi, studyId, dispatch)
+            return response
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
+export const getStudySetupInfo = createAsyncThunk(
+    'getStudySetupInfo',
+    async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(getStudySetupInfoApi, studyId, dispatch)
             return response
         } catch (err) {
             return rejectWithValue(err)
@@ -109,7 +127,6 @@ export const studySlice = createSlice({
                     state.status = action.payload.status
                     state.currentRequestId = undefined
                     state.studies = action.payload.body
-
                 }
             })
             .addCase(getStudy.pending, (state, action) => {
@@ -123,7 +140,19 @@ export const studySlice = createSlice({
                     state.status = action.payload.status
                     state.currentRequestId = undefined
                     state.study = action.payload.body
-
+                }
+            })
+            .addCase(getStudySetupInfo.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(getStudySetupInfo.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                    state.studySetupInfo = action.payload.body
                 }
             })
             .addCase(createStudy.pending, (state, action) => {
@@ -151,6 +180,10 @@ export const selectStudies = (state) => {
 
 export const selectStudy = (state) => {
     return state.studies.study;
+}
+
+export const selectStudySetupInfo = (state) => {
+    return state.studies.studySetupInfo;
 }
 
 export default studySlice.reducer;

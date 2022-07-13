@@ -20,6 +20,9 @@ import {
 } from "./redux/reducers/authSlice";
 import CreateInformation from "./app/create_study_flow/CreateInformation";
 import CreateProcedure from "./app/create_study_flow/CreateProcedure";
+import StudyCreationLogic from "./app/create_study_flow/StudyCreationLogic"
+import CreateIntegrations from "./app/create_study_flow/CreateIntegrations";
+import CreateCheck from "./app/create_study_flow/CreateCheck";
 
 
 export default function App() {
@@ -44,7 +47,10 @@ export default function App() {
                         <Route path="/study/:study_id/:page"    element={<StudyOverviewLayout/>} />
 
                         <Route path="/create"                   element={<CreateInformation/>} />
+                        <Route path="/create/:study_id"         element={<StudyCreationLogic/>} />
                         <Route path="/create/:study_id/procedure" element={<CreateProcedure/>} />
+                        <Route path="/create/:study_id/integrations" element={<CreateIntegrations/>} />
+                        <Route path="/create/:study_id/check"   element={<CreateCheck/>} />
                     </Route>
 
 
