@@ -46,13 +46,14 @@ export default function App() {
                         <Route path="/"                         element={<Dashboard/>} />
                         <Route path="/study/:study_id/:page"    element={<StudyOverviewLayout/>} />
 
-                        <Route path="/create"                   element={<CreateInformation/>} />
-                        <Route path="/create/:study_id"         element={<StudyCreationLogic/>} />
-                        <Route path="/create/:study_id/procedure" element={<CreateProcedure/>} />
-                        <Route path="/create/:study_id/integrations" element={<CreateIntegrations/>} />
-                        <Route path="/create/:study_id/check"   element={<CreateCheck/>} />
+                        <Route path="create"            element={<CreateInformation/>} />
+                        <Route path="create/:study_id"  element={<StudyCreationLogic/>}>
+                            <Route path="procedure"     element={<CreateProcedure/>} />
+                            <Route path="integrations"  element={<CreateIntegrations/>} />
+                            <Route path="check"         element={<CreateCheck/>} />
+                            <Route path="*"             element={<h1>ERROR</h1>} />
+                        </Route>
                     </Route>
-
 
                     <Route path="/login"            element={<Login/>} />
                     <Route path="/logout"           element={<Login logout/>} />
