@@ -1,29 +1,52 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import StudyCreationLayout, {CreationSteps} from "./StudyCreationLayout";
-import {useDispatch, useSelector} from "react-redux";
+import {ProcedureTypes} from "./ProcedureObject";
 import {useParams} from "react-router";
-import {Button, Card, Col, Container, ListGroup, Row} from "react-bootstrap";
-import {getStudy, selectStudy} from "../../redux/reducers/studySlice";
+import {Button, Card, Col, Container, ListGroup, Row, Accordion} from "react-bootstrap";
 import {DragDropContext, Droppable} from "react-beautiful-dnd";
 import ProcedureObject from "./ProcedureObject";
 
 export default function CreateProcedure() {
-    const dispatch = useDispatch()
     const { study_id } = useParams()
 
     const [procedure, setProcedure] = useState([
-        {id: 'step-0', name: 'Welcome Message', type: 'Text Page'},
-        {id: 'step-1', name: 'Procedure Description', type: 'Text Page'},
-        {id: 'step-2', name: 'Prototype 1', type: 'Condition'},
-        {id: 'step-3', name: 'Likert Prototype 1', type: 'Questionnaire'},
+        {id: "0", type: ProcedureTypes.TextPage, content: {
+                "title": "Welcome Message",
+                "body": "Some Welcome Message ...",
+                "study_id": study_id
+            }},
+        {id: "1", type: ProcedureTypes.Condition, content: {
+                "name": "Test Condition",
+                "config": "{}", // What is the config??
+                "url": "www.some-url.com",
+                "study_id": study_id
+            }},
+        {id: "2", type: ProcedureTypes.Questionnaire, content: {
+                "url": "www.limesurvey.com/123456",
+                "system": "limesurvey",
+                "ext_id": "string",
+                "api_url": "string",
+                "api_username": "string",
+                "api_password": "string",
+                "study_id": study_id
+            }},
+        {id: "3", type: ProcedureTypes.Pause, content: {
+                "title": "Test Pause",
+                "body": "string",
+                "proceed_body": "string",
+                "type": "time_based", // What else??
+                "config": "{}",
+                "study_id": study_id
+            }},
     ])
 
-    const study = useSelector(selectStudy)
-    useEffect(( ) => {
-        dispatch(getStudy(study_id));
-    }, [])
+    const editProcedure = (index, content_id, value) => {
+        let new_procedure = [...procedure]
+        new_procedure[index].content[content_id] = value
+        setProcedure(new_procedure)
+    }
 
-    const handleDragEnd = (result) => {
+    const onDragEnd = (result) => {
         if(result.destination === null) return
         const idx_src = result.source.index
         const idx_dest = result.destination.index
@@ -33,35 +56,61 @@ export default function CreateProcedure() {
         procedure.splice(idx_dest, 0, obj)
     }
 
+    const createProcedureStep = (event, procedureType) => {
+        event.preventDefault()
+        let new_procedure = [...procedure]
+        let prodStep = {
+            id: procedure.length.toString(),
+            type: procedureType,
+            content: procedureType.emptyContent,
+        }
+        prodStep.content.study_id = study_id
+        new_procedure.push(prodStep)
+        setProcedure(new_procedure)
+    }
+
+    let buttons = []
+    for (let t in ProcedureTypes) {
+        buttons.push(
+            <Col xs={'auto'} key={ProcedureTypes[t].id}>
+                <Button onClick={(event) => createProcedureStep(event, ProcedureTypes[t])}> { ProcedureTypes[t].label } </Button>
+            </Col>
+        )
+    }
+
     return (
         <StudyCreationLayout step={CreationSteps.Procedure}>
 
             <Container>
                 <Row className='mt-3'>
-                    <Col xs={'auto'}> <Button> Text Page </Button> </Col>
-                    <Col xs={'auto'}> <Button> Condition </Button> </Col>
-                    <Col xs={'auto'}> <Button> Questionnaire </Button> </Col>
-                    <Col xs={'auto'}> <Button> Pause </Button> </Col>
+                    { buttons }
                 </Row>
 
                 <Row className='mt-3'>
                     <Col>
-                    <DragDropContext onDragEnd={handleDragEnd}>
+                    <DragDropContext onDragEnd={onDragEnd}>
                         <Card>
                             <Card.Header> Procedure Order </Card.Header>
                             <Card.Body>
-                                <Droppable droppableId={'procedure-0'}>
+
+                                <Accordion>
+                                <Droppable droppableId={"procedure-0"}>
                                     {provided => (
                                         <div ref={provided.innerRef} {...provided.droppableProps}>
                                             <ListGroup>
                                                 {procedure.map((step, index) => (
-                                                    <ProcedureObject key={step.id} procedureStep={step} index={index} />
+                                                    <ProcedureObject key={step.id} index={index}
+                                                                     procedureStep={step}
+                                                                     editProcedureStep={(content_id, value) => editProcedure(index, content_id, value)}
+                                                    />
                                                 ))}
                                             </ListGroup>
                                             {provided.placeholder}
                                         </div>
                                     )}
                                 </Droppable>
+                                </Accordion>
+
                             </Card.Body>
                         </Card>
                     </DragDropContext>
