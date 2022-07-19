@@ -155,6 +155,16 @@ export const studySlice = createSlice({
                     state.studySetupInfo = action.payload.body
                 }
             })
+            .addCase(getStudySetupInfo.rejected, (state, action) => {
+                console.log("Here")
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                    //state.studySetupInfo = action.payload.body
+                }
+            })
             .addCase(createStudy.pending, (state, action) => {
                 state.api = LOADING
                 state.currentRequestId = action.meta.requestId
@@ -184,6 +194,10 @@ export const selectStudy = (state) => {
 
 export const selectStudySetupInfo = (state) => {
     return state.studies.studySetupInfo;
+}
+
+export const selectStudyApiStatus = (state) => {
+    return state.studies.status
 }
 
 export default studySlice.reducer;

@@ -31,7 +31,7 @@ export async function apiWithAuth(apiMethod, args, dispatch) {
                 return Promise.reject(err)
             }
         }
-        dispatch(authSlice.actions.logout())
+        //dispatch(authSlice.actions.logout())
         return Promise.reject(err)
     }
 }

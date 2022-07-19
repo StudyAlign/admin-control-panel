@@ -1,6 +1,6 @@
 import {useParams} from "react-router";
 import {useDispatch, useSelector} from "react-redux";
-import {getStudySetupInfo, selectStudySetupInfo} from "../../redux/reducers/studySlice";
+import {getStudySetupInfo, selectStudyApiStatus, selectStudySetupInfo} from "../../redux/reducers/studySlice";
 import React, {useEffect} from "react";
 import {Navigate, Outlet, useLocation} from "react-router-dom";
 import LoadingScreen from "../../components/LoadingScreen";
@@ -19,9 +19,13 @@ export default function StudyCreationLogic(props) {
     ]
 
     const studySetupInfo = useSelector(selectStudySetupInfo)
-    useEffect(() => {
+    const studyApiStatus = useSelector(selectStudyApiStatus)
+    useEffect( () => {
         dispatch(getStudySetupInfo(study_id));
+        console.log("Status1")
+        console.log(studyApiStatus)
     }, [])
+
 
 
     const next_step = (current_step) => {
@@ -35,11 +39,13 @@ export default function StudyCreationLogic(props) {
             return ''
         }
         else {
-            console.log(path_split.slice(3).join('/'))
             return path_split.slice(3).join('/')
         }
     }
 
+    console.log("Status")
+    console.log(studyApiStatus)
+    // Status 404 -> navigate to dashboard
     if(studySetupInfo === null) {
         return <LoadingScreen/>
     }
