@@ -22,11 +22,7 @@ export default function StudyCreationLogic(props) {
     const studyApiStatus = useSelector(selectStudyApiStatus)
     useEffect( () => {
         dispatch(getStudySetupInfo(study_id));
-        console.log("Status1")
-        console.log(studyApiStatus)
     }, [])
-
-
 
     const next_step = (current_step) => {
         let idx = creationOrder.indexOf(current_step)
@@ -43,9 +39,11 @@ export default function StudyCreationLogic(props) {
         }
     }
 
-    console.log("Status")
-    console.log(studyApiStatus)
     // Status 404 -> navigate to dashboard
+    if(studyApiStatus === 404) {
+        return <Navigate to={'/'} replace state={{ from: location }} />
+    }
+
     if(studySetupInfo === null) {
         return <LoadingScreen/>
     }

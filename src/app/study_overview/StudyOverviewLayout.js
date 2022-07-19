@@ -29,10 +29,15 @@ export default function StudyOverviewLayout() {
         dispatch(getStudy(study_id));
     }, [])
 
-    // Somehow you just get out logged when you enter an invalid study id
-    if(study == null) {
-        return (<h3> Study not found </h3>)
+    if(study === null) {
+        return (
+            <>
+                <Topbar/>
+                <h2> ERROR 404 - Study not found </h2>
+            </>
+        )
     }
+
 
     const getContent = (page) => {
         let content

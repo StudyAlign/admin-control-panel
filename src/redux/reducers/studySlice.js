@@ -156,7 +156,6 @@ export const studySlice = createSlice({
                 }
             })
             .addCase(getStudySetupInfo.rejected, (state, action) => {
-                console.log("Here")
                 const { requestId } = action.meta
                 if (state.api === LOADING && state.currentRequestId === requestId) {
                     state.api = IDLE
