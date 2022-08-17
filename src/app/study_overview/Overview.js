@@ -1,12 +1,13 @@
-import React, {useEffect} from "react";
+import React from "react";
 import {Button} from "react-bootstrap";
-import { useParams } from "react-router";
+
 import "./StudyOverview.css"
-import {useDispatch, useSelector} from "react-redux";
-import {getStudies, getStudy, selectStudy} from "../../redux/reducers/studySlice";
+import {useDispatch} from "react-redux";
+import {updateStudy} from "../../redux/reducers/studySlice";
 
 
 export default function Overview(props) {
+    const dispatch = useDispatch()
 
     // TODO maybe move to an common functions folder
     const reformatDate = (dateString) => {
@@ -19,8 +20,12 @@ export default function Overview(props) {
         return day + "." + month + "." + year
     }
 
-    const handleCloseStudy = (event) => {
+    const handleCloseStudy = async (event) => {
         event.preventDefault()
+        let new_study = {...props.study}
+        new_study.is_active = false
+        await dispatch(updateStudy({studyId: new_study.id, study: new_study}));
+        console.log("Overview")
     }
 
     const handleOpenStudy = (event) => {
@@ -28,14 +33,12 @@ export default function Overview(props) {
     }
 
     const getButton = (is_active) => {
-        let button
         if (is_active) {
-            button = <Button type="button" className="big-button" onClick={handleCloseStudy}> Close Study </Button>
+            return <Button type="button" className="big-button" onClick={handleCloseStudy}> Close Study </Button>
         }
         else {
-            button = <Button type="button" className="big-button" onClick={handleOpenStudy}> Open Study </Button>
+            return <Button type="button" className="big-button" onClick={handleOpenStudy}> Open Study </Button>
         }
-        return button
     }
 
     // TODO fetch partcicipant informations in order to display the amount of participants

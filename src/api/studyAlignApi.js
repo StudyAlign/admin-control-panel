@@ -84,8 +84,8 @@ export function createStudyApi(study) {
     return sal.createStudy(study);
 }
 
-export function updateStudyApi(studyId, study) {
-    return sal.updateStudy(studyId, study);
+export function updateStudyApi(args) {
+    return sal.updateStudy(args.studyId, args.study);
 }
 
 export function generateProcedureWithSteps(studyId, procedureScheme) {

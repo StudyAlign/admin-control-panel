@@ -93,13 +93,14 @@ export const createStudy = createAsyncThunk(
 
 export const updateStudy = createAsyncThunk(
     'updateStudy',
-    async (arg, { dispatch, getState, rejectWithValue, requestId}) => {
+    async (args, { dispatch, getState, rejectWithValue, requestId}) => {
+        console.log(args)
         const { api, currentRequestId } = getState().studies
         if (api !== LOADING || requestId !== currentRequestId) {
             return
         }
         try {
-            const response = await apiWithAuth(updateStudyApi, arg, dispatch)
+            const response = await apiWithAuth(updateStudyApi, args, dispatch)
             return response;
         } catch (err) {
             return rejectWithValue(err)
@@ -169,6 +170,19 @@ export const studySlice = createSlice({
                 state.currentRequestId = action.meta.requestId
             })
             .addCase(createStudy.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                    state.study = action.payload.body
+                }
+            })
+            .addCase(updateStudy.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(updateStudy.fulfilled, (state, action) => {
                 const { requestId } = action.meta
                 if (state.api === LOADING && state.currentRequestId === requestId) {
                     state.api = IDLE
