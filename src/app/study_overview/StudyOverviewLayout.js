@@ -7,6 +7,8 @@ import InteractionData from "./InteractionData";
 import { useParams } from "react-router";
 import {useDispatch, useSelector} from "react-redux";
 import {getStudy, selectStudy} from "../../redux/reducers/studySlice";
+import {Col, Dropdown, Row} from "react-bootstrap";
+import {PeopleFill, ThreeDots} from "react-bootstrap-icons";
 
 // TODO Maybe refactor layout so that the use is similar to the CreateStudyLayout
 export default function StudyOverviewLayout() {
@@ -59,7 +61,25 @@ export default function StudyOverviewLayout() {
         <>
             <Topbar/>
             <SidebarLayout>
-                <h1 className="study-title"> {study.name} <label className="study-id">(#{study_id})</label> </h1>
+                <Row>
+                    <Col>
+                        <h1 className="study-title"> {study.name} <label className="study-id">(#{study_id})</label> </h1>
+                    </Col>
+                    <Col xs="auto">
+                        <Dropdown className="mt-4">
+                            <Dropdown.Toggle variant="link" bsPrefix="p-0" style={{color:'#224396'}}>
+                                <ThreeDots size="28"/>
+                            </Dropdown.Toggle>
+
+                            <Dropdown.Menu>
+                                <Dropdown.Item>Edit</Dropdown.Item>
+                                <Dropdown.Item>Duplicate</Dropdown.Item>
+                                <Dropdown.Item>Export</Dropdown.Item>
+                                <Dropdown.Item>Delete</Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
+                    </Col>
+                </Row>
                 {getContent(page)}
             </SidebarLayout>
         </>
