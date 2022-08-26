@@ -94,7 +94,6 @@ export const createStudy = createAsyncThunk(
 export const updateStudy = createAsyncThunk(
     'updateStudy',
     async (args, { dispatch, getState, rejectWithValue, requestId}) => {
-        console.log(args)
         const { api, currentRequestId } = getState().studies
         if (api !== LOADING || requestId !== currentRequestId) {
             return
@@ -188,7 +187,6 @@ export const studySlice = createSlice({
                     state.api = IDLE
                     state.status = action.payload.status
                     state.currentRequestId = undefined
-                    state.study = action.payload.body
                 }
             })
     },

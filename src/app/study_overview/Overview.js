@@ -3,7 +3,7 @@ import {Button} from "react-bootstrap";
 
 import "./StudyOverview.css"
 import {useDispatch} from "react-redux";
-import {updateStudy} from "../../redux/reducers/studySlice";
+import {getStudy, updateStudy} from "../../redux/reducers/studySlice";
 
 
 export default function Overview(props) {
@@ -20,24 +20,18 @@ export default function Overview(props) {
         return day + "." + month + "." + year
     }
 
-    const handleCloseStudy = async (event) => {
+    const handleStudyActive = async (event, active) => {
         event.preventDefault()
-        let new_study = {...props.study}
-        new_study.is_active = false
-        await dispatch(updateStudy({studyId: new_study.id, study: new_study}));
-        console.log("Overview")
-    }
-
-    const handleOpenStudy = (event) => {
-        event.preventDefault()
+        await dispatch(updateStudy({studyId: props.study.id, study: {"is_active": active}}));
+        await dispatch(getStudy(props.study.id));
     }
 
     const getButton = (is_active) => {
         if (is_active) {
-            return <Button type="button" className="big-button" onClick={handleCloseStudy}> Close Study </Button>
+            return <Button type="button" className="big-button" onClick={(event) => handleStudyActive(event, false)}> Close Study </Button>
         }
         else {
-            return <Button type="button" className="big-button" onClick={handleOpenStudy}> Open Study </Button>
+            return <Button type="button" className="big-button" onClick={(event) => handleStudyActive(event, true)}> Open Study </Button>
         }
     }
 
