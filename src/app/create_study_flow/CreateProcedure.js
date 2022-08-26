@@ -1,49 +1,28 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import StudyCreationLayout, {CreationSteps} from "./StudyCreationLayout";
 import {ProcedureTypes} from "./ProcedureObject";
 import {useParams} from "react-router";
 import {Button, Card, Col, Container, ListGroup, Row, Accordion} from "react-bootstrap";
 import {DragDropContext, Droppable} from "react-beautiful-dnd";
 import ProcedureObject from "./ProcedureObject";
+import {useDispatch, useSelector} from "react-redux";
+import {getStudy, selectStudy} from "../../redux/reducers/studySlice";
+import {createText, getTexts, selectTexts} from "../../redux/reducers/textSlice";
+import LoadingScreen from "../../components/LoadingScreen";
 
 export default function CreateProcedure() {
+    const dispatch = useDispatch()
     const { study_id } = useParams()
+    const [texts, setTexts] = useState([])
 
-    const [procedure, setProcedure] = useState([
-        {id: "0", type: ProcedureTypes.TextPage, content: {
-                "title": "Welcome Message",
-                "body": "Some Welcome Message ...",
-                "study_id": study_id
-            }},
-        {id: "1", type: ProcedureTypes.Condition, content: {
-                "name": "Test Condition",
-                "config": "{}", // What is the config??
-                "url": "www.some-url.com",
-                "study_id": study_id
-            }},
-        {id: "2", type: ProcedureTypes.Questionnaire, content: {
-                "url": "www.limesurvey.com/123456",
-                "system": "limesurvey",
-                "ext_id": "string",
-                "api_url": "string",
-                "api_username": "string",
-                "api_password": "string",
-                "study_id": study_id
-            }},
-        {id: "3", type: ProcedureTypes.Pause, content: {
-                "title": "Test Pause",
-                "body": "string",
-                "proceed_body": "string",
-                "type": "time_based", // What else??
-                "config": "{}",
-                "study_id": study_id
-            }},
-    ])
+    useEffect( () => {
+        dispatch(getTexts(study_id));
+    }, [])
 
-    const editProcedure = (index, content_id, value) => {
-        let new_procedure = [...procedure]
-        new_procedure[index].content[content_id] = value
-        setProcedure(new_procedure)
+    let n_texts = useSelector(selectTexts)
+    if (n_texts != null && texts.length !== n_texts.length) {
+        n_texts = texts.slice(0, texts.length).concat(n_texts.slice(texts.length))
+        setTexts(n_texts)
     }
 
     const onDragEnd = (result) => {
@@ -51,22 +30,24 @@ export default function CreateProcedure() {
         const idx_src = result.source.index
         const idx_dest = result.destination.index
         if(idx_src === idx_dest) return
-        const obj = procedure[idx_src]
-        procedure.splice(idx_src, 1)
-        procedure.splice(idx_dest, 0, obj)
+        let n_texts = [...texts]
+        let obj = texts[idx_src]
+        n_texts.splice(idx_src, 1)
+        n_texts.splice(idx_dest, 0, obj)
+        setTexts(n_texts)
     }
 
-    const createProcedureStep = (event, procedureType) => {
+    const createProcedureStep = async (event, procedureType) => {
         event.preventDefault()
-        let new_procedure = [...procedure]
-        let prodStep = {
-            id: procedure.length.toString(),
-            type: procedureType,
-            content: procedureType.emptyContent,
+        if(procedureType === ProcedureTypes.TextPage) {
+            let text = {
+                "title": "MockTitle",
+                "body": "MockBody",
+                "study_id": study_id
+            }
+            await dispatch(createText(text))
         }
-        prodStep.content.study_id = study_id
-        new_procedure.push(prodStep)
-        setProcedure(new_procedure)
+        await dispatch(getTexts(study_id));
     }
 
     let buttons = []
@@ -76,6 +57,10 @@ export default function CreateProcedure() {
                 <Button onClick={(event) => createProcedureStep(event, ProcedureTypes[t])}> { ProcedureTypes[t].label } </Button>
             </Col>
         )
+    }
+
+    if(texts == null) {
+        return <LoadingScreen/>
     }
 
     return (
@@ -98,10 +83,12 @@ export default function CreateProcedure() {
                                     {provided => (
                                         <div ref={provided.innerRef} {...provided.droppableProps}>
                                             <ListGroup>
-                                                {procedure.map((step, index) => (
-                                                    <ProcedureObject key={step.id} index={index}
-                                                                     procedureStep={step}
-                                                                     editProcedureStep={(content_id, value) => editProcedure(index, content_id, value)}
+                                                {texts.map((text, index) => (
+                                                    <ProcedureObject key={"text" + text.id.toString()}
+                                                                     id={"text" + text.id.toString()}
+                                                                     index={index}
+                                                                     content={text}
+                                                                     type={ProcedureTypes.TextPage}
                                                     />
                                                 ))}
                                             </ListGroup>

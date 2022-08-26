@@ -1,6 +1,8 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Draggable} from 'react-beautiful-dnd';
 import {Card, Accordion, useAccordionButton, Form} from "react-bootstrap";
+import {useDispatch} from "react-redux";
+import {updateText} from "../../redux/reducers/textSlice";
 
 export const ProcedureTypes = {
     TextPage: {
@@ -160,10 +162,24 @@ function PauseForm(props) {
 }
 
 export default function ProcedureObject(props) {
+    const dispatch = useDispatch()
 
-    const decoratedOnClick = useAccordionButton(props.procedureStep.id, () => {
-        // Customize anything on click
+    const [content, setContent] = useState(props.content)
+    const [saved, setSaved] = useState(true)
+
+    const decoratedOnClick = useAccordionButton(props.id, (event) => {
+        event.preventDefault()
+        if(!saved) {
+            dispatch(updateText({textId: content.id, text: {"title": content.title, "body": content.body}}));
+        }
     });
+
+    const editContent = (content_id, value) => {
+        let new_content = {...content}
+        new_content[content_id] = value
+        setContent(new_content)
+        setSaved(false)
+    }
 
     const getForm = (procedureType, content, editProcedureStep) => {
         switch (procedureType) {
@@ -192,18 +208,18 @@ export default function ProcedureObject(props) {
     }
 
     return (
-        <Draggable draggableId={props.procedureStep.id} index={props.index}>
+        <Draggable draggableId={props.id} index={props.index}>
             {provided => (
                 <div {...provided.draggableProps} {...provided.dragHandleProps}  ref={provided.innerRef}>
 
                     <Card className="m-1">
                         <Card.Header onClick={decoratedOnClick}>
-                            { getHeader(props.procedureStep.type, props.procedureStep.content) }
+                            { getHeader(props.type, content) }
                         </Card.Header>
 
-                        <Accordion.Collapse eventKey={props.procedureStep.id}>
+                        <Accordion.Collapse eventKey={props.id}>
                             <Card.Body>
-                                { getForm(props.procedureStep.type, props.procedureStep.content, props.editProcedureStep) }
+                                { getForm(props.type, content, editContent) }
                             </Card.Body>
                         </Accordion.Collapse>
                     </Card>
