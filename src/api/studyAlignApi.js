@@ -182,8 +182,8 @@ export function createTextApi(text) {
     return sal.createText(text);
 }
 
-export function updateTextApi(textId, text) {
-    return sal.updateText(textId, text);
+export function updateTextApi(args) {
+    return sal.updateText(args.textId, args.text);
 }
 
 // Questionnaires
