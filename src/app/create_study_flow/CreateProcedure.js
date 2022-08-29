@@ -6,23 +6,44 @@ import {Button, Card, Col, Container, ListGroup, Row, Accordion} from "react-boo
 import {DragDropContext, Droppable} from "react-beautiful-dnd";
 import ProcedureObject from "./ProcedureObject";
 import {useDispatch, useSelector} from "react-redux";
-import {getStudy, selectStudy} from "../../redux/reducers/studySlice";
 import {createText, getTexts, selectTexts} from "../../redux/reducers/textSlice";
-import LoadingScreen from "../../components/LoadingScreen";
+import {createCondition, getConditions, selectConditions} from "../../redux/reducers/conditionSlice";
+import {createQuestionnaire, getQuestionnaires, selectQuestionnaires} from "../../redux/reducers/questionnaireSlice";
+import {createPause, getPauses, selectPause, selectPauses} from "../../redux/reducers/pauseSlice";
 
 export default function CreateProcedure() {
     const dispatch = useDispatch()
     const { study_id } = useParams()
-    const [texts, setTexts] = useState([])
+    const [procedure, setProcedure] = useState([])
 
     useEffect( () => {
         dispatch(getTexts(study_id));
+        dispatch(getConditions(study_id));
+        dispatch(getQuestionnaires(study_id));
+        dispatch(getPauses(study_id));
     }, [])
 
-    let n_texts = useSelector(selectTexts)
-    if (n_texts != null && texts.length !== n_texts.length) {
-        n_texts = texts.slice(0, texts.length).concat(n_texts.slice(texts.length))
-        setTexts(n_texts)
+    let texts = useSelector(selectTexts)
+    let conditions = useSelector(selectConditions)
+    let pauses = useSelector(selectPauses)
+    let questions = useSelector(selectQuestionnaires)
+
+    if (texts != null && questions != null && pauses != null && conditions != null &&
+        procedure.length !== texts.length + conditions.length + pauses.length + questions.length) {
+        let n_procedure = []
+        for(let text of texts) {
+            n_procedure.push({id: "t" + text.id.toString(), type: ProcedureTypes.TextPage, content: text})
+        }
+        for(let cond of conditions) {
+            n_procedure.push({id: "c" + cond.id.toString(), type: ProcedureTypes.Condition, content: cond})
+        }
+        for(let quest of questions) {
+            n_procedure.push({id: "q" + quest.id.toString(), type: ProcedureTypes.Questionnaire, content: quest})
+        }
+        for(let pause of pauses) {
+            n_procedure.push({id: "p" + pause.id.toString(), type: ProcedureTypes.Pause, content: pause})
+        }
+        setProcedure(n_procedure)
     }
 
     const onDragEnd = (result) => {
@@ -30,11 +51,11 @@ export default function CreateProcedure() {
         const idx_src = result.source.index
         const idx_dest = result.destination.index
         if(idx_src === idx_dest) return
-        let n_texts = [...texts]
-        let obj = texts[idx_src]
-        n_texts.splice(idx_src, 1)
-        n_texts.splice(idx_dest, 0, obj)
-        setTexts(n_texts)
+        let n_procedure = [...procedure]
+        let obj = procedure[idx_src]
+        n_procedure.splice(idx_src, 1)
+        n_procedure.splice(idx_dest, 0, obj)
+        setProcedure(n_procedure)
     }
 
     const createProcedureStep = async (event, procedureType) => {
@@ -46,21 +67,55 @@ export default function CreateProcedure() {
                 "study_id": study_id
             }
             await dispatch(createText(text))
+            await dispatch(getTexts(study_id));
         }
-        await dispatch(getTexts(study_id));
+        else if(procedureType === ProcedureTypes.Condition) {
+            let cond = {
+                "name": "MockCondition",
+                "config": {},
+                "url": "www.mockurl.de",
+                "study_id": study_id
+            }
+            await dispatch(createCondition(cond))
+            await dispatch(getConditions(study_id));
+        }
+        else if(procedureType === ProcedureTypes.Questionnaire) {
+            let quest = {
+                "url": "www.mockurl.de",
+                "system": "limesurvey",
+                "study_id": study_id,
+                "ext_id": "mock",
+                "api_url": "mock",
+                "api_username": "mock",
+                "api_password": "mock"
+            }
+            await dispatch(createQuestionnaire(quest))
+            await dispatch(getQuestionnaires(study_id));
+        }
+        else if(procedureType === ProcedureTypes.Pause) {
+            let pause = {
+                "title": "MockPause",
+                "body": "MockBody",
+                "proceed_body": "MockProceedBody",
+                "type": "time_based",
+                "config": {},
+                "study_id": study_id
+            }
+            await dispatch(createPause(pause))
+            await dispatch(getPauses(study_id));
+        }
     }
 
-    let buttons = []
-    for (let t in ProcedureTypes) {
-        buttons.push(
-            <Col xs={'auto'} key={ProcedureTypes[t].id}>
-                <Button onClick={(event) => createProcedureStep(event, ProcedureTypes[t])}> { ProcedureTypes[t].label } </Button>
-            </Col>
-        )
-    }
-
-    if(texts == null) {
-        return <LoadingScreen/>
+    const procedureStepButtons = () => {
+        let buttons = []
+        for (let t in ProcedureTypes) {
+            buttons.push(
+                <Col xs={'auto'} key={ProcedureTypes[t].id}>
+                    <Button onClick={(event) => createProcedureStep(event, ProcedureTypes[t])}> { ProcedureTypes[t].label } </Button>
+                </Col>
+            )
+        }
+        return buttons
     }
 
     return (
@@ -68,7 +123,7 @@ export default function CreateProcedure() {
 
             <Container>
                 <Row className='mt-3'>
-                    { buttons }
+                    { procedureStepButtons() }
                 </Row>
 
                 <Row className='mt-3'>
@@ -83,14 +138,16 @@ export default function CreateProcedure() {
                                     {provided => (
                                         <div ref={provided.innerRef} {...provided.droppableProps}>
                                             <ListGroup>
-                                                {texts.map((text, index) => (
-                                                    <ProcedureObject key={"text" + text.id.toString()}
-                                                                     id={"text" + text.id.toString()}
+                                                {
+                                                    procedure.map((ps, index) => (
+                                                    <ProcedureObject key={ps.id}
+                                                                     id={ps.id}
                                                                      index={index}
-                                                                     content={text}
-                                                                     type={ProcedureTypes.TextPage}
+                                                                     content={ps.content}
+                                                                     type={ps.type}
                                                     />
-                                                ))}
+                                                ))
+                                                }
                                             </ListGroup>
                                             {provided.placeholder}
                                         </div>

@@ -3,6 +3,9 @@ import {Draggable} from 'react-beautiful-dnd';
 import {Card, Accordion, useAccordionButton, Form} from "react-bootstrap";
 import {useDispatch} from "react-redux";
 import {updateText} from "../../redux/reducers/textSlice";
+import {updateCondition} from "../../redux/reducers/conditionSlice";
+import {updateQuestionnaire} from "../../redux/reducers/questionnaireSlice";
+import {updatePause} from "../../redux/reducers/pauseSlice";
 
 export const ProcedureTypes = {
     TextPage: {
@@ -170,7 +173,32 @@ export default function ProcedureObject(props) {
     const decoratedOnClick = useAccordionButton(props.id, (event) => {
         event.preventDefault()
         if(!saved) {
-            dispatch(updateText({textId: content.id, text: {"title": content.title, "body": content.body}}));
+            if (props.type === ProcedureTypes.TextPage) {
+                dispatch(updateText({textId: content.id, text: {"title": content.title, "body": content.body}}));
+            }
+            else if (props.type === ProcedureTypes.Condition) {
+                dispatch(updateCondition({conditionId: content.id, condition: {"name": content.name, "config": content.config, "url": content.url}}));
+            }
+            else if (props.type === ProcedureTypes.Questionnaire) {
+                dispatch(updateQuestionnaire({questionnaireId: content.id, questionnaire: {
+                        "url": content.url,
+                        "system": content.system,
+                        "ext_id": content.ext_id,
+                        "api_url": content.api_url,
+                        "api_username": content.api_username,
+                        "api_password": content.api_password,
+                    }}))
+            }
+            else if (props.type === ProcedureTypes.Pause) {
+                dispatch(updatePause({pauseId: content.id, pause: {
+                        "title": content.title,
+                        "body": content.body,
+                        "proceed_body": content.proceed_body,
+                        "type": content.type,
+                        "config": content.config
+                    }}))
+            }
+
         }
     });
 

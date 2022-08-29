@@ -7,6 +7,7 @@ import {
     updateQuestionnaireApi,
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
+import {getPauses} from "./pauseSlice";
 
 const initialState = {
     questionnaires: null,
@@ -102,6 +103,15 @@ export const questionnaireSlice = createSlice({
                     state.status = action.payload.status
                     state.currentRequestId = undefined
                     state.questionnaires = action.payload.body
+                }
+            })
+            .addCase(getQuestionnaires.rejected, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                    state.questionnaires = []
                 }
             })
             .addCase(getQuestionnaire.pending, (state, action) => {

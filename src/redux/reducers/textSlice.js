@@ -7,6 +7,7 @@ import {
     updateTextApi,
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
+import {getPauses} from "./pauseSlice";
 
 const initialState = {
     texts: null,
@@ -102,6 +103,15 @@ export const textSlice = createSlice({
                     state.status = action.payload.status
                     state.currentRequestId = undefined
                     state.texts = action.payload.body
+                }
+            })
+            .addCase(getTexts.rejected, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                    state.texts = []
                 }
             })
             .addCase(getText.pending, (state, action) => {

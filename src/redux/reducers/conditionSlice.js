@@ -8,6 +8,7 @@ import {
     updateConditionApi,
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
+import {getStudySetupInfo} from "./studySlice";
 
 const initialState = {
     conditionIds: null,
@@ -133,6 +134,15 @@ export const conditionSlice = createSlice({
                     state.status = action.payload.status
                     state.currentRequestId = undefined
                     state.conditions = action.payload.body
+                }
+            })
+            .addCase(getConditions.rejected, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                    state.conditions = []
                 }
             })
             .addCase(getCondition.pending, (state, action) => {

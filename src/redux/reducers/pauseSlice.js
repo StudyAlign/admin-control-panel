@@ -7,6 +7,7 @@ import {
     updatePauseApi,
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
+import {getConditions} from "./conditionSlice";
 
 const initialState = {
     pauses: null,
@@ -102,6 +103,15 @@ export const pauseSlice = createSlice({
                     state.status = action.payload.status
                     state.currentRequestId = undefined
                     state.pauses = action.payload.body
+                }
+            })
+            .addCase(getPauses.rejected, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                    state.pauses = []
                 }
             })
             .addCase(getPause.pending, (state, action) => {
