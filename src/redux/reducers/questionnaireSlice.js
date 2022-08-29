@@ -1,16 +1,16 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {
     apiWithAuth,
-    getTextsApi,
-    getTextApi,
-    createTextApi,
-    updateTextApi,
+    getQuestionnairesApi,
+    getQuestionnaireApi,
+    createQuestionnaireApi,
+    updateQuestionnaireApi,
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
 
 const initialState = {
-    texts: null,
-    text: null,
+    questionnaires: null,
+    questionnaire: null,
     api: IDLE,
     error: null,
     status: null,
@@ -18,15 +18,15 @@ const initialState = {
 };
 
 //async thunks
-export const getTexts = createAsyncThunk(
-    'getTexts',
+export const getQuestionnaires = createAsyncThunk(
+    'getQuestionnaires',
     async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
-        const { api, currentRequestId } = getState().texts
+        const { api, currentRequestId } = getState().questionnaires
         if (api !== LOADING || requestId !== currentRequestId) {
             return
         }
         try {
-            const response = await apiWithAuth(getTextsApi, studyId, dispatch)
+            const response = await apiWithAuth(getQuestionnairesApi, studyId, dispatch)
             return response
         } catch (err) {
             return rejectWithValue(err)
@@ -34,15 +34,15 @@ export const getTexts = createAsyncThunk(
     }
 );
 
-export const getText = createAsyncThunk(
-    'getText',
-    async (textId, { dispatch, getState, rejectWithValue, requestId}) => {
-        const { api, currentRequestId } = getState().texts
+export const getQuestionnaire = createAsyncThunk(
+    'getQuestionnaire',
+    async (questionnaireId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().questionnaires
         if (api !== LOADING || requestId !== currentRequestId) {
             return
         }
         try {
-            const response = await apiWithAuth(getTextApi, textId, dispatch)
+            const response = await apiWithAuth(getQuestionnaireApi, questionnaireId, dispatch)
             return response
         } catch (err) {
             return rejectWithValue(err)
@@ -50,15 +50,15 @@ export const getText = createAsyncThunk(
     }
 );
 
-export const createText = createAsyncThunk(
-    'createText',
-    async (text, { dispatch, getState, rejectWithValue, requestId}) => {
-        const { api, currentRequestId } = getState().texts
+export const createQuestionnaire = createAsyncThunk(
+    'createQuestionnaire',
+    async (questionnaire, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().questionnaires
         if (api !== LOADING || requestId !== currentRequestId) {
             return
         }
         try {
-            const response = await apiWithAuth(createTextApi, text, dispatch)
+            const response = await apiWithAuth(createQuestionnaireApi, questionnaire, dispatch)
             return response
         } catch (err) {
             return rejectWithValue(err)
@@ -66,15 +66,15 @@ export const createText = createAsyncThunk(
     }
 );
 
-export const updateText = createAsyncThunk(
-    'updateText',
+export const updateQuestionnaire = createAsyncThunk(
+    'updateQuestionnaire',
     async (args, { dispatch, getState, rejectWithValue, requestId}) => {
-        const { api, currentRequestId } = getState().texts
+        const { api, currentRequestId } = getState().questionnaires
         if (api !== LOADING || requestId !== currentRequestId) {
             return
         }
         try {
-            const response = await apiWithAuth(updateTextApi, args, dispatch)
+            const response = await apiWithAuth(updateQuestionnaireApi, args, dispatch)
             return response;
         } catch (err) {
             return rejectWithValue(err)
@@ -83,58 +83,58 @@ export const updateText = createAsyncThunk(
 );
 
 // reducers
-export const textSlice = createSlice({
-    name: 'texts',
+export const questionnaireSlice = createSlice({
+    name: 'questionnaires',
     initialState,
     reducers: {
         // REDUCERS THAT DO NOT DEPEND ON API CALLS GO HERE
     },
     extraReducers: (builder) => {
         builder
-            .addCase(getTexts.pending, (state, action) => {
+            .addCase(getQuestionnaires.pending, (state, action) => {
                 state.api = LOADING
                 state.currentRequestId = action.meta.requestId
             })
-            .addCase(getTexts.fulfilled, (state, action) => {
+            .addCase(getQuestionnaires.fulfilled, (state, action) => {
                 const { requestId } = action.meta
                 if (state.api === LOADING && state.currentRequestId === requestId) {
                     state.api = IDLE
                     state.status = action.payload.status
                     state.currentRequestId = undefined
-                    state.texts = action.payload.body
+                    state.questionnaires = action.payload.body
                 }
             })
-            .addCase(getText.pending, (state, action) => {
+            .addCase(getQuestionnaire.pending, (state, action) => {
                 state.api = LOADING
                 state.currentRequestId = action.meta.requestId
             })
-            .addCase(getText.fulfilled, (state, action) => {
+            .addCase(getQuestionnaire.fulfilled, (state, action) => {
                 const { requestId } = action.meta
                 if (state.api === LOADING && state.currentRequestId === requestId) {
                     state.api = IDLE
                     state.status = action.payload.status
                     state.currentRequestId = undefined
-                    state.text = action.payload.body
+                    state.questionnaire = action.payload.body
                 }
             })
-            .addCase(createText.pending, (state, action) => {
+            .addCase(createQuestionnaire.pending, (state, action) => {
                 state.api = LOADING
                 state.currentRequestId = action.meta.requestId
             })
-            .addCase(createText.fulfilled, (state, action) => {
+            .addCase(createQuestionnaire.fulfilled, (state, action) => {
                 const { requestId } = action.meta
                 if (state.api === LOADING && state.currentRequestId === requestId) {
                     state.api = IDLE
                     state.status = action.payload.status
                     state.currentRequestId = undefined
-                    state.text = action.payload.body
+                    state.questionnaire = action.payload.body
                 }
             })
-            .addCase(updateText.pending, (state, action) => {
+            .addCase(updateQuestionnaire.pending, (state, action) => {
                 state.api = LOADING
                 state.currentRequestId = action.meta.requestId
             })
-            .addCase(updateText.fulfilled, (state, action) => {
+            .addCase(updateQuestionnaire.fulfilled, (state, action) => {
                 const { requestId } = action.meta
                 if (state.api === LOADING && state.currentRequestId === requestId) {
                     state.api = IDLE
@@ -148,16 +148,16 @@ export const textSlice = createSlice({
 
 // selectors
 
-export const selectTexts = (state) => {
-    return state.texts.texts;
+export const selectQuestionnaires = (state) => {
+    return state.questionnaires.questionnaires;
 }
 
-export const selectText = (state) => {
-    return state.texts.text;
+export const selectQuestionnaire = (state) => {
+    return state.questionnaires.questionnaire;
 }
 
-export const selectTextApiStatus = (state) => {
-    return state.texts.status
+export const selectQuestionnaireApiStatus = (state) => {
+    return state.questionnaires.status
 }
 
-export default textSlice.reducer;
+export default questionnaireSlice.reducer;

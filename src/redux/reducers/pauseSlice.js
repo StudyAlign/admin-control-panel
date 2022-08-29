@@ -1,16 +1,16 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {
     apiWithAuth,
-    getTextsApi,
-    getTextApi,
-    createTextApi,
-    updateTextApi,
+    getPausesApi,
+    getPauseApi,
+    createPauseApi,
+    updatePauseApi,
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
 
 const initialState = {
-    texts: null,
-    text: null,
+    pauses: null,
+    pause: null,
     api: IDLE,
     error: null,
     status: null,
@@ -18,15 +18,15 @@ const initialState = {
 };
 
 //async thunks
-export const getTexts = createAsyncThunk(
-    'getTexts',
+export const getPauses = createAsyncThunk(
+    'getPauses',
     async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
-        const { api, currentRequestId } = getState().texts
+        const { api, currentRequestId } = getState().pauses
         if (api !== LOADING || requestId !== currentRequestId) {
             return
         }
         try {
-            const response = await apiWithAuth(getTextsApi, studyId, dispatch)
+            const response = await apiWithAuth(getPausesApi, studyId, dispatch)
             return response
         } catch (err) {
             return rejectWithValue(err)
@@ -34,15 +34,15 @@ export const getTexts = createAsyncThunk(
     }
 );
 
-export const getText = createAsyncThunk(
-    'getText',
-    async (textId, { dispatch, getState, rejectWithValue, requestId}) => {
-        const { api, currentRequestId } = getState().texts
+export const getPause = createAsyncThunk(
+    'getPause',
+    async (pauseId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().pauses
         if (api !== LOADING || requestId !== currentRequestId) {
             return
         }
         try {
-            const response = await apiWithAuth(getTextApi, textId, dispatch)
+            const response = await apiWithAuth(getPauseApi, pauseId, dispatch)
             return response
         } catch (err) {
             return rejectWithValue(err)
@@ -50,15 +50,15 @@ export const getText = createAsyncThunk(
     }
 );
 
-export const createText = createAsyncThunk(
-    'createText',
-    async (text, { dispatch, getState, rejectWithValue, requestId}) => {
-        const { api, currentRequestId } = getState().texts
+export const createPause = createAsyncThunk(
+    'createPause',
+    async (pause, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().pauses
         if (api !== LOADING || requestId !== currentRequestId) {
             return
         }
         try {
-            const response = await apiWithAuth(createTextApi, text, dispatch)
+            const response = await apiWithAuth(createPauseApi, pause, dispatch)
             return response
         } catch (err) {
             return rejectWithValue(err)
@@ -66,15 +66,15 @@ export const createText = createAsyncThunk(
     }
 );
 
-export const updateText = createAsyncThunk(
-    'updateText',
+export const updatePause = createAsyncThunk(
+    'updatePause',
     async (args, { dispatch, getState, rejectWithValue, requestId}) => {
-        const { api, currentRequestId } = getState().texts
+        const { api, currentRequestId } = getState().pauses
         if (api !== LOADING || requestId !== currentRequestId) {
             return
         }
         try {
-            const response = await apiWithAuth(updateTextApi, args, dispatch)
+            const response = await apiWithAuth(updatePauseApi, args, dispatch)
             return response;
         } catch (err) {
             return rejectWithValue(err)
@@ -83,58 +83,58 @@ export const updateText = createAsyncThunk(
 );
 
 // reducers
-export const textSlice = createSlice({
-    name: 'texts',
+export const pauseSlice = createSlice({
+    name: 'pauses',
     initialState,
     reducers: {
         // REDUCERS THAT DO NOT DEPEND ON API CALLS GO HERE
     },
     extraReducers: (builder) => {
         builder
-            .addCase(getTexts.pending, (state, action) => {
+            .addCase(getPauses.pending, (state, action) => {
                 state.api = LOADING
                 state.currentRequestId = action.meta.requestId
             })
-            .addCase(getTexts.fulfilled, (state, action) => {
+            .addCase(getPauses.fulfilled, (state, action) => {
                 const { requestId } = action.meta
                 if (state.api === LOADING && state.currentRequestId === requestId) {
                     state.api = IDLE
                     state.status = action.payload.status
                     state.currentRequestId = undefined
-                    state.texts = action.payload.body
+                    state.pauses = action.payload.body
                 }
             })
-            .addCase(getText.pending, (state, action) => {
+            .addCase(getPause.pending, (state, action) => {
                 state.api = LOADING
                 state.currentRequestId = action.meta.requestId
             })
-            .addCase(getText.fulfilled, (state, action) => {
+            .addCase(getPause.fulfilled, (state, action) => {
                 const { requestId } = action.meta
                 if (state.api === LOADING && state.currentRequestId === requestId) {
                     state.api = IDLE
                     state.status = action.payload.status
                     state.currentRequestId = undefined
-                    state.text = action.payload.body
+                    state.pause = action.payload.body
                 }
             })
-            .addCase(createText.pending, (state, action) => {
+            .addCase(createPause.pending, (state, action) => {
                 state.api = LOADING
                 state.currentRequestId = action.meta.requestId
             })
-            .addCase(createText.fulfilled, (state, action) => {
+            .addCase(createPause.fulfilled, (state, action) => {
                 const { requestId } = action.meta
                 if (state.api === LOADING && state.currentRequestId === requestId) {
                     state.api = IDLE
                     state.status = action.payload.status
                     state.currentRequestId = undefined
-                    state.text = action.payload.body
+                    state.pause = action.payload.body
                 }
             })
-            .addCase(updateText.pending, (state, action) => {
+            .addCase(updatePause.pending, (state, action) => {
                 state.api = LOADING
                 state.currentRequestId = action.meta.requestId
             })
-            .addCase(updateText.fulfilled, (state, action) => {
+            .addCase(updatePause.fulfilled, (state, action) => {
                 const { requestId } = action.meta
                 if (state.api === LOADING && state.currentRequestId === requestId) {
                     state.api = IDLE
@@ -148,16 +148,16 @@ export const textSlice = createSlice({
 
 // selectors
 
-export const selectTexts = (state) => {
-    return state.texts.texts;
+export const selectPauses = (state) => {
+    return state.pauses.pauses;
 }
 
-export const selectText = (state) => {
-    return state.texts.text;
+export const selectPause = (state) => {
+    return state.pauses.pause;
 }
 
-export const selectTextApiStatus = (state) => {
-    return state.texts.status
+export const selectPauseApiStatus = (state) => {
+    return state.pauses.status
 }
 
-export default textSlice.reducer;
+export default pauseSlice.reducer;
