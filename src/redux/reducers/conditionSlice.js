@@ -183,15 +183,15 @@ export const selectConditionIds = (state) => {
     return state.conditions.conditionIds;
 }
 
-export const selectText = (state) => {
+export const selectConditions = (state) => {
     return state.conditions.conditions;
 }
 
-export const selectText = (state) => {
+export const selectCondition = (state) => {
     return state.conditions.condition;
 }
 
-export const selectTextApiStatus = (state) => {
+export const selectConditionApiStatus = (state) => {
     return state.conditions.status
 }
 
