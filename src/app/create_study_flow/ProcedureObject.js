@@ -6,7 +6,7 @@ import {updateText} from "../../redux/reducers/textSlice";
 import {updateCondition} from "../../redux/reducers/conditionSlice";
 import {updateQuestionnaire} from "../../redux/reducers/questionnaireSlice";
 import {updatePause} from "../../redux/reducers/pauseSlice";
-import {DeviceSsd, DeviceSsdFill, Trash3, Trash3Fill} from "react-bootstrap-icons";
+import {DeviceSsd, Trash3} from "react-bootstrap-icons";
 
 export const ProcedureTypes = {
     TextPage: {
@@ -22,12 +22,12 @@ export const ProcedureTypes = {
     Questionnaire: {
         id: 2,
         label: "Questionnaire",
-        emptyContent: { "url": "", "system": "", "ext_id": "", "api_url": "", "api_username": "", "api_password": "", "study_id": -1 }
+        emptyContent: { "url": "", "system": "limesurvey", "ext_id": "-", "api_url": "-", "api_username": "-", "api_password": "-", "study_id": -1}
     },
     Pause:  {
         id: 3,
         label: "Pause",
-        emptyContent: { "title": "", "body": "", "proceed_body": "", "type": "", "config": "", "study_id": -1 }
+        emptyContent: { "title": "", "body": "", "proceed_body": "", "type": "time_based", "config": "", "study_id": -1 }
     },
 }
 
@@ -154,6 +154,7 @@ function PauseForm(props) {
                 <Form.Select value={props.content.type} onChange={onChange}>
                     <option disabled value={""}> -- Select a Type -- </option>
                     <option value={"time_based"}> Time based </option>
+                    <option value={"controlled"}> Controlled </option>
                 </Form.Select>
             </Form.Group>
 

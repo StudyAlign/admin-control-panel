@@ -60,48 +60,22 @@ export default function CreateProcedure() {
 
     const createProcedureStep = async (event, procedureType) => {
         event.preventDefault()
+        let content = procedureType.emptyContent
+        content.study_id = study_id
         if(procedureType === ProcedureTypes.TextPage) {
-            let text = {
-                "title": "MockTitle",
-                "body": "MockBody",
-                "study_id": study_id
-            }
-            await dispatch(createText(text))
+            await dispatch(createText(content))
             await dispatch(getTexts(study_id));
         }
         else if(procedureType === ProcedureTypes.Condition) {
-            let cond = {
-                "name": "MockCondition",
-                "config": {},
-                "url": "www.mockurl.de",
-                "study_id": study_id
-            }
-            await dispatch(createCondition(cond))
+            await dispatch(createCondition(content))
             await dispatch(getConditions(study_id));
         }
         else if(procedureType === ProcedureTypes.Questionnaire) {
-            let quest = {
-                "url": "www.mockurl.de",
-                "system": "limesurvey",
-                "study_id": study_id,
-                "ext_id": "mock",
-                "api_url": "mock",
-                "api_username": "mock",
-                "api_password": "mock"
-            }
-            await dispatch(createQuestionnaire(quest))
+            await dispatch(createQuestionnaire(content))
             await dispatch(getQuestionnaires(study_id));
         }
         else if(procedureType === ProcedureTypes.Pause) {
-            let pause = {
-                "title": "MockPause",
-                "body": "MockBody",
-                "proceed_body": "MockProceedBody",
-                "type": "time_based",
-                "config": {},
-                "study_id": study_id
-            }
-            await dispatch(createPause(pause))
+            await dispatch(createPause(content))
             await dispatch(getPauses(study_id));
         }
     }
