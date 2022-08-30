@@ -9,7 +9,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {createText, getTexts, selectTexts} from "../../redux/reducers/textSlice";
 import {createCondition, getConditions, selectConditions} from "../../redux/reducers/conditionSlice";
 import {createQuestionnaire, getQuestionnaires, selectQuestionnaires} from "../../redux/reducers/questionnaireSlice";
-import {createPause, getPauses, selectPause, selectPauses} from "../../redux/reducers/pauseSlice";
+import {createPause, getPauses, selectPauses} from "../../redux/reducers/pauseSlice";
 
 export default function CreateProcedure() {
     const dispatch = useDispatch()

@@ -8,7 +8,7 @@ import { useParams } from "react-router";
 import {useDispatch, useSelector} from "react-redux";
 import {getStudy, selectStudy} from "../../redux/reducers/studySlice";
 import {Col, Dropdown, Row} from "react-bootstrap";
-import {PeopleFill, ThreeDots} from "react-bootstrap-icons";
+import {ThreeDots} from "react-bootstrap-icons";
 
 // TODO Maybe refactor layout so that the use is similar to the CreateStudyLayout
 export default function StudyOverviewLayout() {

@@ -1,11 +1,12 @@
 import React, {useState} from 'react';
 import {Draggable} from 'react-beautiful-dnd';
-import {Card, Accordion, useAccordionButton, Form} from "react-bootstrap";
+import {Card, Accordion, useAccordionButton, Form, Row, Container, Button, Col} from "react-bootstrap";
 import {useDispatch} from "react-redux";
 import {updateText} from "../../redux/reducers/textSlice";
 import {updateCondition} from "../../redux/reducers/conditionSlice";
 import {updateQuestionnaire} from "../../redux/reducers/questionnaireSlice";
 import {updatePause} from "../../redux/reducers/pauseSlice";
+import {DeviceSsd, DeviceSsdFill, Trash3, Trash3Fill} from "react-bootstrap-icons";
 
 export const ProcedureTypes = {
     TextPage: {
@@ -170,37 +171,53 @@ export default function ProcedureObject(props) {
     const [content, setContent] = useState(props.content)
     const [saved, setSaved] = useState(true)
 
+    const saveContent = () => {
+        if (props.type === ProcedureTypes.TextPage) {
+            dispatch(updateText({textId: content.id, text: {"title": content.title, "body": content.body}}));
+        }
+        else if (props.type === ProcedureTypes.Condition) {
+            dispatch(updateCondition({conditionId: content.id, condition: {"name": content.name, "config": content.config, "url": content.url}}));
+        }
+        else if (props.type === ProcedureTypes.Questionnaire) {
+            dispatch(updateQuestionnaire({questionnaireId: content.id, questionnaire: {
+                    "url": content.url,
+                    "system": content.system,
+                    "ext_id": content.ext_id,
+                    "api_url": content.api_url,
+                    "api_username": content.api_username,
+                    "api_password": content.api_password,
+                }}))
+        }
+        else if (props.type === ProcedureTypes.Pause) {
+            dispatch(updatePause({pauseId: content.id, pause: {
+                    "title": content.title,
+                    "body": content.body,
+                    "proceed_body": content.proceed_body,
+                    "type": content.type,
+                    "config": content.config
+                }}))
+        }
+        setSaved(true)
+    }
+
     const decoratedOnClick = useAccordionButton(props.id, (event) => {
         event.preventDefault()
         if(!saved) {
-            if (props.type === ProcedureTypes.TextPage) {
-                dispatch(updateText({textId: content.id, text: {"title": content.title, "body": content.body}}));
-            }
-            else if (props.type === ProcedureTypes.Condition) {
-                dispatch(updateCondition({conditionId: content.id, condition: {"name": content.name, "config": content.config, "url": content.url}}));
-            }
-            else if (props.type === ProcedureTypes.Questionnaire) {
-                dispatch(updateQuestionnaire({questionnaireId: content.id, questionnaire: {
-                        "url": content.url,
-                        "system": content.system,
-                        "ext_id": content.ext_id,
-                        "api_url": content.api_url,
-                        "api_username": content.api_username,
-                        "api_password": content.api_password,
-                    }}))
-            }
-            else if (props.type === ProcedureTypes.Pause) {
-                dispatch(updatePause({pauseId: content.id, pause: {
-                        "title": content.title,
-                        "body": content.body,
-                        "proceed_body": content.proceed_body,
-                        "type": content.type,
-                        "config": content.config
-                    }}))
-            }
-
+            saveContent()
         }
     });
+
+    const handleDelete = (event) => {
+        event.preventDefault()
+        // TODO Delete Object
+    }
+
+    const handleSave = (event) => {
+        event.preventDefault()
+        if(!saved) {
+            saveContent()
+        }
+    }
 
     const editContent = (content_id, value) => {
         let new_content = {...content}
@@ -246,7 +263,16 @@ export default function ProcedureObject(props) {
                         </Card.Header>
 
                         <Accordion.Collapse eventKey={props.id}>
-                            <Card.Body>
+                            <Card.Body className="pt-1">
+                                <Row className="me-0">
+                                    <Col> </Col>
+                                    <Col xs="auto" className="p-1">
+                                        <Button className="p-1 pt-0 m-0" onClick={handleSave} disabled={saved}> <DeviceSsd/> </Button>
+                                    </Col>
+                                    <Col xs="auto" className="p-1">
+                                        <Button className="p-1 pt-0 m-0" onClick={handleDelete} variant="danger"> <Trash3/> </Button>
+                                    </Col>
+                                </Row>
                                 { getForm(props.type, content, editContent) }
                             </Card.Body>
                         </Accordion.Collapse>
