@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {Draggable} from 'react-beautiful-dnd';
-import {Card, Accordion, useAccordionButton, Form, Row, Container, Button, Col} from "react-bootstrap";
+import {Card, Accordion, useAccordionButton, Form, Row, Button, Col} from "react-bootstrap";
 import {useDispatch} from "react-redux";
 import {updateText} from "../../redux/reducers/textSlice";
 import {updateCondition} from "../../redux/reducers/conditionSlice";
@@ -174,10 +174,17 @@ export default function ProcedureObject(props) {
 
     const saveContent = () => {
         if (props.type === ProcedureTypes.TextPage) {
-            dispatch(updateText({textId: content.id, text: {"title": content.title, "body": content.body}}));
+            dispatch(updateText({textId: content.id, text: {
+                    "title": content.title,
+                    "body": content.body
+                }}))
         }
         else if (props.type === ProcedureTypes.Condition) {
-            dispatch(updateCondition({conditionId: content.id, condition: {"name": content.name, "config": content.config, "url": content.url}}));
+            dispatch(updateCondition({conditionId: content.id, condition: {
+                    "name": content.name,
+                    "config": content.config,
+                    "url": content.url
+                }}))
         }
         else if (props.type === ProcedureTypes.Questionnaire) {
             dispatch(updateQuestionnaire({questionnaireId: content.id, questionnaire: {
