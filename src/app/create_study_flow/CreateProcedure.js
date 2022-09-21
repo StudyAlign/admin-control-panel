@@ -6,15 +6,22 @@ import {Button, Card, Col, Container, ListGroup, Row, Accordion} from "react-boo
 import {DragDropContext, Droppable} from "react-beautiful-dnd";
 import ProcedureObject from "./ProcedureObject";
 import {useDispatch, useSelector} from "react-redux";
-import {createText, getTexts, selectTexts} from "../../redux/reducers/textSlice";
-import {createCondition, getConditions, selectConditions} from "../../redux/reducers/conditionSlice";
-import {createQuestionnaire, getQuestionnaires, selectQuestionnaires} from "../../redux/reducers/questionnaireSlice";
-import {createPause, getPauses, selectPauses} from "../../redux/reducers/pauseSlice";
+import {getTexts, selectTexts} from "../../redux/reducers/textSlice";
+import {getConditions, selectConditions} from "../../redux/reducers/conditionSlice";
+import {getQuestionnaires, selectQuestionnaires} from "../../redux/reducers/questionnaireSlice";
+import {getPauses, selectPauses} from "../../redux/reducers/pauseSlice";
+import ProcedureAlert from "./ProcedureAlert";
 
 export default function CreateProcedure() {
     const dispatch = useDispatch()
     const { study_id } = useParams()
     const [procedure, setProcedure] = useState([])
+    const [notStoredSteps, setNSSteps] = useState([])
+    const [idCounter, setIdCounter] = useState(0)
+    const [message, setMessage] = useState({
+        type: "none", // "success"/"danger"/"warning"/"info"
+        text: "..."
+    })
 
     useEffect( () => {
         dispatch(getTexts(study_id));
@@ -58,26 +65,19 @@ export default function CreateProcedure() {
         setProcedure(n_procedure)
     }
 
-    const createProcedureStep = async (event, procedureType) => {
+    const createProcedureStep = (event, procedureType) => {
         event.preventDefault()
-        let content = procedureType.emptyContent
-        content.study_id = study_id
-        if(procedureType === ProcedureTypes.TextPage) {
-            await dispatch(createText(content))
-            await dispatch(getTexts(study_id));
+        let empty_content = procedureType.emptyContent
+        empty_content.study_id = study_id
+        let n_steps = [...notStoredSteps]
+        let step = {
+            id: "x" + idCounter,
+            type: procedureType,
+            content: empty_content,
         }
-        else if(procedureType === ProcedureTypes.Condition) {
-            await dispatch(createCondition(content))
-            await dispatch(getConditions(study_id));
-        }
-        else if(procedureType === ProcedureTypes.Questionnaire) {
-            await dispatch(createQuestionnaire(content))
-            await dispatch(getQuestionnaires(study_id));
-        }
-        else if(procedureType === ProcedureTypes.Pause) {
-            await dispatch(createPause(content))
-            await dispatch(getPauses(study_id));
-        }
+        setIdCounter(idCounter+1)
+        n_steps.push(step)
+        setNSSteps(n_steps)
     }
 
     const procedureStepButtons = () => {
@@ -96,6 +96,10 @@ export default function CreateProcedure() {
         <StudyCreationLayout step={CreationSteps.Procedure}>
 
             <Container>
+                <Row className='mt-3'>
+                    <ProcedureAlert message={message}/>
+                </Row>
+
                 <Row className='mt-3'>
                     { procedureStepButtons() }
                 </Row>
@@ -119,6 +123,19 @@ export default function CreateProcedure() {
                                                                      index={index}
                                                                      content={ps.content}
                                                                      type={ps.type}
+                                                                     stored={true}
+                                                                     setMessage={setMessage}
+                                                    />
+                                                ))
+                                                }
+                                                {   notStoredSteps.map((ps, index) => (
+                                                    <ProcedureObject key={ps.id}
+                                                                     id={ps.id}
+                                                                     index={procedure.length+index}
+                                                                     content={ps.content}
+                                                                     type={ps.type}
+                                                                     stored={false}
+                                                                     setMessage={setMessage}
                                                     />
                                                 ))
                                                 }

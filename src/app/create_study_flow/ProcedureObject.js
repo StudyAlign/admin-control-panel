@@ -2,10 +2,10 @@ import React, {useState} from 'react';
 import {Draggable} from 'react-beautiful-dnd';
 import {Card, Accordion, useAccordionButton, Form, Row, Button, Col} from "react-bootstrap";
 import {useDispatch} from "react-redux";
-import {updateText} from "../../redux/reducers/textSlice";
-import {updateCondition} from "../../redux/reducers/conditionSlice";
-import {updateQuestionnaire} from "../../redux/reducers/questionnaireSlice";
-import {updatePause} from "../../redux/reducers/pauseSlice";
+import {createText, updateText} from "../../redux/reducers/textSlice";
+import {createCondition, updateCondition} from "../../redux/reducers/conditionSlice";
+import {createQuestionnaire, updateQuestionnaire} from "../../redux/reducers/questionnaireSlice";
+import {createPause, updatePause} from "../../redux/reducers/pauseSlice";
 import {DeviceSsd, Trash3} from "react-bootstrap-icons";
 
 export const ProcedureTypes = {
@@ -170,9 +170,45 @@ export default function ProcedureObject(props) {
     const dispatch = useDispatch()
 
     const [content, setContent] = useState(props.content)
-    const [saved, setSaved] = useState(true)
+    const [stored, setStored] = useState(props.stored) // Indicator if ProcedureObject already got stored in backed
+    const [updated, setUpdated] = useState(false) // Indicator if the content got updated
 
-    const saveContent = () => {
+    const contentComplete = () => {
+        let required = Object.keys(props.type.emptyContent).filter(k => k !== "study_id")
+        for (let k of required) {
+            if (content[k] === "") {
+                return false
+            }
+        }
+        return true
+    }
+
+    const storeContent = () => {
+        if (!contentComplete()) {
+            props.setMessage({type: "danger", text: "There are still some fields missing that need to be filled in!", duration: 4000})
+            return
+        }
+        if(props.type === ProcedureTypes.TextPage) {
+            dispatch(createText(content))
+        }
+        else if(props.type === ProcedureTypes.Condition) {
+            dispatch(createCondition(content))
+        }
+        else if(props.type === ProcedureTypes.Questionnaire) {
+            dispatch(createQuestionnaire(content))
+        }
+        else if(props.type === ProcedureTypes.Pause) {
+            dispatch(createPause(content))
+        }
+        setStored(true)
+        props.setMessage({type: "success", text: "Procedure-Object created"})
+    }
+
+    const updateContent = () => {
+        if (!stored) {
+            storeContent()
+            return
+        }
         if (props.type === ProcedureTypes.TextPage) {
             dispatch(updateText({textId: content.id, text: {
                     "title": content.title,
@@ -205,13 +241,14 @@ export default function ProcedureObject(props) {
                     "config": content.config
                 }}))
         }
-        setSaved(true)
+        setUpdated(false)
+        props.setMessage({type: "success", text: "Procedure-Object updated"})
     }
 
     const decoratedOnClick = useAccordionButton(props.id, (event) => {
         event.preventDefault()
-        if(!saved) {
-            saveContent()
+        if(updated) {
+            updateContent()
         }
     });
 
@@ -222,8 +259,8 @@ export default function ProcedureObject(props) {
 
     const handleSave = (event) => {
         event.preventDefault()
-        if(!saved) {
-            saveContent()
+        if(updated) {
+            updateContent()
         }
     }
 
@@ -231,7 +268,7 @@ export default function ProcedureObject(props) {
         let new_content = {...content}
         new_content[content_id] = value
         setContent(new_content)
-        setSaved(false)
+        setUpdated(true)
     }
 
     const getForm = (procedureType, content, editProcedureStep) => {
@@ -248,20 +285,27 @@ export default function ProcedureObject(props) {
     }
 
     const getHeader = (procedureType, content) => {
+        let header
         switch (procedureType) {
             case ProcedureTypes.TextPage:
             case ProcedureTypes.Pause:
-                return content.title + " - " + procedureType.label
+                header = content.title + " - " + procedureType.label
+                break
             case ProcedureTypes.Condition:
-                return content.name + " - " + procedureType.label
+                header = content.name + " - " + procedureType.label
+                break
             case ProcedureTypes.Questionnaire:
-                return procedureType.label
-
+                header = procedureType.label
+                break
         }
+        if(!stored) {
+            header += ' [Not Stored]'
+        }
+        return header
     }
 
     return (
-        <Draggable draggableId={props.id} index={props.index}>
+        <Draggable draggableId={props.id} index={props.index} disabled={!props.stored}>
             {provided => (
                 <div {...provided.draggableProps} {...provided.dragHandleProps}  ref={provided.innerRef}>
 
@@ -275,7 +319,7 @@ export default function ProcedureObject(props) {
                                 <Row className="me-0">
                                     <Col> </Col>
                                     <Col xs="auto" className="p-1">
-                                        <Button className="p-1 pt-0 m-0" onClick={handleSave} disabled={saved}> <DeviceSsd/> </Button>
+                                        <Button className="p-1 pt-0 m-0" onClick={handleSave} disabled={!updated}> <DeviceSsd/> </Button>
                                     </Col>
                                     <Col xs="auto" className="p-1">
                                         <Button className="p-1 pt-0 m-0" onClick={handleDelete} variant="danger"> <Trash3/> </Button>
