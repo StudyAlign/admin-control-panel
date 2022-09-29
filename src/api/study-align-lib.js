@@ -1,5 +1,4 @@
 import { DragInteraction, GenericInteraction, KeyboardInteraction, MouseInteraction, TouchInteraction } from "./interactions";
-import "./interfaces";
 class StudyAlignLib {
     constructor(url = "http://localhost:8080", studyId) {
         // Interaction Lists (Web Events only), needed for bulk saving
@@ -27,9 +26,8 @@ class StudyAlignLib {
         options.headers["Content-type"] = "application/json";
     }
     setLoggerHeaders(options) {
-        const loggerKey = this.readLoggerKey();
-        if (loggerKey) {
-            options.headers["Studyalign-Logger-Key"] = loggerKey;
+        if (this.loggerKey) {
+            options.headers["Studyalign-Logger-Key"] = this.loggerKey;
         }
         options.headers["Content-type"] = "application/json";
     }
@@ -83,7 +81,7 @@ class StudyAlignLib {
                     xhr.setRequestHeader(key, options.headers[key]);
                 });
             }
-            if (options.method === "GET") {
+            if (options.method === "GET" || options.method === "DELETE") {
                 let params = options.params;
                 let encodedParams = "";
                 if (params && typeof params === 'object') {
@@ -125,6 +123,17 @@ class StudyAlignLib {
         options.body = data;
         return this.request(options);
     }
+    basicDelete(path) {
+        let options = {
+            method: "DELETE",
+            path: path,
+            headers: {}
+        };
+        this.setHeaders(options);
+        const yo = this.request(options);
+        console.log(yo);
+        return yo;
+    }
     // Admin related functions
     userLogin(username, password) {
         const options = {
@@ -161,6 +170,9 @@ class StudyAlignLib {
     updateUser(userId, user) {
         return this.basicUpdate("users/" + userId, user);
     }
+    deleteUser(userId) {
+        return this.basicDelete("users/" + userId);
+    }
     // ---- MAINLY FOR USE IN ADMIN FRONTEND ---- //
     // Studies
     getStudies() {
@@ -171,6 +183,9 @@ class StudyAlignLib {
     }
     updateStudy(studyId, study) {
         return this.basicUpdate("studies/" + studyId, study);
+    }
+    deleteStudy(studyId) {
+        return this.basicDelete("studies/" + studyId);
     }
     generateProcedureWithSteps(studyId, procedureScheme) {
         this.basicCreate("studies/" + studyId + "/procedures", procedureScheme);
@@ -207,14 +222,17 @@ class StudyAlignLib {
     getCondition(conditionId) {
         return this.basicRead("conditions/" + conditionId);
     }
+    getConditions(studyId) {
+        return this.basicRead("studies/" + studyId + "/conditions");
+    }
     createCondition(condition) {
         return this.basicCreate("conditions", condition);
     }
     updateCondition(conditionId, condition) {
         return this.basicUpdate("conditions/" + conditionId, condition);
     }
-    getConditions(studyId) {
-        return this.basicRead("studies/" + studyId + "/conditions");
+    deleteCondition(conditionId) {
+        return this.basicDelete("conditions/" + conditionId);
     }
     getTasks(studyId) {
         return this.basicRead("studies/" + studyId + "/tasks");
@@ -268,6 +286,9 @@ class StudyAlignLib {
     updateTask(taskId, task) {
         return this.basicUpdate("tasks/" + taskId, task);
     }
+    deleteTask(taskId) {
+        return this.basicDelete("tasks/" + taskId);
+    }
     //Texts
     createText(text) {
         return this.basicCreate("texts", text);
@@ -277,6 +298,9 @@ class StudyAlignLib {
     }
     updateText(textId, text) {
         return this.basicUpdate("texts/" + textId, text);
+    }
+    deleteText(textId) {
+        return this.basicDelete("texts/" + textId);
     }
     //Questionnaires
     createQuestionnaire(questionnaire) {
@@ -288,6 +312,9 @@ class StudyAlignLib {
     updateQuestionnaire(questionnaireId, questionnaire) {
         return this.basicUpdate("questionnaires/" + questionnaireId, questionnaire);
     }
+    deleteQuestionnaire(questionnaireId) {
+        return this.basicDelete("questionnaires/" + questionnaireId);
+    }
     //Pauses
     createPause(pause) {
         return this.basicCreate("pauses", pause);
@@ -298,6 +325,9 @@ class StudyAlignLib {
     updatePause(pauseId, pause) {
         return this.basicUpdate("pauses/" + pauseId, pause);
     }
+    deletePause(pauseId) {
+        return this.basicDelete("pauses/" + pauseId);
+    }
     // ---- MAINLY FOR USE IN STUDY FRONTEND ---- //
     //TODO: read condition config
     //Study Frontend related functions
@@ -307,6 +337,9 @@ class StudyAlignLib {
             path: "studies/" + (studyId || this.studyId),
         };
         return this.request(options);
+    }
+    getStudySetupInfo(studyId) {
+        return this.basicRead("studies/" + studyId + "/setup-info");
     }
     // Participation related methods
     getParticipant(participantToken) {
@@ -328,6 +361,9 @@ class StudyAlignLib {
             };
         }
         return this.request(options);
+    }
+    setLoggerKey(loggerKey) {
+        this.loggerKey = loggerKey;
     }
     storeTokens(responseJson) {
         localStorage.setItem("tokens", JSON.stringify(responseJson));
@@ -359,15 +395,6 @@ class StudyAlignLib {
         };
         this.setHeaders(options, true);
         return this.request(options);
-    }
-    storeLoggerKey(key) {
-        localStorage.setItem("loggerKey", key);
-    }
-    readLoggerKey() {
-        return localStorage.getItem("loggerKey");
-    }
-    deleteLoggerKey() {
-        localStorage.removeItem("loggerKey");
     }
     me() {
         const options = {
@@ -588,9 +615,10 @@ class StudyAlignLib {
         const options = {
             method: "POST",
             path: "procedures/navigator",
-            headers: {}
+            headers: {
+                "Content-type": "application/json"
+            }
         };
-        this.setHeaders(options);
         options.body = {
             participant_token: participantToken,
             source: source,
@@ -600,5 +628,18 @@ class StudyAlignLib {
         return this.request(options);
     }
 }
+StudyAlignLib.getParamsFromURL = () => {
+    const url = new URL(window.location.href);
+    const studyId = url.searchParams.get("study_id");
+    const conditionId = url.searchParams.get("condition_id") || 1; // value from get parameter or 1 (default)
+    const loggerKey = url.searchParams.get("logger_key"); // needed for logging
+    const participantToken = url.searchParams.get("participant_token");
+    return {
+        studyId: studyId,
+        conditionId: conditionId,
+        loggerKey: loggerKey,
+        participantToken: participantToken
+    };
+};
 export default StudyAlignLib;
 //# sourceMappingURL=study-align-lib.js.map

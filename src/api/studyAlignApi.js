@@ -1,4 +1,4 @@
-import studyAlignLib from "./study-align-lib";
+import StudyAlignLib from "./study-align-lib";
 import {authSlice} from "../redux/reducers/authSlice";
 
 const STUDY_ALIGN_URL = process.env.REACT_APP_STUDY_ALIGN_URL || "http://localhost:8000";
@@ -8,13 +8,14 @@ let sal;
 export function initApi(studyId) {
     if (!sal) {
         console.log("Init StudyAlign api...")
-        sal = new studyAlignLib(STUDY_ALIGN_URL, studyId);
+        sal = new StudyAlignLib(STUDY_ALIGN_URL, studyId);
     }
 }
 
 export async function apiWithAuth(apiMethod, args, dispatch) {
     try {
         const response = await apiMethod(args)
+        console.log("apiWithAuth:", apiMethod, args)
         return Promise.resolve(response)
     } catch (err) {
         if (err.status === 401 || err.status === 403) { //unauthorized or forbidden
@@ -30,7 +31,7 @@ export async function apiWithAuth(apiMethod, args, dispatch) {
                 return Promise.reject(err)
             }
         }
-        dispatch(authSlice.actions.logout())
+        //dispatch(authSlice.actions.logout())
         return Promise.reject(err)
     }
 }
@@ -65,6 +66,11 @@ export function updateUserApi(userId, user) {
     return sal.updateUser(userId, user);
 }
 
+export function deleteUserApi(userId) {
+    return sal.deleteUser(userId);
+}
+
+
 // Studies
 
 export function getStudiesApi() {
@@ -75,12 +81,20 @@ export function getStudyApi(studyId) {
     return sal.getStudy(studyId);
 }
 
+export function getStudySetupInfoApi(studyId) {
+    return sal.getStudySetupInfo(studyId)
+}
+
 export function createStudyApi(study) {
     return sal.createStudy(study);
 }
 
-export function updateStudyApi(studyId, study) {
-    return sal.updateStudy(studyId, study);
+export function updateStudyApi(args) {
+    return sal.updateStudy(args.studyId, args.study);
+}
+
+export function deleteStudyApi(studyId) {
+    return sal.deleteStudy(studyId);
 }
 
 export function generateProcedureWithSteps(studyId, procedureScheme) {
@@ -135,9 +149,14 @@ export function createConditionApi(condition) {
     return sal.createCondition(condition);
 }
 
-export function updateConditionApi(conditionId, condition) {
-    return sal.updateCondition(conditionId, condition);
+export function updateConditionApi(args) {
+    return sal.updateCondition(args.conditionId, args.condition);
 }
+
+export function deleteConditionApi(conditionId) {
+    return sal.deleteCondition(conditionId);
+}
+
 
 // Procedures
 
@@ -163,6 +182,11 @@ export function updateTaskApi(taskId, task) {
     return sal.updateTask(taskId, task);
 }
 
+export function deleteTaskApi(taskId) {
+    return sal.deleteTask(taskId);
+}
+
+
 // Texts
 
 export function getTextsApi(studyId) {
@@ -177,8 +201,12 @@ export function createTextApi(text) {
     return sal.createText(text);
 }
 
-export function updateTextApi(textId, text) {
-    return sal.updateText(textId, text);
+export function updateTextApi(args) {
+    return sal.updateText(args.textId, args.text);
+}
+
+export function deleteTextApi(textId) {
+    return sal.deleteText(textId);
 }
 
 // Questionnaires
@@ -195,8 +223,12 @@ export function createQuestionnaireApi(questionnaire) {
     return sal.createQuestionnaire(questionnaire);
 }
 
-export function updateQuestionnaireApi(questionnaireId, questionnaire) {
-    return sal.updateQuestionnaire(questionnaireId, questionnaireId);
+export function updateQuestionnaireApi(args) {
+    return sal.updateQuestionnaire(args.questionnaireId, args.questionnaire);
+}
+
+export function deleteQuestionnaireApi(questionnaireId) {
+    return sal.deleteQuestionnaire(questionnaireId);
 }
 
 // Pauses
@@ -213,9 +245,15 @@ export function createPauseApi(pause) {
     return sal.createPause(pause);
 }
 
-export function updatePauseApi(pauseId, pause) {
-    return sal.updatePause(pauseId, pause);
+export function updatePauseApi(args) {
+    return sal.updatePause(args.pauseId, args.pause);
 }
+
+export function deletePause(pauseId) {
+    return sal.deletePause(pauseId);
+}
+
+// ...
 
 export function storeTokensApi(tokens) {
     return sal.storeTokens(tokens);
