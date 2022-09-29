@@ -66,6 +66,10 @@ export function updateUserApi(userId, user) {
     return sal.updateUser(userId, user);
 }
 
+export function deleteUserApi(userId) {
+    return sal.deleteUser(userId);
+}
+
 // Studies
 
 export function getStudiesApi() {
@@ -86,6 +90,10 @@ export function createStudyApi(study) {
 
 export function updateStudyApi(args) {
     return sal.updateStudy(args.studyId, args.study);
+}
+
+export function deleteStudyApi(studyId) {
+    return sal.deleteStudy(studyId);
 }
 
 export function generateProcedureWithSteps(studyId, procedureScheme) {
@@ -144,6 +152,10 @@ export function updateConditionApi(conditionId, condition) {
     return sal.updateCondition(conditionId, condition);
 }
 
+export function deleteConditionApi(conditionId) {
+    return sal.deleteCondition(conditionId);
+}
+
 // Procedures
 
 export function getProceduresApi(studyId) {
@@ -168,6 +180,11 @@ export function updateTaskApi(taskId, task) {
     return sal.updateTask(taskId, task);
 }
 
+export function deleteTaskApi(taskId) {
+    return sal.deleteTask(taskId);
+}
+
+
 // Texts
 
 export function getTextsApi(studyId) {
@@ -184,6 +201,10 @@ export function createTextApi(text) {
 
 export function updateTextApi(textId, text) {
     return sal.updateText(textId, text);
+}
+
+export function deleteTextApi(textId) {
+    return sal.deleteText(textId);
 }
 
 // Questionnaires
@@ -204,6 +225,10 @@ export function updateQuestionnaireApi(questionnaireId, questionnaire) {
     return sal.updateQuestionnaire(questionnaireId, questionnaireId);
 }
 
+export function deleteQuestionnaireApi(questionnaireId) {
+    return sal.deleteQuestionnaire(questionnaireId);
+}
+
 // Pauses
 
 export function getPausesApi(studyId) {
@@ -221,6 +246,12 @@ export function createPauseApi(pause) {
 export function updatePauseApi(pauseId, pause) {
     return sal.updatePause(pauseId, pause);
 }
+
+export function deletePause(pauseId) {
+    return sal.deletePause(pauseId);
+}
+
+// Other calls
 
 export function storeTokensApi(tokens) {
     return sal.storeTokens(tokens);
