@@ -1,49 +1,56 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import StudyCreationLayout, {CreationSteps} from "./StudyCreationLayout";
 import {ProcedureTypes} from "./ProcedureObject";
 import {useParams} from "react-router";
 import {Button, Card, Col, Container, ListGroup, Row, Accordion} from "react-bootstrap";
 import {DragDropContext, Droppable} from "react-beautiful-dnd";
 import ProcedureObject from "./ProcedureObject";
+import {useDispatch, useSelector} from "react-redux";
+import {getTexts, selectTexts} from "../../redux/reducers/textSlice";
+import {getConditions, selectConditions} from "../../redux/reducers/conditionSlice";
+import {getQuestionnaires, selectQuestionnaires} from "../../redux/reducers/questionnaireSlice";
+import {getPauses, selectPauses} from "../../redux/reducers/pauseSlice";
+import ProcedureAlert from "./ProcedureAlert";
 
 export default function CreateProcedure() {
+    const dispatch = useDispatch()
     const { study_id } = useParams()
+    const [procedure, setProcedure] = useState([])
+    const [notStoredSteps, setNSSteps] = useState([])
+    const [idCounter, setIdCounter] = useState(0)
+    const [message, setMessage] = useState({
+        type: "none", // "success"/"danger"/"warning"/"info"
+        text: "..."
+    })
 
-    const [procedure, setProcedure] = useState([
-        {id: "0", type: ProcedureTypes.TextPage, content: {
-                "title": "Welcome Message",
-                "body": "Some Welcome Message ...",
-                "study_id": study_id
-            }},
-        {id: "1", type: ProcedureTypes.Condition, content: {
-                "name": "Test Condition",
-                "config": "{}", // What is the config??
-                "url": "www.some-url.com",
-                "study_id": study_id
-            }},
-        {id: "2", type: ProcedureTypes.Questionnaire, content: {
-                "url": "www.limesurvey.com/123456",
-                "system": "limesurvey",
-                "ext_id": "string",
-                "api_url": "string",
-                "api_username": "string",
-                "api_password": "string",
-                "study_id": study_id
-            }},
-        {id: "3", type: ProcedureTypes.Pause, content: {
-                "title": "Test Pause",
-                "body": "string",
-                "proceed_body": "string",
-                "type": "time_based", // What else??
-                "config": "{}",
-                "study_id": study_id
-            }},
-    ])
+    useEffect( () => {
+        dispatch(getTexts(study_id));
+        dispatch(getConditions(study_id));
+        dispatch(getQuestionnaires(study_id));
+        dispatch(getPauses(study_id));
+    }, [])
 
-    const editProcedure = (index, content_id, value) => {
-        let new_procedure = [...procedure]
-        new_procedure[index].content[content_id] = value
-        setProcedure(new_procedure)
+    let texts = useSelector(selectTexts)
+    let conditions = useSelector(selectConditions)
+    let pauses = useSelector(selectPauses)
+    let questions = useSelector(selectQuestionnaires)
+
+    if (texts != null && questions != null && pauses != null && conditions != null &&
+        procedure.length !== texts.length + conditions.length + pauses.length + questions.length) {
+        let n_procedure = []
+        for(let text of texts) {
+            n_procedure.push({id: "t" + text.id.toString(), type: ProcedureTypes.TextPage, content: text})
+        }
+        for(let cond of conditions) {
+            n_procedure.push({id: "c" + cond.id.toString(), type: ProcedureTypes.Condition, content: cond})
+        }
+        for(let quest of questions) {
+            n_procedure.push({id: "q" + quest.id.toString(), type: ProcedureTypes.Questionnaire, content: quest})
+        }
+        for(let pause of pauses) {
+            n_procedure.push({id: "p" + pause.id.toString(), type: ProcedureTypes.Pause, content: pause})
+        }
+        setProcedure(n_procedure)
     }
 
     const onDragEnd = (result) => {
@@ -51,31 +58,38 @@ export default function CreateProcedure() {
         const idx_src = result.source.index
         const idx_dest = result.destination.index
         if(idx_src === idx_dest) return
-        const obj = procedure[idx_src]
-        procedure.splice(idx_src, 1)
-        procedure.splice(idx_dest, 0, obj)
+        let n_procedure = [...procedure]
+        let obj = procedure[idx_src]
+        n_procedure.splice(idx_src, 1)
+        n_procedure.splice(idx_dest, 0, obj)
+        setProcedure(n_procedure)
     }
 
     const createProcedureStep = (event, procedureType) => {
         event.preventDefault()
-        let new_procedure = [...procedure]
-        let prodStep = {
-            id: procedure.length.toString(),
+        let empty_content = procedureType.emptyContent
+        empty_content.study_id = study_id
+        let n_steps = [...notStoredSteps]
+        let step = {
+            id: "x" + idCounter,
             type: procedureType,
-            content: procedureType.emptyContent,
+            content: empty_content,
         }
-        prodStep.content.study_id = study_id
-        new_procedure.push(prodStep)
-        setProcedure(new_procedure)
+        setIdCounter(idCounter+1)
+        n_steps.push(step)
+        setNSSteps(n_steps)
     }
 
-    let buttons = []
-    for (let t in ProcedureTypes) {
-        buttons.push(
-            <Col xs={'auto'} key={ProcedureTypes[t].id}>
-                <Button onClick={(event) => createProcedureStep(event, ProcedureTypes[t])}> { ProcedureTypes[t].label } </Button>
-            </Col>
-        )
+    const procedureStepButtons = () => {
+        let buttons = []
+        for (let t in ProcedureTypes) {
+            buttons.push(
+                <Col xs={'auto'} key={ProcedureTypes[t].id}>
+                    <Button onClick={(event) => createProcedureStep(event, ProcedureTypes[t])}> { ProcedureTypes[t].label } </Button>
+                </Col>
+            )
+        }
+        return buttons
     }
 
     return (
@@ -83,7 +97,11 @@ export default function CreateProcedure() {
 
             <Container>
                 <Row className='mt-3'>
-                    { buttons }
+                    <ProcedureAlert message={message}/>
+                </Row>
+
+                <Row className='mt-3'>
+                    { procedureStepButtons() }
                 </Row>
 
                 <Row className='mt-3'>
@@ -98,12 +116,29 @@ export default function CreateProcedure() {
                                     {provided => (
                                         <div ref={provided.innerRef} {...provided.droppableProps}>
                                             <ListGroup>
-                                                {procedure.map((step, index) => (
-                                                    <ProcedureObject key={step.id} index={index}
-                                                                     procedureStep={step}
-                                                                     editProcedureStep={(content_id, value) => editProcedure(index, content_id, value)}
+                                                {
+                                                    procedure.map((ps, index) => (
+                                                    <ProcedureObject key={ps.id}
+                                                                     id={ps.id}
+                                                                     index={index}
+                                                                     content={ps.content}
+                                                                     type={ps.type}
+                                                                     stored={true}
+                                                                     setMessage={setMessage}
                                                     />
-                                                ))}
+                                                ))
+                                                }
+                                                {   notStoredSteps.map((ps, index) => (
+                                                    <ProcedureObject key={ps.id}
+                                                                     id={ps.id}
+                                                                     index={procedure.length+index}
+                                                                     content={ps.content}
+                                                                     type={ps.type}
+                                                                     stored={false}
+                                                                     setMessage={setMessage}
+                                                    />
+                                                ))
+                                                }
                                             </ListGroup>
                                             {provided.placeholder}
                                         </div>

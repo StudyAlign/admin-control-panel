@@ -20,13 +20,15 @@
     position: relative;
 }
 
-.sidebar-item {
+.sidebar-item,
+.sidebar-item:hover {
     color: black;
     font-size: 16pt;
     margin-bottom: 5px;
 }
 
-.sidebar-item-selected {
+.sidebar-item-selected,
+.sidebar-item-selected:hover {
     color: #224396;
     font-weight: bold;
 }

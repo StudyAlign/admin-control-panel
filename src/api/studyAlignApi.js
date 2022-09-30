@@ -148,8 +148,8 @@ export function createConditionApi(condition) {
     return sal.createCondition(condition);
 }
 
-export function updateConditionApi(conditionId, condition) {
-    return sal.updateCondition(conditionId, condition);
+export function updateConditionApi(args) {
+    return sal.updateCondition(args.conditionId, args.condition);
 }
 
 export function deleteConditionApi(conditionId) {
@@ -199,8 +199,8 @@ export function createTextApi(text) {
     return sal.createText(text);
 }
 
-export function updateTextApi(textId, text) {
-    return sal.updateText(textId, text);
+export function updateTextApi(args) {
+    return sal.updateText(args.textId, args.text);
 }
 
 export function deleteTextApi(textId) {
@@ -221,8 +221,8 @@ export function createQuestionnaireApi(questionnaire) {
     return sal.createQuestionnaire(questionnaire);
 }
 
-export function updateQuestionnaireApi(questionnaireId, questionnaire) {
-    return sal.updateQuestionnaire(questionnaireId, questionnaireId);
+export function updateQuestionnaireApi(args) {
+    return sal.updateQuestionnaire(args.questionnaireId, args.questionnaire);
 }
 
 export function deleteQuestionnaireApi(questionnaireId) {
@@ -243,8 +243,8 @@ export function createPauseApi(pause) {
     return sal.createPause(pause);
 }
 
-export function updatePauseApi(pauseId, pause) {
-    return sal.updatePause(pauseId, pause);
+export function updatePauseApi(args) {
+    return sal.updatePause(args.pauseId, args.pause);
 }
 
 export function deletePause(pauseId) {
