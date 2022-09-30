@@ -247,7 +247,7 @@ export function updatePauseApi(args) {
     return sal.updatePause(args.pauseId, args.pause);
 }
 
-export function deletePause(pauseId) {
+export function deletePauseApi(pauseId) {
     return sal.deletePause(pauseId);
 }
 

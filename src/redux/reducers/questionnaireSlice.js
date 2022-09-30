@@ -4,7 +4,7 @@ import {
     getQuestionnairesApi,
     getQuestionnaireApi,
     createQuestionnaireApi,
-    updateQuestionnaireApi,
+    updateQuestionnaireApi, deleteTextApi, deleteQuestionnaireApi,
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
 import {getPauses} from "./pauseSlice";
@@ -83,6 +83,22 @@ export const updateQuestionnaire = createAsyncThunk(
     }
 );
 
+export const deleteQuestionnaire = createAsyncThunk(
+    'deleteQuestionnaire',
+    async (questionnaireId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().questionnaires
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(deleteQuestionnaireApi, questionnaireId, dispatch)
+            return response;
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
 // reducers
 export const questionnaireSlice = createSlice({
     name: 'questionnaires',
@@ -145,6 +161,18 @@ export const questionnaireSlice = createSlice({
                 state.currentRequestId = action.meta.requestId
             })
             .addCase(updateQuestionnaire.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                }
+            })
+            .addCase(deleteQuestionnaire.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(deleteQuestionnaire.fulfilled, (state, action) => {
                 const { requestId } = action.meta
                 if (state.api === LOADING && state.currentRequestId === requestId) {
                     state.api = IDLE

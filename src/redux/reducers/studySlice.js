@@ -12,7 +12,7 @@ import {
     createStudyApi,
     getStudyApi,
     getStudySetupInfoApi,
-    updateStudyApi
+    updateStudyApi, deleteStudyApi
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
 
@@ -107,6 +107,22 @@ export const updateStudy = createAsyncThunk(
     }
 );
 
+export const deleteStudy = createAsyncThunk(
+    'deleteStudy',
+    async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(deleteStudyApi, studyId, dispatch)
+            return response;
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
 // reducers
 export const studySlice = createSlice({
     name: 'studies',
@@ -182,6 +198,18 @@ export const studySlice = createSlice({
                 state.currentRequestId = action.meta.requestId
             })
             .addCase(updateStudy.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                }
+            })
+            .addCase(deleteStudy.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(deleteStudy.fulfilled, (state, action) => {
                 const { requestId } = action.meta
                 if (state.api === LOADING && state.currentRequestId === requestId) {
                     state.api = IDLE

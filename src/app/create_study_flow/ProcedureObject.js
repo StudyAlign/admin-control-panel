@@ -2,10 +2,10 @@ import React, {useState} from 'react';
 import {Draggable} from 'react-beautiful-dnd';
 import {Card, Accordion, useAccordionButton, Form, Row, Button, Col} from "react-bootstrap";
 import {useDispatch} from "react-redux";
-import {createText, updateText} from "../../redux/reducers/textSlice";
-import {createCondition, updateCondition} from "../../redux/reducers/conditionSlice";
-import {createQuestionnaire, updateQuestionnaire} from "../../redux/reducers/questionnaireSlice";
-import {createPause, updatePause} from "../../redux/reducers/pauseSlice";
+import {createText, deleteText, updateText} from "../../redux/reducers/textSlice";
+import {createCondition, deleteCondition, updateCondition} from "../../redux/reducers/conditionSlice";
+import {createQuestionnaire, deleteQuestionnaire, updateQuestionnaire} from "../../redux/reducers/questionnaireSlice";
+import {createPause, deletePause, updatePause} from "../../redux/reducers/pauseSlice";
 import {DeviceSsd, Trash3} from "react-bootstrap-icons";
 
 export const ProcedureTypes = {
@@ -254,7 +254,20 @@ export default function ProcedureObject(props) {
 
     const handleDelete = (event) => {
         event.preventDefault()
-        // TODO Delete Object
+        console.log("Delete Object")
+        // TODO Check if id is already stored
+        if(props.type === ProcedureTypes.TextPage) {
+            dispatch(deleteText(content.id))
+        }
+        else if (props.type === ProcedureTypes.Condition) {
+            dispatch(deleteCondition(content.id))
+        }
+        else if (props.type === ProcedureTypes.Questionnaire) {
+            dispatch(deleteQuestionnaire(content.id))
+        }
+        else if (props.type === ProcedureTypes.Pause) {
+            dispatch(deletePause(content.id))
+        }
     }
 
     const handleSave = (event) => {

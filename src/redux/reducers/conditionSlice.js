@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {
     apiWithAuth,
-    createConditionApi,
+    createConditionApi, deleteConditionApi,
     getConditionApi,
     getConditionIdsApi,
     getConditionsApi,
@@ -101,6 +101,22 @@ export const updateCondition = createAsyncThunk(
     }
 );
 
+export const deleteCondition = createAsyncThunk(
+    'deleteCondition',
+    async (conditionId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().conditions
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(deleteConditionApi, conditionId, dispatch)
+            return response;
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
 // reducers
 export const conditionSlice = createSlice({
     name: 'conditions',
@@ -176,6 +192,18 @@ export const conditionSlice = createSlice({
                 state.currentRequestId = action.meta.requestId
             })
             .addCase(updateCondition.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                }
+            })
+            .addCase(deleteCondition.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(deleteCondition.fulfilled, (state, action) => {
                 const { requestId } = action.meta
                 if (state.api === LOADING && state.currentRequestId === requestId) {
                     state.api = IDLE

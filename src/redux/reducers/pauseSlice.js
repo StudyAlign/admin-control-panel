@@ -4,7 +4,7 @@ import {
     getPausesApi,
     getPauseApi,
     createPauseApi,
-    updatePauseApi,
+    updatePauseApi, deleteTextApi, deletePauseApi,
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
 import {getConditions} from "./conditionSlice";
@@ -83,6 +83,22 @@ export const updatePause = createAsyncThunk(
     }
 );
 
+export const deletePause = createAsyncThunk(
+    'deletePause',
+    async (pauseId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().pauses
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(deletePauseApi, pauseId, dispatch)
+            return response;
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
 // reducers
 export const pauseSlice = createSlice({
     name: 'pauses',
@@ -145,6 +161,18 @@ export const pauseSlice = createSlice({
                 state.currentRequestId = action.meta.requestId
             })
             .addCase(updatePause.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                }
+            })
+            .addCase(deletePause.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(deletePause.fulfilled, (state, action) => {
                 const { requestId } = action.meta
                 if (state.api === LOADING && state.currentRequestId === requestId) {
                     state.api = IDLE

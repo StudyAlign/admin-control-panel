@@ -4,7 +4,7 @@ import {
     getTextsApi,
     getTextApi,
     createTextApi,
-    updateTextApi,
+    updateTextApi, deleteTextApi,
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
 import {getPauses} from "./pauseSlice";
@@ -83,6 +83,22 @@ export const updateText = createAsyncThunk(
     }
 );
 
+export const deleteText = createAsyncThunk(
+    'deleteText',
+    async (textId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().texts
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(deleteTextApi, textId, dispatch)
+            return response;
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
 // reducers
 export const textSlice = createSlice({
     name: 'texts',
@@ -145,6 +161,18 @@ export const textSlice = createSlice({
                 state.currentRequestId = action.meta.requestId
             })
             .addCase(updateText.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                }
+            })
+            .addCase(deleteText.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(deleteText.fulfilled, (state, action) => {
                 const { requestId } = action.meta
                 if (state.api === LOADING && state.currentRequestId === requestId) {
                     state.api = IDLE
