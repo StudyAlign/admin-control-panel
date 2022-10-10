@@ -11,21 +11,25 @@ import {DeviceSsd, Trash3} from "react-bootstrap-icons";
 export const ProcedureTypes = {
     TextPage: {
         id: 0,
+        key: "text",
         label: "Text Page",
         emptyContent: { "title": "", "body": "", "study_id": -1 }
     },
     Condition: {
         id: 1,
+        key: "condition",
         label: "Condition",
         emptyContent: { "name": "", "config": "", "url": "", "study_id": -1 }
     },
     Questionnaire: {
         id: 2,
+        key: "questionnaire",
         label: "Questionnaire",
         emptyContent: { "url": "", "system": "limesurvey", "ext_id": "-", "api_url": "-", "api_username": "-", "api_password": "-", "study_id": -1}
     },
     Pause:  {
         id: 3,
+        key: "pause",
         label: "Pause",
         emptyContent: { "title": "", "body": "", "proceed_body": "", "type": "time_based", "config": "", "study_id": -1 }
     },
@@ -183,47 +187,48 @@ export default function ProcedureObject(props) {
         return true
     }
 
-    const storeContent = () => {
+    const storeContent = async () => {
         if (!contentComplete()) {
             props.setMessage({type: "danger", text: "There are still some fields missing that need to be filled in!", duration: 4000})
             return
         }
         if(props.type === ProcedureTypes.TextPage) {
-            dispatch(createText(content))
+            await dispatch(createText(content))
         }
         else if(props.type === ProcedureTypes.Condition) {
-            dispatch(createCondition(content))
+            await dispatch(createCondition(content))
         }
         else if(props.type === ProcedureTypes.Questionnaire) {
-            dispatch(createQuestionnaire(content))
+            await dispatch(createQuestionnaire(content))
         }
         else if(props.type === ProcedureTypes.Pause) {
-            dispatch(createPause(content))
+            await dispatch(createPause(content))
         }
         setStored(true)
         props.setMessage({type: "success", text: "Procedure-Object created"})
+        props.storeProcedureStep(props.id, props.type)
     }
 
-    const updateContent = () => {
+    const updateContent = async () => {
         if (!stored) {
-            storeContent()
+            storeContent().then(r => { })
             return
         }
         if (props.type === ProcedureTypes.TextPage) {
-            dispatch(updateText({textId: content.id, text: {
+            await dispatch(updateText({textId: content.id, text: {
                     "title": content.title,
                     "body": content.body
                 }}))
         }
         else if (props.type === ProcedureTypes.Condition) {
-            dispatch(updateCondition({conditionId: content.id, condition: {
+            await dispatch(updateCondition({conditionId: content.id, condition: {
                     "name": content.name,
                     "config": content.config,
                     "url": content.url
                 }}))
         }
         else if (props.type === ProcedureTypes.Questionnaire) {
-            dispatch(updateQuestionnaire({questionnaireId: content.id, questionnaire: {
+            await dispatch(updateQuestionnaire({questionnaireId: content.id, questionnaire: {
                     "url": content.url,
                     "system": content.system,
                     "ext_id": content.ext_id,
@@ -233,7 +238,7 @@ export default function ProcedureObject(props) {
                 }}))
         }
         else if (props.type === ProcedureTypes.Pause) {
-            dispatch(updatePause({pauseId: content.id, pause: {
+            await dispatch(updatePause({pauseId: content.id, pause: {
                     "title": content.title,
                     "body": content.body,
                     "proceed_body": content.proceed_body,
@@ -252,22 +257,25 @@ export default function ProcedureObject(props) {
         }
     });
 
-    const handleDelete = (event) => {
+    const handleDelete = async (event) => {
         event.preventDefault()
         console.log("Delete Object")
         // TODO Check if id is already stored
         if(props.type === ProcedureTypes.TextPage) {
-            dispatch(deleteText(content.id))
+            await dispatch(deleteText(content.id))
         }
         else if (props.type === ProcedureTypes.Condition) {
-            dispatch(deleteCondition(content.id))
+            await dispatch(deleteCondition(content.id))
         }
         else if (props.type === ProcedureTypes.Questionnaire) {
-            dispatch(deleteQuestionnaire(content.id))
+            await dispatch(deleteQuestionnaire(content.id))
         }
         else if (props.type === ProcedureTypes.Pause) {
-            dispatch(deletePause(content.id))
+            await dispatch(deletePause(content.id))
         }
+        console.log("...deleted")
+        props.setMessage({type: "success", text: "Procedure-Object deleted"})
+        props.deleteProcedureStep(props.id, props.type)
     }
 
     const handleSave = (event) => {
@@ -322,7 +330,7 @@ export default function ProcedureObject(props) {
             {provided => (
                 <div {...provided.draggableProps} {...provided.dragHandleProps}  ref={provided.innerRef}>
 
-                    <Card className="m-1">
+                    <Card className="m-1" hidden={props.deleted}>
                         <Card.Header onClick={decoratedOnClick}>
                             { getHeader(props.type, content) }
                         </Card.Header>
