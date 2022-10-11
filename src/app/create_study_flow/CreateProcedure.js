@@ -10,21 +10,27 @@ import {getTexts, selectTexts} from "../../redux/reducers/textSlice";
 import {getConditions, selectConditions} from "../../redux/reducers/conditionSlice";
 import {getQuestionnaires, selectQuestionnaires} from "../../redux/reducers/questionnaireSlice";
 import {getPauses, selectPauses} from "../../redux/reducers/pauseSlice";
-import ProcedureAlert from "./ProcedureAlert";
 import {getStudySetupInfo, selectStudySetupInfo, updateStudy} from "../../redux/reducers/studySlice";
+import ProcedureAlert from "./ProcedureAlert";
 
 export default function CreateProcedure() {
     const dispatch = useDispatch()
     const { study_id } = useParams()
-    const [procedure, setProcedure] = useState([])
-    const [notStoredSteps, setNSSteps] = useState([])
+
+    const [notStoredSteps, setNotStoredSteps] = useState([])
     const [idCounter, setIdCounter] = useState(0)
     const [message, setMessage] = useState({
         type: "none", // "success"/"danger"/"warning"/"info"
         text: "..."
     })
 
-    useEffect( () => {
+    const texts = useSelector(selectTexts)
+    const conditions = useSelector(selectConditions)
+    const pauses = useSelector(selectPauses)
+    const questions = useSelector(selectQuestionnaires)
+    const studySetupInfo = useSelector(selectStudySetupInfo)
+
+    useEffect(  () => {
         dispatch(getTexts(study_id))
         dispatch(getConditions(study_id))
         dispatch(getQuestionnaires(study_id))
@@ -32,79 +38,67 @@ export default function CreateProcedure() {
         dispatch(getStudySetupInfo(study_id))
     }, [])
 
-    const texts = useSelector(selectTexts)
-    const conditions = useSelector(selectConditions)
-    const pauses = useSelector(selectPauses)
-    const questions = useSelector(selectQuestionnaires)
-
-    const studySetupInfo = useSelector(selectStudySetupInfo)
-
-
-    console.log("Here")
-    if (texts != null && questions != null && pauses != null && conditions != null &&
-        procedure.length !== texts.length + conditions.length + pauses.length + questions.length) {
-        console.log("New Procedure")
+    let procedure = []
+    if (texts != null && questions != null && pauses != null && conditions != null) {
         let texts_c = [...texts]
         let conditions_c = [...conditions]
         let pauses_c = [...pauses]
         let questions_c = [...questions]
 
-        let n_procedure = []
-
-        if(studySetupInfo.planned_procedure != null) {
-            for(let step of studySetupInfo.planned_procedure) {
-                if(step["text_id"] != null) {
+        if (studySetupInfo.planned_procedure != null) {
+            for (let step of studySetupInfo.planned_procedure) {
+                if (step["text_id"] != null) {
                     let idx = texts_c.findIndex(obj => {
                         return obj.id === step["text_id"]
                     })
-                    if(idx > -1) {
-                        n_procedure.push({
+                    if (idx > -1) {
+                        procedure.push({
                             id: "t" + step["text_id"].toString(),
                             type: ProcedureTypes.TextPage,
                             content: texts_c[idx],
-                            deleted: false
+                            stored: true
                         })
                         texts_c.splice(idx, 1)
                     }
                 }
-                else if(step["condition_id"] != null) {
+                else if (step["condition_id"] != null) {
                     let idx = conditions_c.findIndex(obj => {
                         return obj.id === step["condition_id"]
                     })
-                    if(idx > -1) {
-                        n_procedure.push({
+                    if (idx > -1) {
+                        procedure.push({
                             id: "c" + step["condition_id"].toString(),
                             type: ProcedureTypes.Condition,
                             content: conditions_c[idx],
-                            deleted: false
+                            stored: true
                         })
                         conditions_c.splice(idx, 1)
                     }
                 }
-                else if(step["questionnaire_id"] != null) {
+                else if (step["questionnaire_id"] != null) {
                     let idx = questions_c.findIndex(obj => {
                         return obj.id === step["questionnaire_id"]
                     })
-                    if(idx > -1) {
-                        n_procedure.push({
+                    if (idx > -1) {
+                        procedure.push({
                             id: "q" + step["questionnaire_id"].toString(),
                             type: ProcedureTypes.Questionnaire,
                             content: questions_c[idx],
-                            deleted: false
+                            stored: true
                         })
                         questions_c.splice(idx, 1)
                     }
                 }
-                else if(step["pause_id"] != null) {
+                else if (step["pause_id"] != null) {
                     let idx = pauses_c.findIndex(obj => {
                         return obj.id === step["pause_id"]
                     })
                     if (idx > -1) {
-                        n_procedure.push({
+                        procedure.push({
                             id: "p" + step["pause_id"].toString(),
                             type: ProcedureTypes.Pause,
                             content: pauses_c[idx],
-                            deleted: false
+                            stored: true
                         })
                         pauses_c.splice(idx, 1)
                     }
@@ -112,19 +106,20 @@ export default function CreateProcedure() {
             }
         }
 
-        for(let text of texts_c) {
-            n_procedure.push({id: "t" + text.id.toString(), type: ProcedureTypes.TextPage, content: text, deleted: false})
+        for (let text of texts_c) {
+            procedure.push({id: "t" + text.id.toString(), type: ProcedureTypes.TextPage, content: text, stored: true})
         }
-        for(let cond of conditions_c) {
-            n_procedure.push({id: "c" + cond.id.toString(), type: ProcedureTypes.Condition, content: cond, deleted: false})
+        for (let cond of conditions_c) {
+            procedure.push({id: "c" + cond.id.toString(), type: ProcedureTypes.Condition, content: cond, stored: true})
         }
-        for(let quest of questions_c) {
-            n_procedure.push({id: "q" + quest.id.toString(), type: ProcedureTypes.Questionnaire, content: quest, deleted: false})
+        for (let quest of questions_c) {
+            procedure.push({id: "q" + quest.id.toString(), type: ProcedureTypes.Questionnaire, content: quest, stored: true})
         }
-        for(let pause of pauses_c) {
-            n_procedure.push({id: "p" + pause.id.toString(), type: ProcedureTypes.Pause, content: pause, deleted: false})
+        for (let pause of pauses_c) {
+            procedure.push({id: "p" + pause.id.toString(), type: ProcedureTypes.Pause, content: pause, stored: true})
         }
-        setProcedure(n_procedure)
+
+        procedure.push(...notStoredSteps)
     }
 
     const onDragEnd = (result) => {
@@ -132,25 +127,26 @@ export default function CreateProcedure() {
         const idx_src = result.source.index
         const idx_dest = result.destination.index
         if(idx_src === idx_dest) return
-        let n_procedure = [...procedure]
         let obj = procedure[idx_src]
-        n_procedure.splice(idx_src, 1)
-        n_procedure.splice(idx_dest, 0, obj)
-        setProcedure(n_procedure)
-        storeProcedureOrder(n_procedure)
+        procedure.splice(idx_src, 1)
+        procedure.splice(idx_dest, 0, obj)
+        storeProcedureOrder(procedure)
     }
 
-    const storeProcedureOrder = (procedure) => {
+    const storeProcedureOrder = async (procedure) => {
         let planned_procedure = []
         for (const step of procedure) {
-            let obj = {}
-            obj[step.type.key + "_id"] = step.content.id
-            planned_procedure.push(obj)
+            if (step.stored) {
+                let obj = {}
+                obj[step.type.key + "_id"] = step.content.id
+                planned_procedure.push(obj)
+            }
         }
-        dispatch(updateStudy({
+        await dispatch(updateStudy({
             "studyId": study_id,
             "study": {"planned_procedure": planned_procedure}
         }))
+        await dispatch(getStudySetupInfo(study_id))
     }
 
     const createProcedureStep = (event, procedureType) => {
@@ -162,26 +158,14 @@ export default function CreateProcedure() {
             id: "x" + idCounter,
             type: procedureType,
             content: empty_content,
+            stored: false
         }
         setIdCounter(idCounter+1)
         n_steps.push(step)
-        setNSSteps(n_steps)
+        setNotStoredSteps(n_steps)
     }
 
-    const storeProcedureStep = (id, type) => {
-        if (type === ProcedureTypes.TextPage) {
-            dispatch(getTexts(study_id))
-        }
-        else if (type === ProcedureTypes.Condition) {
-            dispatch(getConditions(study_id))
-        }
-        else if (type === ProcedureTypes.Questionnaire) {
-            dispatch(getQuestionnaires(study_id))
-        }
-        else if (type === ProcedureTypes.Pause) {
-            dispatch(getPauses(study_id))
-        }
-
+    const removeFromNotStored = async (id) => {
         let idx = notStoredSteps.findIndex(obj => {
             return obj.id === id
         })
@@ -189,42 +173,23 @@ export default function CreateProcedure() {
         if (idx > -1) {
             let nss = [...notStoredSteps]
             nss.splice(idx, 1)
-            setNSSteps(nss)
+            setNotStoredSteps(nss)
         }
     }
 
-    const deleteProcedureStep = (id, type) => {
+    const deleteProcedureStep = async (id, type) => {
         if (type === ProcedureTypes.TextPage) {
-            dispatch(getTexts(study_id))
+            await dispatch(getTexts(study_id))
         }
         else if (type === ProcedureTypes.Condition) {
-            dispatch(getConditions(study_id))
+            await dispatch(getConditions(study_id))
         }
         else if (type === ProcedureTypes.Questionnaire) {
-            dispatch(getQuestionnaires(study_id))
+            await dispatch(getQuestionnaires(study_id))
         }
         else if (type === ProcedureTypes.Pause) {
-            dispatch(getPauses(study_id))
+            await dispatch(getPauses(study_id))
         }
-
-        let idx = procedure.findIndex(obj => {
-            return obj.id === id
-        })
-
-        let n_prod = [...procedure]
-        n_prod[idx].deleted = true
-        setProcedure(n_prod)
-
-        /*
-        let idx = procedure.findIndex(obj => {
-            return obj.id === id
-        })
-        if (idx > -1) {
-            let proc = [...procedure]
-            proc.splice(idx, 1)
-            setProcedure(proc)
-        }
-        */
     }
 
     const procedureStepButtons = () => {
@@ -270,25 +235,9 @@ export default function CreateProcedure() {
                                                                      index={index}
                                                                      content={ps.content}
                                                                      type={ps.type}
-                                                                     stored={true}
-                                                                     deleted={ps.deleted}
+                                                                     stored={ps.stored}
                                                                      setMessage={setMessage}
-                                                                     storeProcedureStep={storeProcedureStep}
-                                                                     deleteProcedureStep={deleteProcedureStep}
-                                                    />
-                                                ))
-                                                }
-                                                {   notStoredSteps.map((ps, index) => (
-                                                    <ProcedureObject key={ps.id}
-                                                                     id={ps.id}
-                                                                     index={procedure.length+index}
-                                                                     content={ps.content}
-                                                                     type={ps.type}
-                                                                     stored={false}
-                                                                     deleted={ps.deleted}
-                                                                     setMessage={setMessage}
-                                                                     storeProcedureStep={storeProcedureStep}
-                                                                     deleteProcedureStep={deleteProcedureStep}
+                                                                     removeFromNotStored={removeFromNotStored}
                                                     />
                                                 ))
                                                 }

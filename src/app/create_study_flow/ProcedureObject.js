@@ -2,10 +2,10 @@ import React, {useState} from 'react';
 import {Draggable} from 'react-beautiful-dnd';
 import {Card, Accordion, useAccordionButton, Form, Row, Button, Col} from "react-bootstrap";
 import {useDispatch} from "react-redux";
-import {createText, deleteText, updateText} from "../../redux/reducers/textSlice";
-import {createCondition, deleteCondition, updateCondition} from "../../redux/reducers/conditionSlice";
-import {createQuestionnaire, deleteQuestionnaire, updateQuestionnaire} from "../../redux/reducers/questionnaireSlice";
-import {createPause, deletePause, updatePause} from "../../redux/reducers/pauseSlice";
+import {createText, deleteText, getTexts, updateText} from "../../redux/reducers/textSlice";
+import {createCondition, deleteCondition, getConditions, updateCondition} from "../../redux/reducers/conditionSlice";
+import {createQuestionnaire, deleteQuestionnaire, getQuestionnaires, updateQuestionnaire} from "../../redux/reducers/questionnaireSlice";
+import {createPause, deletePause, getPauses, updatePause} from "../../redux/reducers/pauseSlice";
 import {DeviceSsd, Trash3} from "react-bootstrap-icons";
 
 export const ProcedureTypes = {
@@ -187,9 +187,29 @@ export default function ProcedureObject(props) {
         return true
     }
 
+    const updateProcedureOfType = async (type) => {
+        const study_id = props.content.study_id
+
+        if (type === ProcedureTypes.TextPage) {
+            await dispatch(getTexts(study_id))
+        }
+        else if (type === ProcedureTypes.Condition) {
+            await dispatch(getConditions(study_id))
+        }
+        else if (type === ProcedureTypes.Questionnaire) {
+            await dispatch(getQuestionnaires(study_id))
+        }
+        else if (type === ProcedureTypes.Pause) {
+            await dispatch(getPauses(study_id))
+        }
+    }
+
     const storeContent = async () => {
         if (!contentComplete()) {
-            props.setMessage({type: "danger", text: "There are still some fields missing that need to be filled in!", duration: 4000})
+            props.setMessage({
+                type: "danger",
+                text: "There are still some fields missing that need to be filled in!",
+                duration: 4000})
             return
         }
         if(props.type === ProcedureTypes.TextPage) {
@@ -206,7 +226,8 @@ export default function ProcedureObject(props) {
         }
         setStored(true)
         props.setMessage({type: "success", text: "Procedure-Object created"})
-        props.storeProcedureStep(props.id, props.type)
+        props.removeFromNotStored(props.id)
+        await updateProcedureOfType(props.type)
     }
 
     const updateContent = async () => {
@@ -259,8 +280,10 @@ export default function ProcedureObject(props) {
 
     const handleDelete = async (event) => {
         event.preventDefault()
-        console.log("Delete Object")
-        // TODO Check if id is already stored
+        if (!stored) {
+            props.removeFromNotStored(props.id)
+            return
+        }
         if(props.type === ProcedureTypes.TextPage) {
             await dispatch(deleteText(content.id))
         }
@@ -273,9 +296,8 @@ export default function ProcedureObject(props) {
         else if (props.type === ProcedureTypes.Pause) {
             await dispatch(deletePause(content.id))
         }
-        console.log("...deleted")
         props.setMessage({type: "success", text: "Procedure-Object deleted"})
-        props.deleteProcedureStep(props.id, props.type)
+        await updateProcedureOfType(props.type)
     }
 
     const handleSave = (event) => {
@@ -326,11 +348,11 @@ export default function ProcedureObject(props) {
     }
 
     return (
-        <Draggable draggableId={props.id} index={props.index} disabled={!props.stored}>
+        <Draggable draggableId={props.id} index={props.index} isDragDisabled={!props.stored}>
             {provided => (
                 <div {...provided.draggableProps} {...provided.dragHandleProps}  ref={provided.innerRef}>
 
-                    <Card className="m-1" hidden={props.deleted}>
+                    <Card className="m-1">
                         <Card.Header onClick={decoratedOnClick}>
                             { getHeader(props.type, content) }
                         </Card.Header>
