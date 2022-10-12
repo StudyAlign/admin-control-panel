@@ -201,7 +201,8 @@ export default function CreateProcedure() {
                 "current_setup_step": "procedure"
             }
         }))
-        navigate("/create/"+study_id+"/integration")
+        await dispatch(getStudySetupInfo(study_id))
+        navigate("/create/"+study_id+"/integrations")
     }
 
     return (
