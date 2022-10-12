@@ -48,7 +48,11 @@ export default function StudyCreationLogic(props) {
         return <LoadingScreen/>
     }
 
-    if(get_step(location.pathname) === next_step(studySetupInfo.current_setup_step)) {
+    if (studySetupInfo.current_setup_step === "done" || next_step(studySetupInfo.current_setup_step) === "done") {
+        // If creation is done, navigate to study overview
+        return <Navigate to={"/study/" + study_id + "/overview"} replace state={{ from: location }} />
+    }
+    else if (get_step(location.pathname) === next_step(studySetupInfo.current_setup_step)) {
         return <Outlet/>
     }
     else {
