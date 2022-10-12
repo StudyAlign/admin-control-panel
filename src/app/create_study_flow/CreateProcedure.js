@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import StudyCreationLayout, {CreationSteps} from "./StudyCreationLayout";
 import {ProcedureTypes} from "./ProcedureObject";
-import {useParams} from "react-router";
+import {useNavigate, useParams} from "react-router";
 import {Button, Card, Col, Container, ListGroup, Row, Accordion} from "react-bootstrap";
 import {DragDropContext, Droppable} from "react-beautiful-dnd";
 import ProcedureObject from "./ProcedureObject";
@@ -16,6 +16,7 @@ import ProcedureAlert from "./ProcedureAlert";
 export default function CreateProcedure() {
     const dispatch = useDispatch()
     const { study_id } = useParams()
+    const navigate = useNavigate()
 
     const [notStoredSteps, setNotStoredSteps] = useState([])
     const [idCounter, setIdCounter] = useState(0)
@@ -122,7 +123,7 @@ export default function CreateProcedure() {
         procedure.push(...notStoredSteps)
     }
 
-    const onDragEnd = (result) => {
+    const onDragEnd = async (result) => {
         if(result.destination === null) return
         const idx_src = result.source.index
         const idx_dest = result.destination.index
@@ -130,10 +131,15 @@ export default function CreateProcedure() {
         let obj = procedure[idx_src]
         procedure.splice(idx_src, 1)
         procedure.splice(idx_dest, 0, obj)
-        storeProcedureOrder(procedure)
+        let planned_procedure = getPlannedProcedure()
+        await dispatch(updateStudy({
+            "studyId": study_id,
+            "study": {"planned_procedure": planned_procedure}
+        }))
+        await dispatch(getStudySetupInfo(study_id))
     }
 
-    const storeProcedureOrder = async (procedure) => {
+    const getPlannedProcedure = () => {
         let planned_procedure = []
         for (const step of procedure) {
             if (step.stored) {
@@ -142,11 +148,7 @@ export default function CreateProcedure() {
                 planned_procedure.push(obj)
             }
         }
-        await dispatch(updateStudy({
-            "studyId": study_id,
-            "study": {"planned_procedure": planned_procedure}
-        }))
-        await dispatch(getStudySetupInfo(study_id))
+        return planned_procedure
     }
 
     const createProcedureStep = (event, procedureType) => {
@@ -177,21 +179,6 @@ export default function CreateProcedure() {
         }
     }
 
-    const deleteProcedureStep = async (id, type) => {
-        if (type === ProcedureTypes.TextPage) {
-            await dispatch(getTexts(study_id))
-        }
-        else if (type === ProcedureTypes.Condition) {
-            await dispatch(getConditions(study_id))
-        }
-        else if (type === ProcedureTypes.Questionnaire) {
-            await dispatch(getQuestionnaires(study_id))
-        }
-        else if (type === ProcedureTypes.Pause) {
-            await dispatch(getPauses(study_id))
-        }
-    }
-
     const procedureStepButtons = () => {
         let buttons = []
         for (let t in ProcedureTypes) {
@@ -202,6 +189,19 @@ export default function CreateProcedure() {
             )
         }
         return buttons
+    }
+
+    const handleProceed = async (event) => {
+        event.preventDefault()
+        let planned_procedure = getPlannedProcedure()
+        await dispatch(updateStudy({
+            "studyId": study_id,
+            "study": {
+                "planned_procedure": planned_procedure,
+                "current_setup_step": "procedure"
+            }
+        }))
+        navigate("/create/"+study_id+"/integration")
     }
 
     return (
@@ -255,7 +255,7 @@ export default function CreateProcedure() {
                 </Row>
 
                 <Row className='mt-3'>
-                    <Col> <Button size="lg">Save and Proceed</Button> </Col>
+                    <Col> <Button size="lg" onClick={handleProceed}>Save and Proceed</Button> </Col>
                 </Row>
             </Container>
 

@@ -5,11 +5,13 @@ import {useDispatch, useSelector} from "react-redux";
 import {useAuth} from "../../components/Auth";
 import {createStudy, selectStudy} from "../../redux/reducers/studySlice";
 import {useNavigate} from "react-router";
+import LoadingScreen from "../../components/LoadingScreen";
+import {Navigate, useLocation} from "react-router-dom";
 
 export default function CreateInformation() {
     const dispatch = useDispatch()
     const auth = useAuth()
-    const navigate = useNavigate()
+    const location = useLocation()
 
     const [title, setTitle] = useState('')
     const [startDate, setStartDate] = useState('')
@@ -17,6 +19,10 @@ export default function CreateInformation() {
     const [amountParticipants, setAmountParticipants] = useState('')
     const [description, setDescription] = useState('')
     const [consent, setConsent] = useState('')
+
+    const [created, setCreated] = useState(false)
+
+    const study = useSelector(selectStudy)
 
     const handleTitle = (event) => {
         setTitle(event.target.value)
@@ -44,21 +50,30 @@ export default function CreateInformation() {
 
     const handleSubmit = async (event) => {
         event.preventDefault()
-        const study = {
+        let study = {
             "name": title,
             "startDate": startDate + "T15:08:50.161Z",
             "endDate": endDate  + "T15:08:50.161Z",
-            "is_active": true, // TODO how to initialize study? As active or not active
+            "is_active": false, // TODO how to initialize study? As active or not active
             "owner_id": auth.user.id,
             "invite_only": false, // TODO how to indicate if invite_only or not? Checkbox?
             "description": description,
             "consent": consent,
-            "planned_amount_participants": amountParticipants,
-            "current_setup_step": "study",
+            "planned_number_participants": amountParticipants,
+            "planned_procedure": null,
+            "current_setup_step": "study"
         }
         await dispatch(createStudy(study))
+        setCreated(true)
+    }
 
-        navigate("/create/7/procedure")
+    if (created) {
+        if (study == null) {
+            return <LoadingScreen/>
+        }
+        else {
+            return <Navigate to={"/create/" + study.id + "/procedure"} replace state={{ from: location }}/>
+        }
     }
 
     return(

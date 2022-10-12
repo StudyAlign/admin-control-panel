@@ -54,11 +54,11 @@ export default function FilledDashboard(props) {
                     </Row>
                     <Row>
                         <Col>
-                            <Row> <label className="headline"> Running Studies </label> </Row>
+                            <Row> <label className="headline"> Open Studies </label> </Row>
                             {running_studies}
                         </Col>
                         <Col>
-                            <Row> <label className="headline"> Finished Studies </label> </Row>
+                            <Row> <label className="headline"> Closed Studies </label> </Row>
                             {finished_studies}
                         </Col>
                     </Row>
