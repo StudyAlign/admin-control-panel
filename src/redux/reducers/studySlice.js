@@ -7,9 +7,9 @@ import {
     getStudySetupInfoApi,
     updateStudyApi,
     deleteStudyApi,
-    generateProcedureWithStepsApi,
+    generateProceduresWithStepsApi,
     generateParticipantsApi,
-    populateSurveyParticipantsApi
+    populateSurveyParticipantsApi,
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
 
@@ -120,15 +120,15 @@ export const deleteStudy = createAsyncThunk(
     }
 );
 
-export const generateProcedureWithSteps = createAsyncThunk(
-    'generateProcedureWithSteps',
+export const generateProceduresWithSteps = createAsyncThunk(
+    'generateProceduresWithSteps',
     async (args, { dispatch, getState, rejectWithValue, requestId}) => {
         const { api, currentRequestId } = getState().studies
         if (api !== LOADING || requestId !== currentRequestId) {
             return
         }
         try {
-            const response = await apiWithAuth(generateProcedureWithStepsApi, args, dispatch)
+            const response = await apiWithAuth(generateProceduresWithStepsApi, args, dispatch)
             return response;
         } catch (err) {
             return rejectWithValue(err)
@@ -262,11 +262,11 @@ export const studySlice = createSlice({
                     state.currentRequestId = undefined
                 }
             })
-            .addCase(generateProcedureWithSteps.pending, (state, action) => {
+            .addCase(generateProceduresWithSteps.pending, (state, action) => {
                 state.api = LOADING
                 state.currentRequestId = action.meta.requestId
             })
-            .addCase(generateProcedureWithSteps.fulfilled, (state, action) => {
+            .addCase(generateProceduresWithSteps.fulfilled, (state, action) => {
                 const { requestId } = action.meta
                 if (state.api === LOADING && state.currentRequestId === requestId) {
                     state.api = IDLE
