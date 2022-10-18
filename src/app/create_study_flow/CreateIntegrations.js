@@ -5,6 +5,8 @@ import {Button, Col, Container, Form, Row} from "react-bootstrap";
 import {getStudySetupInfo, selectStudySetupInfo, updateStudy} from "../../redux/reducers/studySlice";
 import {useDispatch, useSelector} from "react-redux";
 
+const url = process.env.REACT_APP_STUDY_ALIGN_URL || "http://localhost:8000/";
+
 const code = "" +
     "<script type=\"text/javascript\">\n" +
     "   const navigatorUpdate = new Promise( (resolve, reject) => {\n" +
@@ -20,7 +22,7 @@ const code = "" +
     " \n" +
     "       const surveyId = \"{SID}\";\n" +
     "\n" +
-    "       let url = \"https://hciaitools.uni-bayreuth.de/study-align\"\n" +
+    "       let url = \"" + url + "\";\n" +
     "       const body = {\n" +
     "           \"source\": \"limesurvey\",\n" +
     "           \"ext_id\": surveyId, // limesurvey ID\n" +
