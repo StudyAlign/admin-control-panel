@@ -1,18 +1,15 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {
-    deleteTokensApi,
-    readTokensApi,
-    refreshTokenApi,
-    storeTokensApi,
-    userLoginApi,
-    userMeApi,
-    initApi,
     apiWithAuth,
     getStudiesApi,
     createStudyApi,
     getStudyApi,
     getStudySetupInfoApi,
-    updateStudyApi, deleteStudyApi
+    updateStudyApi,
+    deleteStudyApi,
+    generateProcedureWithStepsApi,
+    generateParticipantsApi,
+    populateSurveyParticipantsApi
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
 
@@ -123,6 +120,54 @@ export const deleteStudy = createAsyncThunk(
     }
 );
 
+export const generateProcedureWithSteps = createAsyncThunk(
+    'generateProcedureWithSteps',
+    async (args, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(generateProcedureWithStepsApi, args, dispatch)
+            return response;
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
+export const generateParticipants = createAsyncThunk(
+    'generateParticipants',
+    async (args, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(generateParticipantsApi, args, dispatch)
+            return response;
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
+export const populateSurveyParticipants = createAsyncThunk(
+    'populateSurveyParticipants',
+    async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(populateSurveyParticipantsApi, studyId, dispatch)
+            return response;
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
 // reducers
 export const studySlice = createSlice({
     name: 'studies',
@@ -217,6 +262,43 @@ export const studySlice = createSlice({
                     state.currentRequestId = undefined
                 }
             })
+            .addCase(generateProcedureWithSteps.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(generateProcedureWithSteps.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                }
+            })
+            .addCase(generateParticipants.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(generateParticipants.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                }
+            })
+            .addCase(populateSurveyParticipants.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(populateSurveyParticipants.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                }
+            })
+
     },
 });
 

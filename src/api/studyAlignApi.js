@@ -96,16 +96,16 @@ export function deleteStudyApi(studyId) {
     return sal.deleteStudy(studyId);
 }
 
-export function generateProcedureWithSteps(studyId, procedureScheme) {
-    return sal.generateProcedureWithSteps(studyId, procedureScheme);
+export function generateProcedureWithStepsApi(args) {
+    return sal.generateProcedureWithSteps(args.studyId, args.procedureScheme);
 }
 
 export function populateSurveyParticipantsApi(studyId) {
     return sal.populateSurveyParticipants(studyId);
 }
 
-export function generateParticipantsApi(studyId, amount) {
-    return sal.generateParticipants(studyId, amount);
+export function generateParticipantsApi(args) {
+    return sal.generateParticipants(args.studyId, args.amount);
 }
 
 // Participants
