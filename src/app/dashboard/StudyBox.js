@@ -3,6 +3,7 @@ import {useNavigate} from "react-router";
 import {Container, Row, Col, Button} from "react-bootstrap";
 import {PeopleFill} from "react-bootstrap-icons";
 import "./Dashboard.css"
+import {reformatDate} from "../../components/CommonFunctions";
 
 export default function StudyBox(props) {
     const navigate = useNavigate();
@@ -33,16 +34,6 @@ export default function StudyBox(props) {
             button = <Button className="button1"> Export Data </Button>
         }
         return button
-    }
-
-    const reformatDate = (dateString) => {
-        const date = new Date(dateString)
-        let day = date.getDate()
-        if(day < 10) day = "0" + day
-        let month = date.getMonth()
-        if(month < 10) month = "0" + month
-        let year = date.getFullYear()
-        return day + "." + month + "." + year
     }
 
     // TODO Amount participants and max participants has to be read from backend in order to display

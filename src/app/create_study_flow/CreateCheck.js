@@ -14,6 +14,7 @@ import {
 } from "../../redux/reducers/studySlice";
 import {useDispatch, useSelector} from "react-redux";
 import LoadingScreen from "../../components/LoadingScreen";
+import {reformatDate} from "../../components/CommonFunctions";
 
 
 export default function CreateCheck() {
@@ -39,17 +40,6 @@ export default function CreateCheck() {
     if (study == null || studySetupInfo == null
         || texts == null || conditions == null || pauses == null) {
         return <LoadingScreen/>
-    }
-
-    // TODO maybe move to an common functions folder
-    const reformatDate = (dateString) => {
-        const date = new Date(dateString)
-        let day = date.getDate()
-        if(day < 10) day = "0" + day
-        let month = date.getMonth()
-        if(month < 10) month = "0" + month
-        let year = date.getFullYear()
-        return day + "." + month + "." + year
     }
 
     const getProcedureStep = (orderObject, key) => {

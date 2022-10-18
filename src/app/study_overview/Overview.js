@@ -1,24 +1,12 @@
 import React from "react";
 import {Button} from "react-bootstrap";
-
 import "./StudyOverview.css"
 import {useDispatch} from "react-redux";
 import {getStudy, updateStudy} from "../../redux/reducers/studySlice";
-
+import {reformatDate} from "../../components/CommonFunctions";
 
 export default function Overview(props) {
     const dispatch = useDispatch()
-
-    // TODO maybe move to an common functions folder
-    const reformatDate = (dateString) => {
-        const date = new Date(dateString)
-        let day = date.getDate()
-        if(day < 10) day = "0" + day
-        let month = date.getMonth()
-        if(month < 10) month = "0" + month
-        let year = date.getFullYear()
-        return day + "." + month + "." + year
-    }
 
     const handleStudyActive = async (event, active) => {
         event.preventDefault()
