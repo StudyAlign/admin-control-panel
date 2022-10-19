@@ -10,7 +10,8 @@ import {
     getStudySetupInfo,
     selectStudy,
     selectStudySetupInfo,
-    updateStudy
+    updateStudy,
+    generateProceduresWithSteps, generateParticipants, populateSurveyParticipants,
 } from "../../redux/reducers/studySlice";
 import {useDispatch, useSelector} from "react-redux";
 import LoadingScreen from "../../components/LoadingScreen";
@@ -63,7 +64,25 @@ export default function CreateCheck() {
 
     const handleFinish = async (event) => {
         event.preventDefault()
-        // TODO .....?
+
+        let procedureScheme = studySetupInfo.planned_procedure.map(step =>
+            step.condition_id == null ? step : {"dummy": true}
+        )
+
+        await dispatch(generateProceduresWithSteps({
+            "studyId": study_id,
+            "procedureScheme": procedureScheme
+        }))
+
+        await dispatch(generateParticipants({
+            "studyId": study_id,
+            "amount": studySetupInfo.planned_number_participants
+        }))
+
+        if (studySetupInfo.planned_procedure.findIndex(step => step.questionnaire_id != null) > -1) {
+            await dispatch(populateSurveyParticipants(study_id))
+        }
+
         await dispatch(updateStudy({
             "studyId": study_id,
             "study": {

@@ -188,7 +188,7 @@ class StudyAlignLib {
         return this.basicDelete("studies/" + studyId);
     }
     generateProceduresWithSteps(studyId, procedureScheme) {
-        this.basicCreate("studies/" + studyId + "/procedures", procedureScheme);
+        return this.basicCreate("studies/" + studyId + "/procedures", procedureScheme);
     }
     getParticipants(studyId) {
         return this.basicRead("studies/" + studyId + "/participants");
