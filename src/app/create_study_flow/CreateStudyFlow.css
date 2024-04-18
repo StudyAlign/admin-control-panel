@@ -1,0 +1,48 @@
+.sidebar {
+    left: 0;
+    min-height: 100%;
+    padding: 10px 10px 0 10px;
+    background-color: #ececec;
+    color: red;
+}
+
+#sidebar-wrapper{
+    height: 93vh;
+    margin-left: -1rem;
+    -webkit-transition: margin .25s ease-out;
+    -moz-transition: margin .25s ease-out;
+    -o-transition: margin .25s ease-out;
+    transition: margin .25s ease-out;
+    width: 250px;
+}
+
+#page-content-wrapper {
+    position: relative;
+}
+
+.sidebar-item,
+.sidebar-item:hover {
+    color: black;
+    font-size: 16pt;
+    margin-bottom: 5px;
+}
+
+.sidebar-item-selected,
+.sidebar-item-selected:hover {
+    color: #224396;
+    font-weight: bold;
+}
+
+.study-title {
+    color: #494949;
+    font-size: 32pt;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.page-title {
+    color: #494949;
+    font-size: 32pt;
+    font-weight: bold;
+    margin-top: 10px;
+}

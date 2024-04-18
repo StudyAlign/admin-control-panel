@@ -1,4 +1,5 @@
 import { DragInteraction, GenericInteraction, KeyboardInteraction, MouseInteraction, TouchInteraction } from "./interactions";
+import "./interfaces";
 class StudyAlignLib {
     constructor(url = "http://localhost:8080", studyId) {
         // Interaction Lists (Web Events only), needed for bulk saving
@@ -187,8 +188,8 @@ class StudyAlignLib {
     deleteStudy(studyId) {
         return this.basicDelete("studies/" + studyId);
     }
-    generateProcedureWithSteps(studyId, procedureScheme) {
-        this.basicCreate("studies/" + studyId + "/procedures", procedureScheme);
+    generateProceduresWithSteps(studyId, procedureScheme) {
+        return this.basicCreate("studies/" + studyId + "/procedures", procedureScheme);
     }
     getParticipants(studyId) {
         return this.basicRead("studies/" + studyId + "/participants");
