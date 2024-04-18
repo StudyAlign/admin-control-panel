@@ -1,4 +1,5 @@
 import { DragInteraction, GenericInteraction, KeyboardInteraction, MouseInteraction, TouchInteraction } from "./interactions";
+import "./interfaces";
 class StudyAlignLib {
     constructor(url = "http://localhost:8080", studyId) {
         // Interaction Lists (Web Events only), needed for bulk saving
