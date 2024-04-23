@@ -160,8 +160,21 @@ export default function CreateProcedure() {
             id: "x" + idCounter,
             type: procedureType,
             content: empty_content,
-            stored: false
+            stored: false,
         }
+
+        if(procedureType === ProcedureTypes.BlockElement) {
+            // find latest Block-Counter
+            let max_counter = 0
+            for (let n_step of n_steps) {
+                if (n_step.type.label === 'Block Element' && n_step["blockCounter"] > max_counter) {
+                    max_counter = n_step["blockCounter"]
+                }
+            }
+            step["blockCounter"] = max_counter + 1
+            step.content["blockCounter"] = max_counter + 1
+        }
+        
         setIdCounter(idCounter+1)
         n_steps.push(step)
         setNotStoredSteps(n_steps)
@@ -233,6 +246,8 @@ export default function CreateProcedure() {
                                                     procedure.map((ps, index) => (
                                                     <ProcedureObject key={ps.id}
                                                                      id={ps.id}
+                                                                     //
+                                                                     blockCounter={ps.blockCounter}
                                                                      index={index}
                                                                      content={ps.content}
                                                                      type={ps.type}

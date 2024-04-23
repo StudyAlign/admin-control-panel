@@ -33,6 +33,12 @@ export const ProcedureTypes = {
         label: "Pause",
         emptyContent: { "title": "", "body": "", "proceed_body": "", "type": "time_based", "config": "", "study_id": -1 }
     },
+    BlockElement: {
+        id: 4,
+        key: "block",
+        label: "Block Element",
+        emptyContent: { "procedure_holder": "", "study_id": -1 }
+    },
 }
 
 function TextPageForm(props) {
@@ -165,6 +171,23 @@ function PauseForm(props) {
             <Form.Group className="mb-3" controlId="config">
                 <Form.Label> Config </Form.Label>
                 <Form.Control as="textarea" rows={3} value={props.content.config} onChange={onChange} required/>
+            </Form.Group>
+        </Form>
+    )
+}
+
+function BlockElementForm(props) {
+
+    const onChange = (event) => {
+        event.preventDefault()
+        props.editProcedureStep(event.target.id, event.target.value)
+    }
+
+    return (
+        <Form onSubmit={(event) => {event.preventDefault()}}>
+            <Form.Group className="mb-3" controlId="procedure_holder">
+                <Form.Label> Procedure </Form.Label>
+                <Form.Control type="area" value={props.content.name} onChange={onChange} required/>
             </Form.Group>
         </Form>
     )
@@ -324,6 +347,8 @@ export default function ProcedureObject(props) {
                 return <QuestionnaireForm content={content} editProcedureStep={editProcedureStep}/>
             case ProcedureTypes.Pause:
                 return <PauseForm content={content} editProcedureStep={editProcedureStep}/>
+            case ProcedureTypes.BlockElement:
+                return <BlockElementForm content={content} editProcedureStep={editProcedureStep}/>
         }
     }
 
@@ -339,6 +364,9 @@ export default function ProcedureObject(props) {
                 break
             case ProcedureTypes.Questionnaire:
                 header = procedureType.label
+                break
+            case ProcedureTypes.BlockElement:
+                header = props.blockCounter + " - " + procedureType.label
                 break
         }
         if(!stored) {
