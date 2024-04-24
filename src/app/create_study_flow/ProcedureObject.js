@@ -357,16 +357,16 @@ export default function ProcedureObject(props) {
         switch (procedureType) {
             case ProcedureTypes.TextPage:
             case ProcedureTypes.Pause:
-                header = content.title + " - " + procedureType.label
+                header = !content.title ? procedureType.label : content.title + " - " + procedureType.label
                 break
             case ProcedureTypes.Condition:
-                header = content.name + " - " + procedureType.label
+                header = !content.name ? procedureType.label : content.name + " - " + procedureType.label
                 break
             case ProcedureTypes.Questionnaire:
-                header = procedureType.label
+                header = procedureType.label + " - " + props.elemCounter
                 break
             case ProcedureTypes.BlockElement:
-                header = props.blockCounter + " - " + procedureType.label
+                header = procedureType.label + " - " + props.elemCounter
                 break
         }
         if(!stored) {

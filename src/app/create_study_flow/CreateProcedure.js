@@ -163,16 +163,16 @@ export default function CreateProcedure() {
             stored: false,
         }
 
-        if(procedureType === ProcedureTypes.BlockElement) {
-            // find latest Block-Counter
+        if(procedureType === ProcedureTypes.BlockElement || procedureType === ProcedureTypes.Questionnaire) {
+            // find latest Element-Counter
             let max_counter = 0
+            let type = procedureType === ProcedureTypes.BlockElement ? "Block Element" : "Questionnaire"
             for (let n_step of n_steps) {
-                if (n_step.type.label === 'Block Element' && n_step["blockCounter"] > max_counter) {
-                    max_counter = n_step["blockCounter"]
+                if (n_step.type.label === type && n_step["elemCounter"] > max_counter) {
+                    max_counter = n_step["elemCounter"]
                 }
             }
-            step["blockCounter"] = max_counter + 1
-            step.content["blockCounter"] = max_counter + 1
+            step["elemCounter"] = max_counter + 1
         }
         
         setIdCounter(idCounter+1)
@@ -247,7 +247,7 @@ export default function CreateProcedure() {
                                                     <ProcedureObject key={ps.id}
                                                                      id={ps.id}
                                                                      //
-                                                                     blockCounter={ps.blockCounter}
+                                                                     elemCounter={ps.elemCounter}
                                                                      index={index}
                                                                      content={ps.content}
                                                                      type={ps.type}
