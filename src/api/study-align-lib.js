@@ -1,5 +1,4 @@
 import { DragInteraction, GenericInteraction, KeyboardInteraction, MouseInteraction, TouchInteraction } from "./interactions";
-import "./interfaces";
 class StudyAlignLib {
     constructor(url = "http://localhost:8080", studyId) {
         // Interaction Lists (Web Events only), needed for bulk saving
@@ -188,8 +187,11 @@ class StudyAlignLib {
     deleteStudy(studyId) {
         return this.basicDelete("studies/" + studyId);
     }
-    generateProceduresWithSteps(studyId, procedureScheme) {
+    generateProcedureWithSteps(studyId, procedureScheme) {
         return this.basicCreate("studies/" + studyId + "/procedures", procedureScheme);
+    }
+    getProcedureConfigMain(studyId) {
+        return this.basicRead("studies/" + studyId + "/procedure-config");
     }
     getParticipants(studyId) {
         return this.basicRead("studies/" + studyId + "/participants");
@@ -207,6 +209,41 @@ class StudyAlignLib {
     }
     populateSurveyParticipants(studyId) {
         return this.basicRead("studies/" + studyId + "/survey-participants");
+    }
+    // Procedure Configs
+    getProcedureConfig(procedureConfigId) {
+        return this.basicRead("procedure-configs/" + procedureConfigId);
+    }
+    createProcedureConfigBlock(block) {
+        return this.basicCreate("procedure-configs/block", block);
+    }
+    deleteProcedureConfigBlock(blockId) {
+        return this.basicDelete("procedure-configs/block/" + blockId);
+    }
+    createSingleProcedureConfigStep(procedureConfigId, procedureConfigStep) {
+        const options = {
+            method: "POST",
+            path: "procedure-configs/" + procedureConfigId + "/step",
+            headers: {},
+            body: procedureConfigStep,
+            formData: true,
+        };
+        this.setHeaders(options);
+        return this.request(options);
+    }
+    createProcedureConfigSteps(procedureConfigId, procedureConfigSteps) {
+        const options = {
+            method: "POST",
+            path: "procedure-configs/" + procedureConfigId + "/create-steps",
+            headers: {},
+            body: procedureConfigSteps,
+            formData: true,
+        };
+        this.setHeaders(options);
+        return this.request(options);
+    }
+    updateProcedureConfig(procedureConfigId, procedureConfigSteps) {
+        return this.basicUpdate("procedure-configs/" + procedureConfigId, procedureConfigSteps);
     }
     // Conditions
     getConditionIds(studyId) {
@@ -531,6 +568,12 @@ class StudyAlignLib {
         const interactionType = "genericInteractionList";
         const path = "interaction/generic/bulk";
         return this.logInteractionBulk(path, conditionId, interactionType, bulkSize, this.logInteractionBulkRequest.bind(this));
+    }
+    // Meta Interaction (Same as Generic Interaction but without condition_id
+    logMetaInteraction(eventType, genericEvent, timestamp, metaData = {}) {
+        const interaction = new GenericInteraction(eventType, timestamp, genericEvent, metaData);
+        const path = "interaction/meta";
+        return this.logInteractionRequest(path, null, interaction);
     }
     // Procedure related methods
     startProcedure() {

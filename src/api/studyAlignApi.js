@@ -108,6 +108,36 @@ export function generateParticipantsApi(args) {
     return sal.generateParticipants(args.studyId, args.amount);
 }
 
+// Procedure Configs
+
+export function getProcedureConfigMainApi(studyId) {
+    return sal.getProcedureConfigMain(studyId);
+}
+
+export function getProcedureConfigApi(procedureConfigId) {
+    return sal.getProcedureConfig(procedureConfigId);
+}
+
+export function createProcedureConfigBlockApi(procedureConfigBlock) {
+    return sal.createProcedureConfigBlock(procedureConfigBlock);
+}
+
+export function deleteProcedureConfigBlockApi(procedureConfigBlockId) {
+    return sal.deleteProcedureConfigBlock(procedureConfigBlockId);
+}
+
+export function createSingleProcedureConfigStepApi(args) {
+    return sal.createSingleProcedureConfigStep(args.procedureConfigId, args.procedureConfigStep);
+}
+
+export function createProcedureConfigStepsApi(args) {
+    return sal.createProcedureConfigSteps(args.procedureConfigId, args.procedureConfigSteps);
+}
+
+export function updateProcedureConfigApi(args) {
+    return sal.updateProcedureConfig(args.procedureConfigId, args.procedureConfigSteps);
+}
+
 // Participants
 
 export function getParticipantApi(token) {
