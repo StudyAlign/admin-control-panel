@@ -198,6 +198,11 @@ export default function CreateProcedure() {
         }
 
         setItemEntitiesMapState(newMap)
+
+        // TODO: delete from backend
+
+        // Show success
+        setMessage({type: "success", text: "Procedure-Object deleted"})
     }
 
     // ProcedureObject List
@@ -473,6 +478,12 @@ export default function CreateProcedure() {
             <Container>
 
                 <Row className='mt-3'>
+                    <div style={{ height: message.type === "none" || message.text === "" ? 0 : 50, width: '100%' }}>
+                        <ProcedureAlert message={message}/>
+                    </div>
+                </Row>
+
+                <Row className='mt-3'>
                     {procedureStepButtons()}
                 </Row>
 
@@ -495,6 +506,10 @@ export default function CreateProcedure() {
                             </div>
                         </Card.Body>
                     </Card>
+                </Row>
+
+                <Row className='mt-3'>
+                    <Col> <Button size="lg" onClick={handleProceed}>Save and Proceed</Button> </Col>
                 </Row>
 
             </Container>
