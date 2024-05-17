@@ -1,10 +1,9 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useMemo, useCallback} from "react";
 import StudyCreationLayout, {CreationSteps} from "./StudyCreationLayout";
-import {ProcedureTypes} from "./ProcedureObject";
 import {useNavigate, useParams} from "react-router";
 import {Button, Card, Col, Container, ListGroup, Row, Accordion} from "react-bootstrap";
-import {DragDropContext, Droppable} from "react-beautiful-dnd";
-import ProcedureObject from "./ProcedureObject";
+// import {DragDropContext, Droppable} from "react-beautiful-dnd";
+import ProcedureObject, {ProcedureTypes} from "./ProcedureObject";
 import {useDispatch, useSelector} from "react-redux";
 import {getTexts, selectTexts} from "../../redux/reducers/textSlice";
 import {getConditions, selectConditions} from "../../redux/reducers/conditionSlice";
@@ -12,10 +11,44 @@ import {getQuestionnaires, selectQuestionnaires} from "../../redux/reducers/ques
 import {getPauses, selectPauses} from "../../redux/reducers/pauseSlice";
 import {getStudySetupInfo, selectStudySetupInfo, updateStudy} from "../../redux/reducers/studySlice";
 import ProcedureAlert from "./ProcedureAlert";
-// Test sortful
-import NestedVertical from './NestedVertical.js'
+
+// new nested logic -----------------------------------------
+import { DragHandleComponent, List, Item } from "react-sortful";
+import arrayMove from "array-move";
+import classnames from "classnames";
+import styles from "./CreateProcedure.module.css";
+import { Trash3 } from "react-bootstrap-icons";
+// import NestedVertical from './NestedVertical.js'
+
+// Root ID
+const rootItemId = 'root'
+
+// Initial list map
+const initialItemEntitiesMap = new Map([
+    [
+        rootItemId,
+        { id: rootItemId, children: [] },
+    ],
+])
+
+// Render DropLine
+const renderDropLineElement = (injectedProps) => (
+    <div
+        ref={injectedProps.ref}
+        className={styles.dropLine}
+        style={injectedProps.style}
+    />
+)
+
+// new nested logic -----------------------------------------
+
 
 export default function CreateProcedure() {
+
+    // nested state
+    const [itemEntitiesMapState, setItemEntitiesMapState] = useState(initialItemEntitiesMap)
+
+    // old logic -----------------------------------------
     const dispatch = useDispatch()
     const { study_id } = useParams()
     const navigate = useNavigate()
@@ -125,30 +158,6 @@ export default function CreateProcedure() {
         procedure.push(...notStoredSteps)
     }
 
-    const onDragUpdate = (update) => {
-        const { destination } = update
-        if (destination) {
-            const droppableId = destination.droppableId
-            console.log("Current droppableId:", droppableId)
-        }
-    }
-
-    const onDragEnd = async (result) => {
-        if(result.destination === null) return
-        const idx_src = result.source.index
-        const idx_dest = result.destination.index
-        if(idx_src === idx_dest) return
-        let obj = procedure[idx_src]
-        procedure.splice(idx_src, 1)
-        procedure.splice(idx_dest, 0, obj)
-        let planned_procedure = getPlannedProcedure()
-        await dispatch(updateStudy({
-            "studyId": study_id,
-            "study": {"planned_procedure": planned_procedure}
-        }))
-        await dispatch(getStudySetupInfo(study_id))
-    }
-
     const getPlannedProcedure = () => {
         let planned_procedure = []
         for (const step of procedure) {
@@ -161,35 +170,256 @@ export default function CreateProcedure() {
         return planned_procedure
     }
 
-    const createProcedureStep = (event, procedureType) => {
-        event.preventDefault()
-        let empty_content = procedureType.emptyContent
-        empty_content.study_id = study_id
-        let n_steps = [...notStoredSteps]
-        let step = {
-            id: "x" + idCounter,
-            type: procedureType,
-            content: empty_content,
-            stored: false,
+    // old logic -----------------------------------------
+
+    // new nested logic -----------------------------------------
+
+    // Delete ProcedureObject + nested children
+    const deleteItem = (itemId) => {
+        const newMap = new Map(itemEntitiesMapState)
+
+        // recursive delete dependent children
+        const deleteRecursively = (id) => {
+            const item = newMap.get(id)
+            if (item) {
+                if (item.children) {
+                    item.children.forEach(childId => deleteRecursively(childId))
+                }
+                newMap.delete(id)
+            }
+        }
+        deleteRecursively(itemId)
+
+        // delete child from superior element
+        for (let [key, value] of newMap) {
+            if (value.children && value.children.includes(itemId)) {
+                value.children = value.children.filter(id => id !== itemId)
+            }
         }
 
-        if(procedureType === ProcedureTypes.BlockElement || procedureType === ProcedureTypes.Questionnaire) {
-            // find latest Element-Counter
-            let max_counter = 0
-            let type = procedureType === ProcedureTypes.BlockElement ? "Block Element" : "Questionnaire"
-            for (let n_step of n_steps) {
-                if (n_step.type.label === type && n_step["elemCounter"] > max_counter) {
-                    max_counter = n_step["elemCounter"]
-                }
-            }
-            step["elemCounter"] = max_counter + 1
-        }
-        console.log("createProcedureStep: ", step)
-        setIdCounter(idCounter+1)
-        n_steps.push(step)
-        setNotStoredSteps(n_steps)
+        setItemEntitiesMapState(newMap)
     }
 
+    // ProcedureObject List
+    const itemElements = useMemo(() => {
+
+        // Get top level procudure objects
+        const topLevelItems = itemEntitiesMapState
+            .get(rootItemId)
+            .children.map((itemId) => itemEntitiesMapState.get(itemId))
+
+        // recursive create procedure objects
+        const createItemElement = (item, index) => {
+            if (item.children !== undefined) {
+                const childItems = item.children.map((itemId) =>
+                    itemEntitiesMapState.get(itemId)
+                )
+                const childItemElements = childItems.map(createItemElement)
+
+                return (
+                    <Item
+                        key={item.id}
+                        identifier={item.id}
+                        index={index}
+                        isGroup
+                        isUsedCustomDragHandlers
+                    >
+                        <div className={styles.group}>
+                            <div className={styles.groupHeader}>
+                                <DragHandleComponent className={styles.dragHandleBlock}>
+                                    <div className={styles.heading}>
+                                        {item.type.label}
+                                    </div>
+                                </DragHandleComponent>
+                                <Button
+                                    className={styles.deleteButton}
+                                    onClick={() => deleteItem(item.id)}
+                                    variant="danger"
+                                    size="sm"                                    
+                                >
+                                    <Trash3 />
+                                </Button>
+                            </div>
+                            {childItemElements}
+                        </div>
+                    </Item>
+
+                )
+            }
+
+            return (
+                <Item
+                    key={item.id}
+                    identifier={item.id}
+                    index={index}
+                    isUsedCustomDragHandlers
+                >
+                    <ProcedureObject
+                        id={item.id}
+                        content={item.content}
+                        type={item.type}
+                        stored={item.stored}
+                        deleteItem={deleteItem}
+                    />
+                </Item>
+            )
+        }
+
+        return topLevelItems.map(createItemElement)
+    }, [itemEntitiesMapState])
+
+    // render preview of dragged element
+    const renderGhostElement = useCallback(
+        ({ identifier, isGroup }) => {
+            const item = itemEntitiesMapState.get(identifier)
+            if (item === undefined) return
+
+            // TODO maybe change div content
+            if (isGroup) {
+                return (
+                    <div className={classnames(styles.group, styles.ghost)}>
+                        <div className={styles.heading}>
+                            {item.type.label}
+                        </div>
+                    </div>
+                )
+            }
+
+            return (
+                <div className={classnames(styles.item, styles.ghost)}>
+                    {item.type.label + " - " + item.id}
+                </div>
+            )
+        },
+        [itemEntitiesMapState]
+    )
+
+    // render preview for block element while dragging
+    const renderStackedGroupElement = useCallback(
+        (injectedProps, { identifier }) => {
+            const item = itemEntitiesMapState.get(identifier)
+
+            return (
+                <div
+                    className={classnames(styles.group, styles.stacked)}
+                    style={injectedProps.style}
+                >
+                    <div className={styles.heading}>{item.type.label}</div>
+                </div>
+            )
+        },
+        [itemEntitiesMapState]
+    )
+
+    // new nested logic -----------------------------------------
+
+    // updated nested logic -----------------------------------------
+    const onDragEnd = useCallback(
+        (meta) => {
+
+            // Prevent group items from being moved to other group items
+            const targetGroupItem = itemEntitiesMapState.get(meta.nextGroupIdentifier ?? rootItemId)
+            if (targetGroupItem && targetGroupItem.children !== undefined && targetGroupItem.id !== rootItemId) {
+                const draggedItem = itemEntitiesMapState.get(meta.identifier)
+                if (draggedItem && draggedItem.children !== undefined) {
+                    console.error('Gruppenelemente können nicht in andere Gruppenelemente verschoben werden.')
+                    return;
+                }
+            }
+
+            // Check whether the element was moved to the same position within the same group
+            if (meta.groupIdentifier === meta.nextGroupIdentifier && meta.index === meta.nextIndex) return
+
+            // Element does not exist
+            const newMap = new Map(itemEntitiesMapState.entries())
+            const item = newMap.get(meta.identifier)
+            if (item === undefined) return
+
+            // Group does not exist
+            const groupItem = newMap.get(meta.groupIdentifier ?? rootItemId)
+            if (groupItem === undefined) return
+            if (groupItem.children === undefined) return
+
+            // Move element within the same group
+            if (meta.groupIdentifier === meta.nextGroupIdentifier) {
+                const nextIndex = meta.nextIndex ?? groupItem.children?.length ?? 0
+                groupItem.children = arrayMove(
+                    groupItem.children,
+                    meta.index,
+                    nextIndex
+                )
+            } else {
+                // Move item to another group
+                const nextGroupItem = newMap.get(meta.nextGroupIdentifier ?? rootItemId)
+                if (nextGroupItem === undefined) return
+                if (nextGroupItem.children === undefined) return
+
+                groupItem.children.splice(meta.index, 1)
+                if (meta.nextIndex === undefined) {
+                    // Adds element to group without elements
+                    nextGroupItem.children.push(meta.identifier)
+                } else {
+                    // Adds element to group of elements
+                    nextGroupItem.children.splice(meta.nextIndex, 0, item.id)
+                }
+            }
+
+            setItemEntitiesMapState(newMap)
+
+            console.log(itemEntitiesMapState)
+        },
+        [itemEntitiesMapState]
+    )
+
+    const createProcedureStep = (event, procedureType) => {
+        event.preventDefault()
+        // let empty_content = procedureType.emptyContent
+        // empty_content.study_id = study_id
+        // let n_steps = [...notStoredSteps]
+        // let step = {
+        //     id: "x" + idCounter,
+        //     type: procedureType,
+        //     content: empty_content,
+        //     stored: false,
+        // }
+
+        // React Button event => disable, bcause buggy
+        const button = event.target
+        button.disabled = true
+
+        // Procedure ID depends on current time
+        const newId = Date.now()
+
+        let initChildren = procedureType === ProcedureTypes.BlockElement ? [] : undefined
+        const newItem = {
+            id: newId,
+            title: procedureType.label + " - " + newId,
+            type: procedureType,
+            content: procedureType.emptyContent,
+            stored: false,
+            children: initChildren
+        }
+
+        // Add to list
+        const newMap = new Map(itemEntitiesMapState)
+        newMap.set(newId, newItem)
+        const rootItem = newMap.get(rootItemId)
+        rootItem.children.push(newId)
+        setItemEntitiesMapState(newMap)
+
+        // Activate button again
+        setTimeout(() => {
+            button.disabled = false
+        }, 300)
+
+        // setIdCounter(idCounter+1)
+        // n_steps.push(step)
+        // setNotStoredSteps(n_steps)
+    }
+
+    // updated nested logic -----------------------------------------
+
+    // old logic -----------------------------------------
     const removeFromNotStored = async (id) => {
         let idx = notStoredSteps.findIndex(obj => {
             return obj.id === id
@@ -201,19 +431,28 @@ export default function CreateProcedure() {
             setNotStoredSteps(nss)
         }
     }
+    // old logic -----------------------------------------
+
+    // updated nested logic -----------------------------------------
 
     const procedureStepButtons = () => {
         let buttons = []
         for (let t in ProcedureTypes) {
             buttons.push(
                 <Col xs={'auto'} key={ProcedureTypes[t].id}>
-                    <Button onClick={(event) => createProcedureStep(event, ProcedureTypes[t])}> { ProcedureTypes[t].label } </Button>
+                    <Button
+                        type="button"
+                        style={{ backgroundColor: ProcedureTypes[t].color, borderColor: ProcedureTypes[t].color }}
+                        onClick={(event) => createProcedureStep(event, ProcedureTypes[t])}> {ProcedureTypes[t].label} </Button>
                 </Col>
             )
         }
         return buttons
     }
 
+    // updated nested logic -----------------------------------------
+
+    // old logic -----------------------------------------
     const handleProceed = async (event) => {
         event.preventDefault()
         let planned_procedure = getPlannedProcedure()
@@ -227,13 +466,42 @@ export default function CreateProcedure() {
         await dispatch(getStudySetupInfo(study_id))
         navigate("/create/"+study_id+"/integrations")
     }
+    // old logic -----------------------------------------
 
     return (
         <StudyCreationLayout step={CreationSteps.Procedure}>
-            <NestedVertical />
+            <Container>
+
+                <Row className='mt-3'>
+                    {procedureStepButtons()}
+                </Row>
+
+                <Row className='mt-3'>
+                    <Card>
+                        <Card.Header> Procedure Order </Card.Header>
+                        <Card.Body>
+                            <div className={styles.ProcedureOrder}>
+                                <List
+                                    className={styles.wrapper}
+                                    renderDropLine={renderDropLineElement}
+                                    renderGhost={renderGhostElement}
+                                    renderStackedGroup={renderStackedGroupElement}
+                                    onDragEnd={onDragEnd}
+                                >
+                                    <Accordion defaultActiveKey="0" flush>
+                                        {itemElements}
+                                    </Accordion>
+                                </List>
+                            </div>
+                        </Card.Body>
+                    </Card>
+                </Row>
+
+            </Container>
         </StudyCreationLayout>
     )
-
+    
+    // old return statement
     // return (
     //     <StudyCreationLayout step={CreationSteps.Procedure}>
 

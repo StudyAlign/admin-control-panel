@@ -7,36 +7,45 @@ import {createCondition, deleteCondition, getConditions, updateCondition} from "
 import {createQuestionnaire, deleteQuestionnaire, getQuestionnaires, updateQuestionnaire} from "../../redux/reducers/questionnaireSlice";
 import {createPause, deletePause, getPauses, updatePause} from "../../redux/reducers/pauseSlice";
 import {DeviceSsd, Trash3} from "react-bootstrap-icons";
+// new import
+import { DragHandleComponent } from 'react-sortful'
+import styles from './CreateProcedure.module.css'
 
+// updated color scheme
 export const ProcedureTypes = {
     TextPage: {
         id: 0,
         key: "text",
         label: "Text Page",
+        color: "rgb(23, 162, 184)",
         emptyContent: { "title": "", "body": "", "study_id": -1 }
     },
     Condition: {
         id: 1,
         key: "condition",
         label: "Condition",
+        color: "rgb(23, 162, 184)",
         emptyContent: { "name": "", "config": "", "url": "", "study_id": -1 }
     },
     Questionnaire: {
         id: 2,
         key: "questionnaire",
         label: "Questionnaire",
+        color: "rgb(23, 162, 184)",
         emptyContent: { "url": "", "system": "limesurvey", "ext_id": "-", "api_url": "-", "api_username": "-", "api_password": "-", "study_id": -1}
     },
     Pause:  {
         id: 3,
         key: "pause",
         label: "Pause",
+        color: "rgb(23, 162, 184)",
         emptyContent: { "title": "", "body": "", "proceed_body": "", "type": "time_based", "config": "", "study_id": -1 }
     },
     BlockElement: {
         id: 4,
         key: "block",
         label: "Block Element",
+        color: "rgb(87, 145, 53)",
         emptyContent: { "children": [], "study_id": -1 }
     },
 }
@@ -176,22 +185,19 @@ function PauseForm(props) {
     )
 }
 
-function BlockElementForm(props) {
-
-    return (
-        <Form onSubmit={(event) => { event.preventDefault() }}>
-            <Droppable droppableId="form-droppable">
-                {(provided) => (
-                    <div ref={provided.innerRef} {...provided.droppableProps}
-                        style={{ minHeight: '200px', border: '1px solid #ccc', padding: '20px' }}
-                    >
-                        {provided.placeholder}
-                    </div>
-                )}
-            </Droppable>
-        </Form>
-    )
-}
+// new nested logic -----------------------------------------
+// Drag Element for Procedure Object
+const dotsSVG = (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+        <circle cx="18" cy="12" r="3" />
+        <circle cx="18" cy="24" r="3" />
+        <circle cx="18" cy="36" r="3" />
+        <circle cx="30" cy="12" r="3" />
+        <circle cx="30" cy="24" r="3" />
+        <circle cx="30" cy="36" r="3" />
+    </svg>
+)
+// new nested logic -----------------------------------------
 
 export default function ProcedureObject(props) {
     const dispatch = useDispatch()
@@ -294,12 +300,18 @@ export default function ProcedureObject(props) {
         props.setMessage({type: "success", text: "Procedure-Object updated"})
     }
 
-    const decoratedOnClick = useAccordionButton(props.id, (event) => {
-        event.preventDefault()
-        if(updated) {
-            updateContent()
-        }
-    });
+    // new
+    const decoratedOnClick = (id) => {
+        console.log("decoratedOnClick: " + id)
+    }
+
+    // old logic -----------------------------------------
+    // const decoratedOnClick = useAccordionButton(props.id, (event) => {
+    //     event.preventDefault()
+    //     if(updated) {
+    //         updateContent()
+    //     }
+    // })
 
     const handleDelete = async (event) => {
         event.preventDefault()
@@ -330,6 +342,8 @@ export default function ProcedureObject(props) {
         }
     }
 
+    // old logic -----------------------------------------
+
     const editContent = (content_id, value) => {
         let new_content = {...content}
         new_content[content_id] = value
@@ -347,8 +361,6 @@ export default function ProcedureObject(props) {
                 return <QuestionnaireForm content={content} editProcedureStep={editProcedureStep}/>
             case ProcedureTypes.Pause:
                 return <PauseForm content={content} editProcedureStep={editProcedureStep}/>
-            case ProcedureTypes.BlockElement:
-                return <BlockElementForm content={content}/>
         }
     }
 
@@ -365,9 +377,6 @@ export default function ProcedureObject(props) {
             case ProcedureTypes.Questionnaire:
                 header = procedureType.label + " - " + props.elemCounter
                 break
-            case ProcedureTypes.BlockElement:
-                header = procedureType.label + " - " + props.elemCounter
-                break
         }
         if(!stored) {
             header += ' [Not Stored]'
@@ -375,34 +384,58 @@ export default function ProcedureObject(props) {
         return header
     }
 
+    // new return logic
     return (
-        <Draggable draggableId={props.id} index={props.index} isDragDisabled={!stored}>
-            {provided => (
-                <div {...provided.draggableProps} {...provided.dragHandleProps}  ref={provided.innerRef}>
+        <div className={styles.item}>
+            <DragHandleComponent className={styles.dragHandle}>
+                {dotsSVG}
+            </DragHandleComponent>
 
-                    <Card className="m-1">
-                        <Card.Header onClick={decoratedOnClick}>
-                            { getHeader(props.type, content) }
-                        </Card.Header>
 
-                        <Accordion.Collapse eventKey={props.id}>
-                            <Card.Body className="pt-1">
-                                <Row className="me-0">
-                                    <Col> </Col>
-                                    <Col xs="auto" className="p-1">
-                                        <Button className="p-1 pt-0 m-0" onClick={handleSave} disabled={!updated}> <DeviceSsd/> </Button>
-                                    </Col>
-                                    <Col xs="auto" className="p-1">
-                                        <Button className="p-1 pt-0 m-0" onClick={handleDelete} variant="danger"> <Trash3/> </Button>
-                                    </Col>
-                                </Row>
-                                { getForm(props.type, content, editContent) }
-                            </Card.Body>
-                        </Accordion.Collapse>
-                    </Card>
+            <Accordion.Item onClick={() => decoratedOnClick(props.id)} eventKey={props.id} className={styles.accordionItem}>
+                <Accordion.Header>{getHeader(props.type, content)}</Accordion.Header>
+                <Accordion.Body>
+                    {getForm(props.type, content, editContent)}
+                </Accordion.Body>
+            </Accordion.Item>
 
-                </div>
-            )}
-        </Draggable>
-    );
+
+            <Button variant="danger" size="sm" onClick={() => props.deleteItem(props.id)} className={styles.deleteButton}>
+                <Trash3 />
+            </Button>
+
+        </div>
+    )
+
+    // Old return logic
+    // return (
+    //     <Draggable draggableId={props.id} index={props.index} isDragDisabled={!stored}>
+    //         {provided => (
+    //             <div {...provided.draggableProps} {...provided.dragHandleProps}  ref={provided.innerRef}>
+
+    //                 <Card className="m-1">
+    //                     <Card.Header onClick={decoratedOnClick}>
+    //                         { getHeader(props.type, content) }
+    //                     </Card.Header>
+
+    //                     <Accordion.Collapse eventKey={props.id}>
+    //                         <Card.Body className="pt-1">
+    //                             <Row className="me-0">
+    //                                 <Col> </Col>
+    //                                 <Col xs="auto" className="p-1">
+    //                                     <Button className="p-1 pt-0 m-0" onClick={handleSave} disabled={!updated}> <DeviceSsd/> </Button>
+    //                                 </Col>
+    //                                 <Col xs="auto" className="p-1">
+    //                                     <Button className="p-1 pt-0 m-0" onClick={handleDelete} variant="danger"> <Trash3/> </Button>
+    //                                 </Col>
+    //                             </Row>
+    //                             { getForm(props.type, content, editContent) }
+    //                         </Card.Body>
+    //                     </Accordion.Collapse>
+    //                 </Card>
+
+    //             </div>
+    //         )}
+    //     </Draggable>
+    // )
 }
