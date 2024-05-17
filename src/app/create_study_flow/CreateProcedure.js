@@ -12,6 +12,8 @@ import {getQuestionnaires, selectQuestionnaires} from "../../redux/reducers/ques
 import {getPauses, selectPauses} from "../../redux/reducers/pauseSlice";
 import {getStudySetupInfo, selectStudySetupInfo, updateStudy} from "../../redux/reducers/studySlice";
 import ProcedureAlert from "./ProcedureAlert";
+// Test sortful
+import NestedVertical from './NestedVertical.js'
 
 export default function CreateProcedure() {
     const dispatch = useDispatch()
@@ -123,6 +125,14 @@ export default function CreateProcedure() {
         procedure.push(...notStoredSteps)
     }
 
+    const onDragUpdate = (update) => {
+        const { destination } = update
+        if (destination) {
+            const droppableId = destination.droppableId
+            console.log("Current droppableId:", droppableId)
+        }
+    }
+
     const onDragEnd = async (result) => {
         if(result.destination === null) return
         const idx_src = result.source.index
@@ -174,7 +184,7 @@ export default function CreateProcedure() {
             }
             step["elemCounter"] = max_counter + 1
         }
-        
+        console.log("createProcedureStep: ", step)
         setIdCounter(idCounter+1)
         n_steps.push(step)
         setNotStoredSteps(n_steps)
@@ -220,61 +230,67 @@ export default function CreateProcedure() {
 
     return (
         <StudyCreationLayout step={CreationSteps.Procedure}>
-
-            <Container>
-                <Row className='mt-3'>
-                    <ProcedureAlert message={message}/>
-                </Row>
-
-                <Row className='mt-3'>
-                    { procedureStepButtons() }
-                </Row>
-
-                <Row className='mt-3'>
-                    <Col>
-                    <DragDropContext onDragEnd={onDragEnd}>
-                        <Card>
-                            <Card.Header> Procedure Order </Card.Header>
-                            <Card.Body>
-
-                                <Accordion>
-                                <Droppable droppableId={"procedure-0"}>
-                                    {provided => (
-                                        <div ref={provided.innerRef} {...provided.droppableProps}>
-                                            <ListGroup>
-                                                {
-                                                    procedure.map((ps, index) => (
-                                                    <ProcedureObject key={ps.id}
-                                                                     id={ps.id}
-                                                                     //
-                                                                     elemCounter={ps.elemCounter}
-                                                                     index={index}
-                                                                     content={ps.content}
-                                                                     type={ps.type}
-                                                                     stored={ps.stored}
-                                                                     setMessage={setMessage}
-                                                                     removeFromNotStored={removeFromNotStored}
-                                                    />
-                                                ))
-                                                }
-                                            </ListGroup>
-                                            {provided.placeholder}
-                                        </div>
-                                    )}
-                                </Droppable>
-                                </Accordion>
-
-                            </Card.Body>
-                        </Card>
-                    </DragDropContext>
-                    </Col>
-                </Row>
-
-                <Row className='mt-3'>
-                    <Col> <Button size="lg" onClick={handleProceed}>Save and Proceed</Button> </Col>
-                </Row>
-            </Container>
-
+            <NestedVertical />
         </StudyCreationLayout>
     )
+
+    // return (
+    //     <StudyCreationLayout step={CreationSteps.Procedure}>
+
+    //         <Container>
+    //             <Row className='mt-3'>
+    //                 <ProcedureAlert message={message}/>
+    //             </Row>
+
+    //             <Row className='mt-3'>
+    //                 { procedureStepButtons() }
+    //             </Row>
+
+    //             <Row className='mt-3'>
+    //                 <Col>
+    //                 <DragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragUpdate}>
+    //                     <Card>
+    //                         <Card.Header> Procedure Order </Card.Header>
+    //                         <Card.Body>
+
+    //                             <Accordion>
+    //                             <Droppable droppableId={"procedure-0"}>
+    //                                 {provided => (
+    //                                     <div ref={provided.innerRef} {...provided.droppableProps}>
+    //                                         <ListGroup>
+    //                                             {
+    //                                                 procedure.map((ps, index) => (
+    //                                                 <ProcedureObject key={ps.id}
+    //                                                                  id={ps.id}
+    //                                                                  //
+    //                                                                  elemCounter={ps.elemCounter}
+    //                                                                  index={index}
+    //                                                                  content={ps.content}
+    //                                                                  type={ps.type}
+    //                                                                  stored={ps.stored}
+    //                                                                  setMessage={setMessage}
+    //                                                                  removeFromNotStored={removeFromNotStored}
+    //                                                 />
+    //                                             ))
+    //                                             }
+    //                                         </ListGroup>
+    //                                         {provided.placeholder}
+    //                                     </div>
+    //                                 )}
+    //                             </Droppable>
+    //                             </Accordion>
+
+    //                         </Card.Body>
+    //                     </Card>
+    //                 </DragDropContext>
+    //                 </Col>
+    //             </Row>
+
+    //             <Row className='mt-3'>
+    //                 <Col> <Button size="lg" onClick={handleProceed}>Save and Proceed</Button> </Col>
+    //             </Row>
+    //         </Container>
+
+    //     </StudyCreationLayout>
+    // )
 }

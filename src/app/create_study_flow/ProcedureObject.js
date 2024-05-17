@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
-import {Draggable} from 'react-beautiful-dnd';
-import {Card, Accordion, useAccordionButton, Form, Row, Button, Col} from "react-bootstrap";
+import {Draggable, Droppable} from 'react-beautiful-dnd';
+import {Card, Accordion, useAccordionButton, Form, Row, Button, Col, ListGroup} from "react-bootstrap";
 import {useDispatch} from "react-redux";
 import {createText, deleteText, getTexts, updateText} from "../../redux/reducers/textSlice";
 import {createCondition, deleteCondition, getConditions, updateCondition} from "../../redux/reducers/conditionSlice";
@@ -37,7 +37,7 @@ export const ProcedureTypes = {
         id: 4,
         key: "block",
         label: "Block Element",
-        emptyContent: { "procedure_holder": "", "study_id": -1 }
+        emptyContent: { "children": [], "study_id": -1 }
     },
 }
 
@@ -178,17 +178,17 @@ function PauseForm(props) {
 
 function BlockElementForm(props) {
 
-    const onChange = (event) => {
-        event.preventDefault()
-        props.editProcedureStep(event.target.id, event.target.value)
-    }
-
     return (
-        <Form onSubmit={(event) => {event.preventDefault()}}>
-            <Form.Group className="mb-3" controlId="procedure_holder">
-                <Form.Label> Procedure </Form.Label>
-                <Form.Control type="area" value={props.content.name} onChange={onChange} required/>
-            </Form.Group>
+        <Form onSubmit={(event) => { event.preventDefault() }}>
+            <Droppable droppableId="form-droppable">
+                {(provided) => (
+                    <div ref={provided.innerRef} {...provided.droppableProps}
+                        style={{ minHeight: '200px', border: '1px solid #ccc', padding: '20px' }}
+                    >
+                        {provided.placeholder}
+                    </div>
+                )}
+            </Droppable>
         </Form>
     )
 }
@@ -348,7 +348,7 @@ export default function ProcedureObject(props) {
             case ProcedureTypes.Pause:
                 return <PauseForm content={content} editProcedureStep={editProcedureStep}/>
             case ProcedureTypes.BlockElement:
-                return <BlockElementForm content={content} editProcedureStep={editProcedureStep}/>
+                return <BlockElementForm content={content}/>
         }
     }
 
@@ -376,7 +376,7 @@ export default function ProcedureObject(props) {
     }
 
     return (
-        <Draggable draggableId={props.id} index={props.index} isDragDisabled={!props.stored}>
+        <Draggable draggableId={props.id} index={props.index} isDragDisabled={!stored}>
             {provided => (
                 <div {...provided.draggableProps} {...provided.dragHandleProps}  ref={provided.innerRef}>
 
