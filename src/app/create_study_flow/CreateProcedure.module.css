@@ -24,7 +24,7 @@
 }
 
 .dropLine {
-    /* Linie beim verschieben */
+    /* Drag & Drop rendered Line */
     height: 2px;
     background-color: #007bff;
 }
@@ -50,7 +50,7 @@
 
 
 .dragHandleBlock {
-    /* Block griff */
+    /* Block cursor */
     cursor: grab;
 }
 .dragHandleBlock:active {
@@ -58,7 +58,7 @@
 }
 
 .dragHandle svg {
-    /* Item griff */
+    /* Drag Handle Design */
     margin: 4px;
     height: 16px;
     fill: black;
@@ -69,12 +69,13 @@
 }
 
 .accordionItem {
+    cursor: auto;
     margin-left: 12px;
     width: 100%;
 }
 
 .wrapper {
-    /* Damit alle Item/Gruppe der Breite angepasst */
+    /* Ensure ProcedureObject width */
     --padding: 8px;
 
     display: flex;
@@ -89,32 +90,33 @@
 }
 
 .group {
-    /* Gruppenelement aussehen */
+    /* block design */
     padding: 0 var(--padding) calc(var(--padding) / 2);
     border: 1px solid #bee0a9;
     border-radius: 4px;
     background-color: rgba(113, 189, 69, 0.1);
 }
 .groupHeader {
-    /* Trash Button anzeigen*/
+    /* design to show trash button */
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 .group.stacked {
-    /* Damit in die Gruppe ziehen gut aussieht */
+    /* drag in block design */
     --color: #71bd45;
 
     box-shadow: 0 0 0 1px var(--color);
     border-color: var(--color);
 }
 .group.ghost {
-    /* Bei Verschiebung */
+    /* drag block */
     border-color: #aed893;
     background-color: #e7f3df;
+    z-index: 1000; /* Ensure it stays on top */
 }
 .heading {
-    /* Überschrift Gruppe */
+    /* Block Heading */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -127,7 +129,7 @@
 }
 
 .item {
-    /* Element aussehen */
+    /* ProcedureObject Design */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -138,12 +140,13 @@
     background-color: white;
 }
 .item.ghost {
-    /* Bei Verschiebung */
+    /* Drag procedureElement */
     background-color: #f6f9fc;
+    z-index: 1000; /* Ensure it stays on top */
 }
 
 .ghost {
-    /* Animation beim clicken von Elementen */
+    /* Preview animation */
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
     width: 100%;
     height: 100%;
@@ -151,6 +154,7 @@
     animation-name: ghostItemVisible;
     animation-duration: 200ms;
     animation-fill-mode: forwards;
+    z-index: 1000; /* Ensure it stays on top */
 }
 @keyframes ghostItemVisible {
     0% {

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useImperativeHandle, forwardRef} from 'react';
 import {Draggable, Droppable} from 'react-beautiful-dnd';
 import {Card, Accordion, useAccordionButton, Form, Row, Button, Col, ListGroup} from "react-bootstrap";
 import {useDispatch} from "react-redux";
@@ -199,7 +199,18 @@ const dotsSVG = (
 )
 // new nested logic -----------------------------------------
 
-export default function ProcedureObject(props) {
+const ProcedureObject = forwardRef((props, ref) => {
+
+    // onclose logic ref from accordion in createProcedure
+    useImperativeHandle(ref, () => ({
+        handleClose() {
+            console.log(`ProcedureObject with ID ${props.id} is closing, call update`);
+            if(updated) {
+                updateContent()
+            }
+        }
+    }))
+
     const dispatch = useDispatch()
 
     const [content, setContent] = useState(props.content)
@@ -241,22 +252,22 @@ export default function ProcedureObject(props) {
                 duration: 4000})
             return
         }
-        if(props.type === ProcedureTypes.TextPage) {
-            await dispatch(createText(content))
-        }
-        else if(props.type === ProcedureTypes.Condition) {
-            await dispatch(createCondition(content))
-        }
-        else if(props.type === ProcedureTypes.Questionnaire) {
-            await dispatch(createQuestionnaire(content))
-        }
-        else if(props.type === ProcedureTypes.Pause) {
-            await dispatch(createPause(content))
-        }
+        // if(props.type === ProcedureTypes.TextPage) {
+        //     await dispatch(createText(content))
+        // }
+        // else if(props.type === ProcedureTypes.Condition) {
+        //     await dispatch(createCondition(content))
+        // }
+        // else if(props.type === ProcedureTypes.Questionnaire) {
+        //     await dispatch(createQuestionnaire(content))
+        // }
+        // else if(props.type === ProcedureTypes.Pause) {
+        //     await dispatch(createPause(content))
+        // }
         setStored(true)
         props.setMessage({type: "success", text: "Procedure-Object created"})
-        props.removeFromNotStored(props.id)
-        await updateProcedureOfType(props.type)
+        // props.removeFromNotStored(props.id)
+        // await updateProcedureOfType(props.type)
     }
 
     const updateContent = async () => {
@@ -264,48 +275,44 @@ export default function ProcedureObject(props) {
             storeContent().then(r => { })
             return
         }
-        if (props.type === ProcedureTypes.TextPage) {
-            await dispatch(updateText({textId: content.id, text: {
-                    "title": content.title,
-                    "body": content.body
-                }}))
-        }
-        else if (props.type === ProcedureTypes.Condition) {
-            await dispatch(updateCondition({conditionId: content.id, condition: {
-                    "name": content.name,
-                    "config": content.config,
-                    "url": content.url
-                }}))
-        }
-        else if (props.type === ProcedureTypes.Questionnaire) {
-            await dispatch(updateQuestionnaire({questionnaireId: content.id, questionnaire: {
-                    "url": content.url,
-                    "system": content.system,
-                    "ext_id": content.ext_id,
-                    "api_url": content.api_url,
-                    "api_username": content.api_username,
-                    "api_password": content.api_password,
-                }}))
-        }
-        else if (props.type === ProcedureTypes.Pause) {
-            await dispatch(updatePause({pauseId: content.id, pause: {
-                    "title": content.title,
-                    "body": content.body,
-                    "proceed_body": content.proceed_body,
-                    "type": content.type,
-                    "config": content.config
-                }}))
-        }
+        // if (props.type === ProcedureTypes.TextPage) {
+        //     await dispatch(updateText({textId: content.id, text: {
+        //             "title": content.title,
+        //             "body": content.body
+        //         }}))
+        // }
+        // else if (props.type === ProcedureTypes.Condition) {
+        //     await dispatch(updateCondition({conditionId: content.id, condition: {
+        //             "name": content.name,
+        //             "config": content.config,
+        //             "url": content.url
+        //         }}))
+        // }
+        // else if (props.type === ProcedureTypes.Questionnaire) {
+        //     await dispatch(updateQuestionnaire({questionnaireId: content.id, questionnaire: {
+        //             "url": content.url,
+        //             "system": content.system,
+        //             "ext_id": content.ext_id,
+        //             "api_url": content.api_url,
+        //             "api_username": content.api_username,
+        //             "api_password": content.api_password,
+        //         }}))
+        // }
+        // else if (props.type === ProcedureTypes.Pause) {
+        //     await dispatch(updatePause({pauseId: content.id, pause: {
+        //             "title": content.title,
+        //             "body": content.body,
+        //             "proceed_body": content.proceed_body,
+        //             "type": content.type,
+        //             "config": content.config
+        //         }}))
+        // }
         setUpdated(false)
         props.setMessage({type: "success", text: "Procedure-Object updated"})
     }
 
-    // new
-    const decoratedOnClick = (id) => {
-        console.log("decoratedOnClick: " + id)
-    }
-
     // old logic -----------------------------------------
+    
     // const decoratedOnClick = useAccordionButton(props.id, (event) => {
     //     event.preventDefault()
     //     if(updated) {
@@ -375,7 +382,7 @@ export default function ProcedureObject(props) {
                 header = !content.name ? procedureType.label : content.name + " - " + procedureType.label
                 break
             case ProcedureTypes.Questionnaire:
-                header = procedureType.label + " - " + props.elemCounter
+                header = procedureType.label
                 break
         }
         if(!stored) {
@@ -392,7 +399,7 @@ export default function ProcedureObject(props) {
             </DragHandleComponent>
 
 
-            <Accordion.Item onClick={() => decoratedOnClick(props.id)} eventKey={props.id} className={styles.accordionItem}>
+            <Accordion.Item eventKey={props.id} className={styles.accordionItem}>
                 <Accordion.Header>{getHeader(props.type, content)}</Accordion.Header>
                 <Accordion.Body>
                     {getForm(props.type, content, editContent)}
@@ -438,4 +445,5 @@ export default function ProcedureObject(props) {
     //         )}
     //     </Draggable>
     // )
-}
+})
+export default ProcedureObject

@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useMemo, useCallback} from "react";
+import React, {useEffect, useState, useMemo, useCallback, useRef} from "react";
 import StudyCreationLayout, {CreationSteps} from "./StudyCreationLayout";
 import {useNavigate, useParams} from "react-router";
 import {Button, Card, Col, Container, ListGroup, Row, Accordion} from "react-bootstrap";
@@ -47,6 +47,10 @@ export default function CreateProcedure() {
 
     // nested state
     const [itemEntitiesMapState, setItemEntitiesMapState] = useState(initialItemEntitiesMap)
+    // Collapse Reference State
+    const [selectedAccordionKey, setSelectedAccordionKey] = useState(null)
+    // reference to ProcedureObject elements
+    const itemRefs = useRef(new Map());
 
     // old logic -----------------------------------------
     const dispatch = useDispatch()
@@ -186,6 +190,8 @@ export default function CreateProcedure() {
                     item.children.forEach(childId => deleteRecursively(childId))
                 }
                 newMap.delete(id)
+                // delete ref from itemRefs
+                itemRefs.current.delete(id)
             }
         }
         deleteRecursively(itemId)
@@ -215,6 +221,13 @@ export default function CreateProcedure() {
 
         // recursive create procedure objects
         const createItemElement = (item, index) => {
+            // Create reference to element
+            let ref = itemRefs.current.get(item.id);
+            if (!ref) {
+                ref = React.createRef();
+                itemRefs.current.set(item.id, ref);
+            }
+
             if (item.children !== undefined) {
                 const childItems = item.children.map((itemId) =>
                     itemEntitiesMapState.get(itemId)
@@ -260,10 +273,12 @@ export default function CreateProcedure() {
                     isUsedCustomDragHandlers
                 >
                     <ProcedureObject
+                        ref={ref}
                         id={item.id}
                         content={item.content}
                         type={item.type}
                         stored={item.stored}
+                        setMessage={setMessage}
                         deleteItem={deleteItem}
                     />
                 </Item>
@@ -318,9 +333,45 @@ export default function CreateProcedure() {
 
     // new nested logic -----------------------------------------
 
+    // update cursor while dragging
+    const toggleCursorStyles = (disable) => {
+        // deactivate pointer events on accordion to show ghost render
+        let elementsWithCursorStyle = document.querySelectorAll('.accordion-header')
+        elementsWithCursorStyle.forEach(element => {
+            if (disable) {
+                element.style.pointerEvents = 'none'
+            } else {
+                element.style.pointerEvents = 'auto'
+            }
+        })
+        // change cursor style on svg and body
+        elementsWithCursorStyle = document.querySelectorAll('svg')
+        elementsWithCursorStyle.forEach(element => {
+            if (disable) {
+                element.style.cursor = 'grabbing'
+            } else {
+                element.style.cursor = 'grab'
+            }
+        });
+        let body = document.querySelector('body')
+        if (disable) {
+            body.style.cursor = 'grabbing'
+        } else {
+            body.style.cursor = 'auto'
+        }
+
+    }
+
+    const onDragStart = () => {
+        // deactivate cursor styles
+        toggleCursorStyles(true)
+    }
+
     // updated nested logic -----------------------------------------
     const onDragEnd = useCallback(
         (meta) => {
+            // activate cursor styles
+            toggleCursorStyles(false)
 
             // Prevent group items from being moved to other group items
             const targetGroupItem = itemEntitiesMapState.get(meta.nextGroupIdentifier ?? rootItemId)
@@ -473,12 +524,33 @@ export default function CreateProcedure() {
     }
     // old logic -----------------------------------------
 
+    
+
+    const onCollapseListener = (eventKey, event) => {
+        // if event key = null => Accordion is closed => current state is last closed Accordion
+        // if event key is not state and both are not null => current state represents last closed Accordion
+        let closedEvent = eventKey === null || (selectedAccordionKey !== eventKey && selectedAccordionKey !== null && eventKey !== null)
+
+        if(closedEvent && selectedAccordionKey !== null){
+            const ref = itemRefs.current.get(selectedAccordionKey);
+            if (ref && ref.current) {
+                ref.current.handleClose();
+            }
+        }
+
+        // check if the selected Accordion is already open
+        const isAlreadyOpen = selectedAccordionKey === eventKey;
+    
+        // update state with selected Accordion key
+        setSelectedAccordionKey(isAlreadyOpen ? null : eventKey);
+    }
+
     return (
         <StudyCreationLayout step={CreationSteps.Procedure}>
             <Container>
 
                 <Row className='mt-3'>
-                    <div style={{ height: message.type === "none" || message.text === "" ? 0 : 50, width: '100%' }}>
+                    <div style={{ height: 50, width: '100%' }}>
                         <ProcedureAlert message={message}/>
                     </div>
                 </Row>
@@ -498,8 +570,13 @@ export default function CreateProcedure() {
                                     renderGhost={renderGhostElement}
                                     renderStackedGroup={renderStackedGroupElement}
                                     onDragEnd={onDragEnd}
+                                    onDragStart={onDragStart}
                                 >
-                                    <Accordion defaultActiveKey="0" flush>
+                                    <Accordion
+                                        onSelect={(eventKey, event) => onCollapseListener(eventKey, event)}
+                                        defaultActiveKey="0"
+                                        flush 
+                                    >
                                         {itemElements}
                                     </Accordion>
                                 </List>
