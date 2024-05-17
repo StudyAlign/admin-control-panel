@@ -1,24 +1,26 @@
-import React, {useEffect, useState, useMemo, useCallback, useRef} from "react";
-import StudyCreationLayout, {CreationSteps} from "./StudyCreationLayout";
-import {useNavigate, useParams} from "react-router";
-import {Button, Card, Col, Container, ListGroup, Row, Accordion} from "react-bootstrap";
-// import {DragDropContext, Droppable} from "react-beautiful-dnd";
-import ProcedureObject, {ProcedureTypes} from "./ProcedureObject";
-import {useDispatch, useSelector} from "react-redux";
-import {getTexts, selectTexts} from "../../redux/reducers/textSlice";
-import {getConditions, selectConditions} from "../../redux/reducers/conditionSlice";
-import {getQuestionnaires, selectQuestionnaires} from "../../redux/reducers/questionnaireSlice";
-import {getPauses, selectPauses} from "../../redux/reducers/pauseSlice";
-import {getStudySetupInfo, selectStudySetupInfo, updateStudy} from "../../redux/reducers/studySlice";
-import ProcedureAlert from "./ProcedureAlert";
-
-// new nested logic -----------------------------------------
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { useNavigate, useParams } from "react-router";
+import { Button, Card, Col, Container, ListGroup, Row, Accordion } from "react-bootstrap";
+import { Trash3 } from "react-bootstrap-icons";
 import { DragHandleComponent, List, Item } from "react-sortful";
+import { useDispatch, useSelector } from "react-redux";
 import arrayMove from "array-move";
 import classnames from "classnames";
+// import {DragDropContext, Droppable} from "react-beautiful-dnd";
+
+import { getTexts, selectTexts } from "../../redux/reducers/textSlice";
+import { getConditions, selectConditions } from "../../redux/reducers/conditionSlice";
+import { getQuestionnaires, selectQuestionnaires } from "../../redux/reducers/questionnaireSlice";
+import { getPauses, selectPauses } from "../../redux/reducers/pauseSlice";
+import { getStudySetupInfo, selectStudySetupInfo, updateStudy } from "../../redux/reducers/studySlice";
+
+import StudyCreationLayout, { CreationSteps } from "./StudyCreationLayout";
+import ProcedureAlert from "./ProcedureAlert";
+import ProcedureObject, { ProcedureTypes } from "./ProcedureObject";
+
 import styles from "./CreateProcedure.module.css";
-import { Trash3 } from "react-bootstrap-icons";
-// import NestedVertical from './NestedVertical.js'
+
+// new nested logic -----------------------------------------
 
 // Root ID
 const rootItemId = 'root'

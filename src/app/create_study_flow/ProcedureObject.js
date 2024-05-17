@@ -1,17 +1,18 @@
-import React, {useState, useImperativeHandle, forwardRef} from 'react';
-import {Draggable, Droppable} from 'react-beautiful-dnd';
-import {Card, Accordion, useAccordionButton, Form, Row, Button, Col, ListGroup} from "react-bootstrap";
-import {useDispatch} from "react-redux";
-import {createText, deleteText, getTexts, updateText} from "../../redux/reducers/textSlice";
-import {createCondition, deleteCondition, getConditions, updateCondition} from "../../redux/reducers/conditionSlice";
-import {createQuestionnaire, deleteQuestionnaire, getQuestionnaires, updateQuestionnaire} from "../../redux/reducers/questionnaireSlice";
-import {createPause, deletePause, getPauses, updatePause} from "../../redux/reducers/pauseSlice";
-import {DeviceSsd, Trash3} from "react-bootstrap-icons";
-// new import
+import React, { useState, useImperativeHandle, forwardRef } from 'react';
 import { DragHandleComponent } from 'react-sortful'
+//import {Draggable, Droppable} from 'react-beautiful-dnd';
+import { Accordion, Form, Button } from "react-bootstrap";
+import { DeviceSsd, Trash3 } from "react-bootstrap-icons";
+//import {Card, Accordion, useAccordionButton, Form, Row, Button, Col, ListGroup} from "react-bootstrap";
+import { useDispatch} from "react-redux";
+
+import { createText, deleteText, getTexts, updateText } from "../../redux/reducers/textSlice";
+import { createCondition, deleteCondition, getConditions, updateCondition } from "../../redux/reducers/conditionSlice";
+import { createQuestionnaire, deleteQuestionnaire, getQuestionnaires, updateQuestionnaire } from "../../redux/reducers/questionnaireSlice";
+import { createPause, deletePause, getPauses, updatePause } from "../../redux/reducers/pauseSlice";
+
 import styles from './CreateProcedure.module.css'
 
-// updated color scheme
 export const ProcedureTypes = {
     TextPage: {
         id: 0,
@@ -185,7 +186,6 @@ function PauseForm(props) {
     )
 }
 
-// new nested logic -----------------------------------------
 // Drag Element for Procedure Object
 const dotsSVG = (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
@@ -197,14 +197,12 @@ const dotsSVG = (
         <circle cx="30" cy="36" r="3" />
     </svg>
 )
-// new nested logic -----------------------------------------
 
 const ProcedureObject = forwardRef((props, ref) => {
 
     // onclose logic ref from accordion in createProcedure
     useImperativeHandle(ref, () => ({
         handleClose() {
-            console.log(`ProcedureObject with ID ${props.id} is closing, call update`);
             if(updated) {
                 updateContent()
             }
@@ -271,8 +269,16 @@ const ProcedureObject = forwardRef((props, ref) => {
     }
 
     const updateContent = async () => {
+        setUpdated(false)
         if (!stored) {
             storeContent().then(r => { })
+            return
+        }
+        if (!contentComplete()) {
+            props.setMessage({
+                type: "danger",
+                text: "There are still some fields missing that need to be filled in!",
+                duration: 4000})
             return
         }
         // if (props.type === ProcedureTypes.TextPage) {
@@ -307,19 +313,10 @@ const ProcedureObject = forwardRef((props, ref) => {
         //             "config": content.config
         //         }}))
         // }
-        setUpdated(false)
         props.setMessage({type: "success", text: "Procedure-Object updated"})
     }
 
     // old logic -----------------------------------------
-    
-    // const decoratedOnClick = useAccordionButton(props.id, (event) => {
-    //     event.preventDefault()
-    //     if(updated) {
-    //         updateContent()
-    //     }
-    // })
-
     const handleDelete = async (event) => {
         event.preventDefault()
         if (!stored) {
@@ -341,6 +338,7 @@ const ProcedureObject = forwardRef((props, ref) => {
         props.setMessage({type: "success", text: "Procedure-Object deleted"})
         await updateProcedureOfType(props.type)
     }
+    // old logic -----------------------------------------
 
     const handleSave = (event) => {
         event.preventDefault()
@@ -348,8 +346,6 @@ const ProcedureObject = forwardRef((props, ref) => {
             updateContent()
         }
     }
-
-    // old logic -----------------------------------------
 
     const editContent = (content_id, value) => {
         let new_content = {...content}
@@ -406,6 +402,9 @@ const ProcedureObject = forwardRef((props, ref) => {
                 </Accordion.Body>
             </Accordion.Item>
 
+            <Button size="sm" onClick={handleSave} disabled={!updated} className={styles.saveButton}>
+                <DeviceSsd/>
+            </Button>
 
             <Button variant="danger" size="sm" onClick={() => props.deleteItem(props.id)} className={styles.deleteButton}>
                 <Trash3 />
