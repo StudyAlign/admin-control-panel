@@ -103,27 +103,27 @@
     width: 100%;
 }
 
-.group {
+.block {
     /* block design */
     padding: 0 var(--padding) calc(var(--padding) / 2);
     border: 1px solid #bee0a9;
     border-radius: 4px;
     background-color: rgba(113, 189, 69, 0.1);
 }
-.groupHeader {
+.blockHeader {
     /* design to show trash button */
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
-.group.stacked {
+.block.stacked {
     /* drag in block design */
     --color: #71bd45;
 
     box-shadow: 0 0 0 1px var(--color);
     border-color: var(--color);
 }
-.group.ghost {
+.block.ghost {
     /* drag block */
     border-color: #aed893;
     background-color: #e7f3df;
@@ -142,7 +142,7 @@
     line-height: 1.4;
 }
 
-.item {
+.procedureElement {
     /* ProcedureObject Design */
     display: flex;
     justify-content: space-between;
@@ -153,7 +153,7 @@
     border-radius: 4px;
     background-color: white;
 }
-.item.ghost {
+.procedureElement.ghost {
     /* Drag procedureElement */
     background-color: #f6f9fc;
     z-index: 1000; /* Ensure it stays on top */

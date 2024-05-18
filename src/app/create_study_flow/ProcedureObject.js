@@ -1,9 +1,7 @@
-import React, { useState, useImperativeHandle, forwardRef } from 'react';
+import React, { useEffect, useState, useImperativeHandle, forwardRef } from 'react';
 import { DragHandleComponent } from 'react-sortful'
-//import {Draggable, Droppable} from 'react-beautiful-dnd';
 import { Accordion, Form, Button } from "react-bootstrap";
 import { DeviceSsd, Trash3 } from "react-bootstrap-icons";
-//import {Card, Accordion, useAccordionButton, Form, Row, Button, Col, ListGroup} from "react-bootstrap";
 import { useDispatch} from "react-redux";
 
 import { createText, deleteText, getTexts, updateText } from "../../redux/reducers/textSlice";
@@ -12,6 +10,12 @@ import { createQuestionnaire, deleteQuestionnaire, getQuestionnaires, updateQues
 import { createPause, deletePause, getPauses, updatePause } from "../../redux/reducers/pauseSlice";
 
 import styles from './CreateProcedure.module.css'
+
+
+
+
+// -------------------------------------------------------------------------------------------------------
+// Sector: ProcedureObject Structure: Start --------------------------------------------------------------
 
 export const ProcedureTypes = {
     TextPage: {
@@ -47,9 +51,18 @@ export const ProcedureTypes = {
         key: "block",
         label: "Block Element",
         color: "rgb(87, 145, 53)",
-        emptyContent: { "children": [], "study_id": -1 }
+        emptyContent: { "study_id": -1 }
     },
 }
+
+// Sector: ProcedureObject Structure: End --------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------------
+
+
+
+
+// -----------------------------------------------------------------------------------------------------------
+// Sector: ProcedureObject content forms: Start --------------------------------------------------------------
 
 function TextPageForm(props) {
 
@@ -198,22 +211,48 @@ const dotsSVG = (
     </svg>
 )
 
+// Sector: ProcedureObject content forms: End --------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------
+
+
+
+
 const ProcedureObject = forwardRef((props, ref) => {
 
-    // onclose logic ref from accordion in createProcedure
-    useImperativeHandle(ref, () => ({
-        handleClose() {
-            if(updated) {
-                updateContent()
-            }
-        }
-    }))
+    
+    
+    
+    // ---------------------------------------------------------------------------------------------------------
+    // Sector: React States and References: Start --------------------------------------------------------------
 
     const dispatch = useDispatch()
 
     const [content, setContent] = useState(props.content)
     const [stored, setStored] = useState(props.stored) // Indicator if ProcedureObject already got stored in backed
     const [updated, setUpdated] = useState(false) // Indicator if the content got updated
+
+    // onclose logic ref from accordion in createProcedure
+    useImperativeHandle(ref, () => ({
+        handleClose() {
+            if (updated) {
+                updateContent()
+            }
+        }
+    }))
+
+    // Update Frontend if stored changed
+    useEffect(() => {
+        props.updateProcedureMap(props.id, content, stored)
+    }, [stored])
+
+    // Sector: React States and References: End --------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------------------
+
+    
+    
+    
+    // -----------------------------------------------------------------------------------------------------------------
+    // Sector: TODO update ProcedureObject backend: Start --------------------------------------------------------------
 
     const contentComplete = () => {
         let required = Object.keys(props.type.emptyContent).filter(k => k !== "study_id")
@@ -316,7 +355,16 @@ const ProcedureObject = forwardRef((props, ref) => {
         props.setMessage({type: "success", text: "Procedure-Object updated"})
     }
 
-    // old logic -----------------------------------------
+    // Sector: TODO update ProcedureObject backend: End --------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------------------------
+
+    
+    
+    
+    // -------------------------------------------------------------------------------------------------------------------
+    // Sector: ProcedureObject FrontEnd interactions: Start --------------------------------------------------------------
+
+    // unused delete logic, may use in CreateProcedure.js
     const handleDelete = async (event) => {
         event.preventDefault()
         if (!stored) {
@@ -338,11 +386,10 @@ const ProcedureObject = forwardRef((props, ref) => {
         props.setMessage({type: "success", text: "Procedure-Object deleted"})
         await updateProcedureOfType(props.type)
     }
-    // old logic -----------------------------------------
 
     const handleSave = (event) => {
         event.preventDefault()
-        if(updated) {
+        if (updated) {
             updateContent()
         }
     }
@@ -387,9 +434,14 @@ const ProcedureObject = forwardRef((props, ref) => {
         return header
     }
 
-    // new return logic
+    // Sector: ProcedureObject FrontEnd interactions: End --------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
+
+    
+    
+    
     return (
-        <div className={styles.item}>
+        <div className={styles.procedureElement}>
             <DragHandleComponent className={styles.dragHandle}>
                 {dotsSVG}
             </DragHandleComponent>
@@ -406,43 +458,11 @@ const ProcedureObject = forwardRef((props, ref) => {
                 <DeviceSsd/>
             </Button>
 
-            <Button variant="danger" size="sm" onClick={() => props.deleteItem(props.id)} className={styles.deleteButton}>
+            <Button variant="danger" size="sm" onClick={() => props.deleteProcedureObject(props.id)} className={styles.deleteButton}>
                 <Trash3 />
             </Button>
 
         </div>
     )
-
-    // Old return logic
-    // return (
-    //     <Draggable draggableId={props.id} index={props.index} isDragDisabled={!stored}>
-    //         {provided => (
-    //             <div {...provided.draggableProps} {...provided.dragHandleProps}  ref={provided.innerRef}>
-
-    //                 <Card className="m-1">
-    //                     <Card.Header onClick={decoratedOnClick}>
-    //                         { getHeader(props.type, content) }
-    //                     </Card.Header>
-
-    //                     <Accordion.Collapse eventKey={props.id}>
-    //                         <Card.Body className="pt-1">
-    //                             <Row className="me-0">
-    //                                 <Col> </Col>
-    //                                 <Col xs="auto" className="p-1">
-    //                                     <Button className="p-1 pt-0 m-0" onClick={handleSave} disabled={!updated}> <DeviceSsd/> </Button>
-    //                                 </Col>
-    //                                 <Col xs="auto" className="p-1">
-    //                                     <Button className="p-1 pt-0 m-0" onClick={handleDelete} variant="danger"> <Trash3/> </Button>
-    //                                 </Col>
-    //                             </Row>
-    //                             { getForm(props.type, content, editContent) }
-    //                         </Card.Body>
-    //                     </Accordion.Collapse>
-    //                 </Card>
-
-    //             </div>
-    //         )}
-    //     </Draggable>
-    // )
 })
 export default ProcedureObject
