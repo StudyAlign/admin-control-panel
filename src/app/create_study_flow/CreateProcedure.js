@@ -11,7 +11,7 @@ import { getTexts, selectTexts } from "../../redux/reducers/textSlice";
 import { getConditions, selectConditions } from "../../redux/reducers/conditionSlice";
 import { getQuestionnaires, selectQuestionnaires } from "../../redux/reducers/questionnaireSlice";
 import { getPauses, selectPauses } from "../../redux/reducers/pauseSlice";
-import { getStudySetupInfo, selectStudySetupInfo, updateStudy } from "../../redux/reducers/studySlice";
+import { getStudySetupInfo, selectStudySetupInfo, updateStudy, getProcedureConfig, selectStudyProcedure } from "../../redux/reducers/studySlice";
 
 import StudyCreationLayout, { CreationSteps } from "./StudyCreationLayout";
 import ProcedureAlert from "./ProcedureAlert";
@@ -32,7 +32,7 @@ const rootMapId = 'root'
 const initialProcedureMap = new Map([
     [
         rootMapId,
-        { id: rootMapId, children: [] },
+        { id: rootMapId, backendId: undefined, children: [] },
     ],
 ])
 
@@ -60,7 +60,7 @@ export default function CreateProcedure() {
     })
 
     // reference to ProcedureObject elements
-    const procedureObjectRefs = useRef(new Map());
+    const procedureObjectRefs = useRef(new Map())
 
     // Sector: React States and References: End --------------------------------------------------------------
     // -------------------------------------------------------------------------------------------------------
@@ -76,15 +76,13 @@ export default function CreateProcedure() {
     const { study_id } = useParams()
     const navigate = useNavigate()
 
-    // unused
-    const [notStoredSteps, setNotStoredSteps] = useState([])
-
     // TODO
     const texts = useSelector(selectTexts)
     const conditions = useSelector(selectConditions)
     const pauses = useSelector(selectPauses)
     const questions = useSelector(selectQuestionnaires)
     const studySetupInfo = useSelector(selectStudySetupInfo)
+    const procedureConfig = useSelector(selectStudyProcedure)
 
     // TODO
     useEffect(  () => {
@@ -93,92 +91,22 @@ export default function CreateProcedure() {
         dispatch(getQuestionnaires(study_id))
         dispatch(getPauses(study_id))
         dispatch(getStudySetupInfo(study_id))
+        dispatch(getProcedureConfig(study_id))
     }, [])
 
-    // TODO
-    let procedure = []
-    if (texts != null && questions != null && pauses != null && conditions != null) {
-        let texts_c = [...texts]
-        let conditions_c = [...conditions]
-        let pauses_c = [...pauses]
-        let questions_c = [...questions]
-
-        if (studySetupInfo.planned_procedure != null) {
-            for (let step of studySetupInfo.planned_procedure) {
-                if (step["text_id"] != null) {
-                    let idx = texts_c.findIndex(obj => {
-                        return obj.id === step["text_id"]
-                    })
-                    if (idx > -1) {
-                        procedure.push({
-                            id: "t" + step["text_id"].toString(),
-                            type: ProcedureTypes.TextPage,
-                            content: texts_c[idx],
-                            stored: true
-                        })
-                        texts_c.splice(idx, 1)
-                    }
-                }
-                else if (step["condition_id"] != null) {
-                    let idx = conditions_c.findIndex(obj => {
-                        return obj.id === step["condition_id"]
-                    })
-                    if (idx > -1) {
-                        procedure.push({
-                            id: "c" + step["condition_id"].toString(),
-                            type: ProcedureTypes.Condition,
-                            content: conditions_c[idx],
-                            stored: true
-                        })
-                        conditions_c.splice(idx, 1)
-                    }
-                }
-                else if (step["questionnaire_id"] != null) {
-                    let idx = questions_c.findIndex(obj => {
-                        return obj.id === step["questionnaire_id"]
-                    })
-                    if (idx > -1) {
-                        procedure.push({
-                            id: "q" + step["questionnaire_id"].toString(),
-                            type: ProcedureTypes.Questionnaire,
-                            content: questions_c[idx],
-                            stored: true
-                        })
-                        questions_c.splice(idx, 1)
-                    }
-                }
-                else if (step["pause_id"] != null) {
-                    let idx = pauses_c.findIndex(obj => {
-                        return obj.id === step["pause_id"]
-                    })
-                    if (idx > -1) {
-                        procedure.push({
-                            id: "p" + step["pause_id"].toString(),
-                            type: ProcedureTypes.Pause,
-                            content: pauses_c[idx],
-                            stored: true
-                        })
-                        pauses_c.splice(idx, 1)
-                    }
-                }
-            }
+    // Set Backend ID to root element
+    const hasRunRef = useRef(false);
+    useEffect(() => {
+        if (procedureConfig != null && !hasRunRef.current) {
+            let newMap = new Map(procedureObjectMapState)
+            newMap.get(rootMapId).backendId = procedureConfig.id
+            setProcedureObjectMapState(newMap)
+            // delete later
+            console.log(procedureConfig)
+            // Mark that the code has run
+            hasRunRef.current = true;
         }
-
-        for (let text of texts_c) {
-            procedure.push({id: "t" + text.id.toString(), type: ProcedureTypes.TextPage, content: text, stored: true})
-        }
-        for (let cond of conditions_c) {
-            procedure.push({id: "c" + cond.id.toString(), type: ProcedureTypes.Condition, content: cond, stored: true})
-        }
-        for (let quest of questions_c) {
-            procedure.push({id: "q" + quest.id.toString(), type: ProcedureTypes.Questionnaire, content: quest, stored: true})
-        }
-        for (let pause of pauses_c) {
-            procedure.push({id: "p" + pause.id.toString(), type: ProcedureTypes.Pause, content: pause, stored: true})
-        }
-
-        procedure.push(...notStoredSteps)
-    }
+    }, [procedureConfig])
 
     // Sector: TODO / Backend: End --------------------------------------------------------------
     // ------------------------------------------------------------------------------------------
@@ -304,10 +232,10 @@ export default function CreateProcedure() {
         // recursive create procedure objects
         const createBlock = (procedureObject, index) => {
             // Create reference to element
-            let ref = procedureObjectRefs.current.get(procedureObject.id);
+            let ref = procedureObjectRefs.current.get(procedureObject.id)
             if (!ref) {
-                ref = React.createRef();
-                procedureObjectRefs.current.set(procedureObject.id, ref);
+                ref = React.createRef()
+                procedureObjectRefs.current.set(procedureObject.id, ref)
             }
 
             if (procedureObject.children !== undefined) {

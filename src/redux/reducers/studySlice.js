@@ -7,6 +7,7 @@ import {
     getStudySetupInfoApi,
     updateStudyApi,
     deleteStudyApi,
+    getProcedureConfigMainApi, // Get Procedure Config
     generateProceduresWithStepsApi,
     generateParticipantsApi,
     populateSurveyParticipantsApi,
@@ -17,6 +18,7 @@ const initialState = {
     studies: null,
     study: null,
     studySetupInfo: null,
+    studyProcedure: null, // Procedure Config State
     api: IDLE,
     error: null,
     status: null,
@@ -114,6 +116,23 @@ export const deleteStudy = createAsyncThunk(
         try {
             const response = await apiWithAuth(deleteStudyApi, studyId, dispatch)
             return response;
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
+// get procedure config
+export const getProcedureConfig = createAsyncThunk(
+    'getProcedureConfig',
+    async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(getProcedureConfigMainApi, studyId, dispatch)
+            return response
         } catch (err) {
             return rejectWithValue(err)
         }
@@ -262,6 +281,21 @@ export const studySlice = createSlice({
                     state.currentRequestId = undefined
                 }
             })
+            // Procedure Config Cases
+            .addCase(getProcedureConfig.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(getProcedureConfig.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                    state.studyProcedure = action.payload.body
+                }
+            })
+            //
             .addCase(generateProceduresWithSteps.pending, (state, action) => {
                 state.api = LOADING
                 state.currentRequestId = action.meta.requestId
@@ -319,6 +353,10 @@ export const selectStudySetupInfo = (state) => {
 
 export const selectStudyApiStatus = (state) => {
     return state.studies.status
+}
+
+export const selectStudyProcedure = (state) => {
+    return state.studies.studyProcedure
 }
 
 export default studySlice.reducer;
