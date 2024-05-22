@@ -8,6 +8,7 @@ import {
     updateStudyApi,
     deleteStudyApi,
     getProcedureConfigMainApi, // Get Procedure Config
+    createSingleProcedureConfigStepApi, // Create Procedure Config Step
     generateProceduresWithStepsApi,
     generateParticipantsApi,
     populateSurveyParticipantsApi,
@@ -115,6 +116,23 @@ export const deleteStudy = createAsyncThunk(
         }
         try {
             const response = await apiWithAuth(deleteStudyApi, studyId, dispatch)
+            return response;
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
+// create procedure config step
+export const createSingleProcedureConfigStep = createAsyncThunk(
+    'createSingleProcedureConfigStep',
+    async (args, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(createSingleProcedureConfigStepApi, args, dispatch)
             return response;
         } catch (err) {
             return rejectWithValue(err)
@@ -293,6 +311,21 @@ export const studySlice = createSlice({
                     state.status = action.payload.status
                     state.currentRequestId = undefined
                     state.studyProcedure = action.payload.body
+                }
+            })
+            //
+            // Add Procedure Config step Cases
+            .addCase(createSingleProcedureConfigStep.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(createSingleProcedureConfigStep.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                    //state.studyProcedure = action.payload.body
                 }
             })
             //

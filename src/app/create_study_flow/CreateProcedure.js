@@ -294,6 +294,8 @@ export default function CreateProcedure() {
                         ref={ref}
                         id={procedureObject.id}
                         backendId={procedureObject.backendId}
+                        rootBackendId={procedureObjectMapState.get(rootMapId).backendId}
+                        counterbalance={procedureObject.counterbalance}
                         content={procedureObject.content}
                         type={procedureObject.type}
                         stored={procedureObject.stored}

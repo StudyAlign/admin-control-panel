@@ -4,6 +4,7 @@ import { Accordion, Form, Button } from "react-bootstrap";
 import { DeviceSsd, Trash3 } from "react-bootstrap-icons";
 import { useDispatch} from "react-redux";
 
+import { createSingleProcedureConfigStep } from "../../redux/reducers/studySlice"
 import { createText, deleteText, getTexts, updateText } from "../../redux/reducers/textSlice";
 import { createCondition, deleteCondition, getConditions, updateCondition } from "../../redux/reducers/conditionSlice";
 import { createQuestionnaire, deleteQuestionnaire, getQuestionnaires, updateQuestionnaire } from "../../redux/reducers/questionnaireSlice";
@@ -274,25 +275,58 @@ const ProcedureObject = forwardRef((props, ref) => {
             return
         }
 
-        // create ProcedureObject in Backend
-        let response = { payload: { status: 400 } }
+        // create ProcedureObject + step in Backend
+        let response_create = { payload: { status: 400 } }
+        let response_step = { payload: { status: 400 } }
         if(props.type === ProcedureTypes.TextPage) {
-            response = await dispatch(createText(content));
+            // create object
+            response_create = await dispatch(createText(content))
+            // create step
+            response_step = await dispatch(createSingleProcedureConfigStep({
+                "procedureConfigId": props.rootBackendId,
+                "procedureConfigStep" : {
+                    "counterbalance" : props.counterbalance,
+                    "text_id" : response_create.payload.body.id
+                }
+            }))
         }
         else if(props.type === ProcedureTypes.Condition) {
-            response = await dispatch(createCondition(content))
+            response_create = await dispatch(createCondition(content))
+            response_step = await dispatch(createSingleProcedureConfigStep({
+                "procedureConfigId": props.rootBackendId,
+                "procedureConfigStep" : {
+                    "counterbalance" : props.counterbalance,
+                    "condition_id" : response_create.payload.body.id
+                }
+            }))
         }
         else if(props.type === ProcedureTypes.Questionnaire) {
-            response = await dispatch(createQuestionnaire(content))
+            response_create = await dispatch(createQuestionnaire(content))
+            response_step = await dispatch(createSingleProcedureConfigStep({
+                "procedureConfigId": props.rootBackendId,
+                "procedureConfigStep" : {
+                    "counterbalance" : props.counterbalance,
+                    "questionnaire_id" : response_create.payload.body.id
+                }
+            }))
         }
         else if(props.type === ProcedureTypes.Pause) {
-            response = await dispatch(createPause(content))
+            response_create = await dispatch(createPause(content))
+            response_step = await dispatch(createSingleProcedureConfigStep({
+                "procedureConfigId": props.rootBackendId,
+                "procedureConfigStep" : {
+                    "counterbalance" : props.counterbalance,
+                    "pause_id" : response_create.payload.body.id
+                }
+            }))
         }
 
+        console.log(response_step)
+
         // if response successful status 200
-        if (response.payload.status === 200) {
+        if (response_create.payload.status === 200) {
             // set backendId
-            setBackendId(response.payload.body.id)
+            setBackendId(response_create.payload.body.id)
             // set stored to update frontend
             setStored(true)
             props.setMessage({ type: "success", text: "Procedure-Object created" })
