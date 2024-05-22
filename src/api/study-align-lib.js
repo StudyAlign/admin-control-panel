@@ -225,8 +225,7 @@ class StudyAlignLib {
             method: "POST",
             path: "procedure-configs/" + procedureConfigId + "/step",
             headers: {},
-            body: procedureConfigStep,
-            formData: true,
+            body: procedureConfigStep
         };
         this.setHeaders(options);
         return this.request(options);
@@ -236,8 +235,7 @@ class StudyAlignLib {
             method: "POST",
             path: "procedure-configs/" + procedureConfigId + "/create-steps",
             headers: {},
-            body: procedureConfigSteps,
-            formData: true,
+            body: procedureConfigSteps
         };
         this.setHeaders(options);
         return this.request(options);

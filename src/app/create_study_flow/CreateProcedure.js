@@ -493,13 +493,13 @@ export default function CreateProcedure() {
                         for(let innerProcedureObject of innerBlockProcedureObjects){
                             if(innerProcedureObject && innerProcedureObject.stored){
                                 let inner_obj = {}
-                                inner_obj[innerProcedureObject.type.key + "_id"] = innerProcedureObject.content
+                                inner_obj[innerProcedureObject.type.key + "_id"] = innerProcedureObject.backendId
                                 inner_procedure.push(inner_obj)
                             }
                         }
                         obj[procedureObject.type.key + "_id"] = inner_procedure
                     }else{
-                        obj[procedureObject.type.key + "_id"] = procedureObject.content
+                        obj[procedureObject.type.key + "_id"] = procedureObject.backendId
                     }
                     planned_procedure.push(obj)
                 }
