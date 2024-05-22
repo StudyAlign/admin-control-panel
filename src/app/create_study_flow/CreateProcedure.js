@@ -102,10 +102,12 @@ export default function CreateProcedure() {
             newMap.get(rootMapId).backendId = procedureConfig.id
             setProcedureObjectMapState(newMap)
             // delete later
-            console.log(procedureConfig)
+            console.log("initial", procedureConfig)
             // Mark that the code has run
             hasRunRef.current = true;
         }
+        // delete later
+        console.log("changed", procedureConfig)
     }, [procedureConfig])
 
     // Sector: TODO / Backend: End --------------------------------------------------------------
@@ -118,12 +120,13 @@ export default function CreateProcedure() {
     // Sector: Modify ProcedureObjectMap: Start --------------------------------------------------------------
 
     // Update ProcedureObject after Input
-    const updateProcedureMap = (id, content, stored) => {
+    const updateProcedureMap = (id, backendId, content, stored) => {
         const newMap = new Map(procedureObjectMapState)
         const procedureObject = newMap.get(id)
         if (procedureObject) {
             procedureObject.content = content
             procedureObject.stored = stored
+            procedureObject.backendId = backendId
         }
         setProcedureObjectMapState(newMap)
     }
@@ -179,13 +182,20 @@ export default function CreateProcedure() {
 
         // Procedure ID depends on current time
         const newId = Date.now()
+        
+        // Set study id
+        let empty_content = procedureType.emptyContent
+        empty_content.study_id = study_id
 
+        // Create new ProcedureObject
         let isBlockElement = procedureType === ProcedureTypes.BlockElement
         const newProcedureObject = {
             id: newId,
             title: procedureType.label + " - " + newId,
             type: procedureType,
-            content: procedureType.emptyContent,
+            backendId: undefined,
+            counterbalance: false,
+            content: empty_content,
             stored: isBlockElement ? true : false,
             children: isBlockElement ? [] : undefined
         }
@@ -283,6 +293,7 @@ export default function CreateProcedure() {
                     <ProcedureObject
                         ref={ref}
                         id={procedureObject.id}
+                        backendId={procedureObject.backendId}
                         content={procedureObject.content}
                         type={procedureObject.type}
                         stored={procedureObject.stored}

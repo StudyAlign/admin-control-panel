@@ -228,6 +228,7 @@ const ProcedureObject = forwardRef((props, ref) => {
     const dispatch = useDispatch()
 
     const [content, setContent] = useState(props.content)
+    const [backendId, setBackendId] = useState(props.backendId) // BackendId of ProcedureObject
     const [stored, setStored] = useState(props.stored) // Indicator if ProcedureObject already got stored in backed
     const [updated, setUpdated] = useState(false) // Indicator if the content got updated
 
@@ -240,10 +241,10 @@ const ProcedureObject = forwardRef((props, ref) => {
         }
     }))
 
-    // Update Frontend if stored changed
+    // Update Frontend if stored, backendId or updated is changed
     useEffect(() => {
-        props.updateProcedureMap(props.id, content, stored)
-    }, [stored])
+        props.updateProcedureMap(props.id, backendId, content, stored)
+    }, [backendId, stored, updated])
 
     // Sector: React States and References: End --------------------------------------------------------------
     // -------------------------------------------------------------------------------------------------------
@@ -264,23 +265,6 @@ const ProcedureObject = forwardRef((props, ref) => {
         return true
     }
 
-    const updateProcedureOfType = async (type) => {
-        const study_id = props.content.study_id
-
-        if (type === ProcedureTypes.TextPage) {
-            await dispatch(getTexts(study_id))
-        }
-        else if (type === ProcedureTypes.Condition) {
-            await dispatch(getConditions(study_id))
-        }
-        else if (type === ProcedureTypes.Questionnaire) {
-            await dispatch(getQuestionnaires(study_id))
-        }
-        else if (type === ProcedureTypes.Pause) {
-            await dispatch(getPauses(study_id))
-        }
-    }
-
     const storeContent = async () => {
         if (!contentComplete()) {
             props.setMessage({
@@ -289,30 +273,42 @@ const ProcedureObject = forwardRef((props, ref) => {
                 duration: 4000})
             return
         }
-        // if(props.type === ProcedureTypes.TextPage) {
-        //     await dispatch(createText(content))
-        // }
-        // else if(props.type === ProcedureTypes.Condition) {
-        //     await dispatch(createCondition(content))
-        // }
-        // else if(props.type === ProcedureTypes.Questionnaire) {
-        //     await dispatch(createQuestionnaire(content))
-        // }
-        // else if(props.type === ProcedureTypes.Pause) {
-        //     await dispatch(createPause(content))
-        // }
-        setStored(true)
-        props.setMessage({type: "success", text: "Procedure-Object created"})
-        // props.removeFromNotStored(props.id)
-        // await updateProcedureOfType(props.type)
+
+        // create ProcedureObject in Backend
+        let response = { payload: { status: 400 } }
+        if(props.type === ProcedureTypes.TextPage) {
+            response = await dispatch(createText(content));
+        }
+        else if(props.type === ProcedureTypes.Condition) {
+            response = await dispatch(createCondition(content))
+        }
+        else if(props.type === ProcedureTypes.Questionnaire) {
+            response = await dispatch(createQuestionnaire(content))
+        }
+        else if(props.type === ProcedureTypes.Pause) {
+            response = await dispatch(createPause(content))
+        }
+
+        // if response successful status 200
+        if (response.payload.status === 200) {
+            // set backendId
+            setBackendId(response.payload.body.id)
+            // set stored to update frontend
+            setStored(true)
+            props.setMessage({ type: "success", text: "Procedure-Object created" })
+        } else {
+            props.setMessage({ type: "danger", text: "Error while creating Procedure-Object" })
+        }
     }
 
     const updateContent = async () => {
         setUpdated(false)
+
         if (!stored) {
             storeContent().then(r => { })
             return
         }
+
         if (!contentComplete()) {
             props.setMessage({
                 type: "danger",
@@ -320,39 +316,47 @@ const ProcedureObject = forwardRef((props, ref) => {
                 duration: 4000})
             return
         }
-        // if (props.type === ProcedureTypes.TextPage) {
-        //     await dispatch(updateText({textId: content.id, text: {
-        //             "title": content.title,
-        //             "body": content.body
-        //         }}))
-        // }
-        // else if (props.type === ProcedureTypes.Condition) {
-        //     await dispatch(updateCondition({conditionId: content.id, condition: {
-        //             "name": content.name,
-        //             "config": content.config,
-        //             "url": content.url
-        //         }}))
-        // }
-        // else if (props.type === ProcedureTypes.Questionnaire) {
-        //     await dispatch(updateQuestionnaire({questionnaireId: content.id, questionnaire: {
-        //             "url": content.url,
-        //             "system": content.system,
-        //             "ext_id": content.ext_id,
-        //             "api_url": content.api_url,
-        //             "api_username": content.api_username,
-        //             "api_password": content.api_password,
-        //         }}))
-        // }
-        // else if (props.type === ProcedureTypes.Pause) {
-        //     await dispatch(updatePause({pauseId: content.id, pause: {
-        //             "title": content.title,
-        //             "body": content.body,
-        //             "proceed_body": content.proceed_body,
-        //             "type": content.type,
-        //             "config": content.config
-        //         }}))
-        // }
-        props.setMessage({type: "success", text: "Procedure-Object updated"})
+
+        // create ProcedureObject in Backend
+        let response = { payload: { status: 400 } }
+        if (props.type === ProcedureTypes.TextPage) {
+            response = await dispatch(updateText({textId: backendId, text: {
+                    "title": content.title,
+                    "body": content.body
+                }}))
+        }
+        else if (props.type === ProcedureTypes.Condition) {
+            response = await dispatch(updateCondition({conditionId: backendId, condition: {
+                    "name": content.name,
+                    "config": content.config,
+                    "url": content.url
+                }}))
+        }
+        else if (props.type === ProcedureTypes.Questionnaire) {
+            response = await dispatch(updateQuestionnaire({questionnaireId: backendId, questionnaire: {
+                    "url": content.url,
+                    "system": content.system,
+                    "ext_id": content.ext_id,
+                    "api_url": content.api_url,
+                    "api_username": content.api_username,
+                    "api_password": content.api_password,
+                }}))
+        }
+        else if (props.type === ProcedureTypes.Pause) {
+            response = await dispatch(updatePause({pauseId: backendId, pause: {
+                    "title": content.title,
+                    "body": content.body,
+                    "proceed_body": content.proceed_body,
+                    "type": content.type,
+                    "config": content.config
+                }}))
+        }
+        // if response successful status 204
+        if (response.payload.status === 204) {
+            props.setMessage({type: "success", text: "Procedure-Object updated"})
+        } else {
+            props.setMessage({ type: "danger", text: "Error while updating Procedure-Object" })
+        }
     }
 
     // Sector: TODO update ProcedureObject backend: End --------------------------------------------------------------
@@ -384,7 +388,7 @@ const ProcedureObject = forwardRef((props, ref) => {
             await dispatch(deletePause(content.id))
         }
         props.setMessage({type: "success", text: "Procedure-Object deleted"})
-        await updateProcedureOfType(props.type)
+        // await updateProcedureOfType(props.type)
     }
 
     const handleSave = (event) => {
