@@ -9,6 +9,7 @@ import {
     deleteStudyApi,
     getProcedureConfigMainApi, // Get Procedure Config
     createSingleProcedureConfigStepApi, // Create Procedure Config Step
+    updateProcedureConfigApi, // Update Procedure Config
     generateProceduresWithStepsApi,
     generateParticipantsApi,
     populateSurveyParticipantsApi,
@@ -151,6 +152,23 @@ export const getProcedureConfig = createAsyncThunk(
         try {
             const response = await apiWithAuth(getProcedureConfigMainApi, studyId, dispatch)
             return response
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
+// update procedure config
+export const updateProcedure = createAsyncThunk(
+    'updateProcedure',
+    async (args, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(updateProcedureConfigApi, args, dispatch)
+            return response;
         } catch (err) {
             return rejectWithValue(err)
         }
@@ -326,6 +344,20 @@ export const studySlice = createSlice({
                     state.status = action.payload.status
                     state.currentRequestId = undefined
                     //state.studyProcedure = action.payload.body
+                }
+            })
+            //
+            // Update Procedure Config Cases
+            .addCase(updateProcedure.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(updateProcedure.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
                 }
             })
             //

@@ -11,7 +11,7 @@ import { getTexts, selectTexts, deleteText } from "../../redux/reducers/textSlic
 import { getConditions, selectConditions, deleteCondition } from "../../redux/reducers/conditionSlice";
 import { getQuestionnaires, selectQuestionnaires, deleteQuestionnaire } from "../../redux/reducers/questionnaireSlice";
 import { getPauses, selectPauses, deletePause } from "../../redux/reducers/pauseSlice";
-import { getStudySetupInfo, selectStudySetupInfo, updateStudy, getProcedureConfig, selectStudyProcedure, createSingleProcedureConfigStep } from "../../redux/reducers/studySlice";
+import { getStudySetupInfo, selectStudySetupInfo, updateStudy, getProcedureConfig, selectStudyProcedure, createSingleProcedureConfigStep, updateProcedure } from "../../redux/reducers/studySlice";
 import { createBlock, deleteBlock } from "../../redux/reducers/blockSlice";
 
 import StudyCreationLayout, { CreationSteps } from "./StudyCreationLayout";
@@ -72,14 +72,12 @@ export default function CreateProcedure() {
     
     
     // --------------------------------------------------------------------------------------------
-    // Sector: TODO / Backend: Start --------------------------------------------------------------
+    // Sector: Backend: Start --------------------------------------------------------------
     
-    // TODO
     const dispatch = useDispatch()
     const { study_id } = useParams()
     const navigate = useNavigate()
 
-    // TODO
     const texts = useSelector(selectTexts)
     const conditions = useSelector(selectConditions)
     const pauses = useSelector(selectPauses)
@@ -87,7 +85,6 @@ export default function CreateProcedure() {
     const studySetupInfo = useSelector(selectStudySetupInfo)
     const procedureConfig = useSelector(selectStudyProcedure)
 
-    // TODO
     useEffect(  () => {
         dispatch(getTexts(study_id))
         dispatch(getConditions(study_id))
@@ -97,6 +94,7 @@ export default function CreateProcedure() {
         dispatch(getProcedureConfig(study_id))
     }, [])
 
+    // After everything is loaded
     useEffect(() => {
         if (!isSetupDone && texts != null && questions != null && pauses != null && conditions != null && procedureConfig != null){
 
@@ -119,6 +117,7 @@ export default function CreateProcedure() {
                         title: undefined,
                         type: undefined,
                         backendId: undefined,
+                        stepId: step["id"],
                         counterbalance: step["counterbalance"],
                         content: undefined,
                         stored: true,
@@ -137,7 +136,7 @@ export default function CreateProcedure() {
                             for(let [key,] of Object.entries(ProcedureTypes.TextPage.emptyContent)){
                                 empty_content[key] = texts_c[idx][key]
                             }
-                            newContent.content = empty_content
+                            newContent.content = JSON.parse(JSON.stringify(empty_content))
                             // push new content
                             procedure.push(newContent)
                             texts_c.splice(idx, 1)
@@ -156,7 +155,7 @@ export default function CreateProcedure() {
                             for(let [key,] of Object.entries(ProcedureTypes.Condition.emptyContent)){
                                 empty_content[key] = conditions_c[idx][key]
                             }
-                            newContent.content = empty_content
+                            newContent.content = JSON.parse(JSON.stringify(empty_content))
                             // push new content
                             procedure.push(newContent)
                             conditions_c.splice(idx, 1)
@@ -175,7 +174,7 @@ export default function CreateProcedure() {
                             for(let [key,] of Object.entries(ProcedureTypes.Questionnaire.emptyContent)){
                                 empty_content[key] = questions_c[idx][key]
                             }
-                            newContent.content = empty_content
+                            newContent.content = JSON.parse(JSON.stringify(empty_content))
                             // push new content
                             procedure.push(newContent)
                             questions_c.splice(idx, 1)
@@ -194,7 +193,7 @@ export default function CreateProcedure() {
                             for(let [key,] of Object.entries(ProcedureTypes.Pause.emptyContent)){
                                 empty_content[key] = pauses_c[idx][key]
                             }
-                            newContent.content = empty_content
+                            newContent.content = JSON.parse(JSON.stringify(empty_content))
                             // push new content
                             procedure.push(newContent)
                             pauses_c.splice(idx, 1)
@@ -208,7 +207,7 @@ export default function CreateProcedure() {
                             newContent.backendId = step["block_id"]
                             let empty_content = ProcedureTypes.BlockElement.emptyContent
                             empty_content.study_id = step["block"]["study_id"]
-                            newContent.content = empty_content
+                            newContent.content = JSON.parse(JSON.stringify(empty_content))
                             newContent.children = step["block"]["procedure_config_steps"]
                             // push new content
                             procedure.push(newContent)
@@ -236,7 +235,16 @@ export default function CreateProcedure() {
         }
     }, [texts, questions, pauses, conditions, procedureConfig, isSetupDone])
 
-    // Sector: TODO / Backend: End --------------------------------------------------------------
+    const updateProcedureBackend = async (config) => {
+        console.log("Update Procedure Backend", config)
+        let response = await dispatch(updateProcedure({
+            "procedureConfigId": procedureObjectMapState.get(rootMapId).backendId,
+            "procedureConfigSteps": config
+        }))
+        console.log("Update Procedure Backend", response)
+    }
+
+    // Sector: Backend: End --------------------------------------------------------------
     // ------------------------------------------------------------------------------------------
 
 
@@ -246,13 +254,14 @@ export default function CreateProcedure() {
     // Sector: Modify ProcedureObjectMap: Start --------------------------------------------------------------
 
     // Update ProcedureObject after Input
-    const updateProcedureMap = (id, backendId, content, stored) => {
+    const updateProcedureMap = (id, backendId, stepId, content, stored) => {
         const newMap = new Map(procedureObjectMapState)
         const procedureObject = newMap.get(id)
         if (procedureObject) {
             procedureObject.content = content
             procedureObject.stored = stored
             procedureObject.backendId = backendId
+            procedureObject.stepId = stepId
         }
         setProcedureObjectMapState(newMap)
     }
@@ -358,6 +367,7 @@ export default function CreateProcedure() {
             title: procedureType.label + " - " + newId,
             type: procedureType,
             backendId: undefined,
+            stepId: undefined,
             counterbalance: false,
             content: empty_content,
             stored: isBlockElement ? true : false,
@@ -372,7 +382,6 @@ export default function CreateProcedure() {
             // create BlockProcedure + step in Backend
             let response_create = { payload: { status: 400 } }
             response_create = await dispatch(createBlock(newProcedureObject.content))
-            console.log("Create Block", response_create)
             let response_step = { payload: { status: 400 } }
             response_step = await dispatch(createSingleProcedureConfigStep({
                 "procedureConfigId": procedureObjectMapState.get(rootMapId).backendId,
@@ -381,10 +390,12 @@ export default function CreateProcedure() {
                     "block_id": response_create.payload.body.id
                 }
             }))
+            console.log("Create Block", response_create, response_step)
             // if response successful status 200
             if (response_create.payload.status === 200 && response_step.payload.status === 200) {
                 // set backendId
                 newProcedureObject.backendId = response_create.payload.body.id
+                newProcedureObject.stepId = response_step.payload.body.id
                 setMessage({ type: "success", text: "Procedure-Object created" })
                 newMap.set(newId, newProcedureObject)
                 rootItem.children.push(newId)
@@ -481,6 +492,7 @@ export default function CreateProcedure() {
                         ref={ref}
                         id={procedureObject.id}
                         backendId={procedureObject.backendId}
+                        stepId={procedureObject.stepId}
                         rootBackendId={procedureObjectMapState.get(rootMapId).backendId}
                         counterbalance={procedureObject.counterbalance}
                         content={procedureObject.content}
@@ -597,9 +609,8 @@ export default function CreateProcedure() {
 
             setProcedureObjectMapState(newMap)
             console.log("DragEnd")
-            console.log(procedureObjectMapState)
-            console.log(getPlannedProcedure())
-            // TODO update backend
+            // update backend
+            updateProcedureBackend(getPlannedProcedure(newMap))
         },
         [procedureObjectMapState]
     )
@@ -665,23 +676,26 @@ export default function CreateProcedure() {
     // ---------------------------------------------------------------------------------------------------
     // Sector: Evaluate ProcedureMap: Start --------------------------------------------------------------
 
-    const getPlannedProcedure = () => {
+    const getPlannedProcedure = (newMap) => {
         let planned_procedure = []
-        const newMap = new Map(procedureObjectMapState)
         const root = newMap.get(rootMapId)
         if (root.children) {
             for (let childId of root.children) {
                 const procedureObject = newMap.get(childId)
                 if (procedureObject && procedureObject.stored) {
                     let obj = {}
-                    obj[procedureObject.type.key + "_id"] = procedureObject.backendId
+                    // set main id
+                    // obj[procedureObject.type.key + "_id"] = procedureObject.backendId
+                    obj["id"] = procedureObject.stepId
                     if(procedureObject.type.key === ProcedureTypes.BlockElement.key){
                         const innerBlockProcedureObjects = procedureObject.children.map((procedureObjectId) => newMap.get(procedureObjectId))
                         let inner_procedure = []
                         for(let innerProcedureObject of innerBlockProcedureObjects){
                             if(innerProcedureObject && innerProcedureObject.stored){
                                 let inner_obj = {}
-                                inner_obj[innerProcedureObject.type.key + "_id"] = innerProcedureObject.backendId
+                                // set child id
+                                // inner_obj[innerProcedureObject.type.key + "_id"] = innerProcedureObject.backendId
+                                inner_obj["id"] = innerProcedureObject.stepId
                                 inner_procedure.push(inner_obj)
                             }
                         }
@@ -691,6 +705,7 @@ export default function CreateProcedure() {
                 }
             }
         }
+        // Convert the array to an object
         return planned_procedure
     }
 
@@ -748,7 +763,7 @@ export default function CreateProcedure() {
     // Navigate currently deactivated
     const handleProceed = async (event) => {
         event.preventDefault()
-        let planned_procedure = getPlannedProcedure()
+        let planned_procedure = getPlannedProcedure(procedureObjectMapState)
         let stillNotStored = getNotStoredSteps()
         // await dispatch(updateStudy({
         //     "studyId": study_id,
@@ -763,6 +778,7 @@ export default function CreateProcedure() {
         console.log("Not Stored Steps", stillNotStored)
         console.log(procedureObjectMapState)
         console.log(planned_procedure)
+        updateProcedureBackend(planned_procedure)
     }
 
     // Sector: Handle leave CreateProcedure Page: End --------------------------------------------------------------

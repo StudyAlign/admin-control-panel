@@ -230,6 +230,7 @@ const ProcedureObject = forwardRef((props, ref) => {
 
     const [content, setContent] = useState(props.content)
     const [backendId, setBackendId] = useState(props.backendId) // BackendId of ProcedureObject
+    const [stepId, setStepId] = useState(props.stepId) // StepId of ProcedureObject
     const [stored, setStored] = useState(props.stored) // Indicator if ProcedureObject already got stored in backed
     const [updated, setUpdated] = useState(false) // Indicator if the content got updated
 
@@ -244,8 +245,8 @@ const ProcedureObject = forwardRef((props, ref) => {
 
     // Update Frontend if stored, backendId or updated is changed
     useEffect(() => {
-        props.updateProcedureMap(props.id, backendId, content, stored)
-    }, [backendId, stored, updated])
+        props.updateProcedureMap(props.id, backendId, stepId, content, stored)
+    }, [backendId, stepId, stored, updated])
 
     // Sector: React States and References: End --------------------------------------------------------------
     // -------------------------------------------------------------------------------------------------------
@@ -325,6 +326,8 @@ const ProcedureObject = forwardRef((props, ref) => {
         if (response_create.payload.status === 200 && response_step.payload.status === 200) {
             // set backendId
             setBackendId(response_create.payload.body.id)
+            // set stepId
+            setStepId(response_step.payload.body.id)
             // set stored to update frontend
             setStored(true)
             props.setMessage({ type: "success", text: "Procedure-Object created" })
