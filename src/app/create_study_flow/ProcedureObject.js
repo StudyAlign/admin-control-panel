@@ -388,6 +388,7 @@ const ProcedureObject = forwardRef((props, ref) => {
             props.setMessage({type: "success", text: "Procedure-Object updated"})
         } else {
             props.setMessage({ type: "danger", text: "Error while updating Procedure-Object" })
+            setUpdated(true)
         }
     }
 
@@ -399,29 +400,6 @@ const ProcedureObject = forwardRef((props, ref) => {
     
     // -------------------------------------------------------------------------------------------------------------------
     // Sector: ProcedureObject FrontEnd interactions: Start --------------------------------------------------------------
-
-    // unused delete logic, may use in CreateProcedure.js
-    const handleDelete = async (event) => {
-        event.preventDefault()
-        if (!stored) {
-            props.removeFromNotStored(props.id)
-            return
-        }
-        if(props.type === ProcedureTypes.TextPage) {
-            await dispatch(deleteText(content.id))
-        }
-        else if (props.type === ProcedureTypes.Condition) {
-            await dispatch(deleteCondition(content.id))
-        }
-        else if (props.type === ProcedureTypes.Questionnaire) {
-            await dispatch(deleteQuestionnaire(content.id))
-        }
-        else if (props.type === ProcedureTypes.Pause) {
-            await dispatch(deletePause(content.id))
-        }
-        props.setMessage({type: "success", text: "Procedure-Object deleted"})
-        // await updateProcedureOfType(props.type)
-    }
 
     const handleSave = (event) => {
         event.preventDefault()

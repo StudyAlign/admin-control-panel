@@ -7,10 +7,10 @@ import { useDispatch, useSelector } from "react-redux";
 import arrayMove from "array-move";
 import classnames from "classnames";
 
-import { getTexts, selectTexts } from "../../redux/reducers/textSlice";
-import { getConditions, selectConditions } from "../../redux/reducers/conditionSlice";
-import { getQuestionnaires, selectQuestionnaires } from "../../redux/reducers/questionnaireSlice";
-import { getPauses, selectPauses } from "../../redux/reducers/pauseSlice";
+import { getTexts, selectTexts, deleteText } from "../../redux/reducers/textSlice";
+import { getConditions, selectConditions, deleteCondition } from "../../redux/reducers/conditionSlice";
+import { getQuestionnaires, selectQuestionnaires, deleteQuestionnaire } from "../../redux/reducers/questionnaireSlice";
+import { getPauses, selectPauses, deletePause } from "../../redux/reducers/pauseSlice";
 import { getStudySetupInfo, selectStudySetupInfo, updateStudy, getProcedureConfig, selectStudyProcedure, createSingleProcedureConfigStep } from "../../redux/reducers/studySlice";
 import { createBlock, deleteBlock } from "../../redux/reducers/blockSlice";
 
@@ -137,38 +137,70 @@ export default function CreateProcedure() {
         const newMap = new Map(procedureObjectMapState)
 
         // delete procedureObject from backend
-        // TODO only delete backEnd if stored
-        // TODO case block element
-        // TODO case procedureObject
-        // TODO only delete frontEnd if backend successfull
-        // TODO show different messages
-         
+        const deleteBackend = async (backendId, type) => {
+            if (backendId) {
+                let response = { payload: { status: 400 } }
+                if (type === ProcedureTypes.BlockElement) {
+                    response = await dispatch(deleteBlock(backendId))
+                } else if (type === ProcedureTypes.TextPage) {
+                    response = await dispatch(deleteText(backendId))
+                }
+                else if (type === ProcedureTypes.Condition) {
+                    response = await dispatch(deleteCondition(backendId))
+                }
+                else if (type === ProcedureTypes.Questionnaire) {
+                    response = await dispatch(deleteQuestionnaire(backendId))
+                }
+                else if (type === ProcedureTypes.Pause) {
+                    response = await dispatch(deletePause(backendId))
+                }
+                // delete later
+                console.log("Delete Backend", response)
+                if (response.payload.status !== 204) {
+                    return false
+                }
+            }
+            return true
+        }
 
         // recursive delete dependent children
-        const deleteRecursively = (id) => {
+        const deleteRecursively = async (id) => {
             const procedureObject = newMap.get(id)
             if (procedureObject) {
                 if (procedureObject.children) {
-                    procedureObject.children.forEach(childId => deleteRecursively(childId))
+                    for (let childId of procedureObject.children) {
+                        await deleteRecursively(childId)
+                    }
                 }
-                newMap.delete(id)
-                // delete ref from procedureObjectRefs
-                procedureObjectRefs.current.delete(id)
+
+                let success = await deleteBackend(procedureObject.backendId, procedureObject.type)
+
+                // Only delete from frontend if deleteBackend was successful
+                if (success) {
+                    newMap.delete(id)
+                    // delete ref from procedureObjectRefs
+                    procedureObjectRefs.current.delete(id)
+
+                    // delete child from superior element
+                    for (let [, value] of newMap) {
+                        if (value.children && value.children.includes(id)) {
+                            value.children = value.children.filter(childId => childId !== id)
+                        }
+                    }
+
+                    // Show success
+                    setMessage({ type: "success", text: "Procedure-Object deleted" })
+                } else {
+                    setMessage({ type: "danger", text: "Error while deleting Procedure-Object" })
+                }
             }
         }
-        deleteRecursively(procedureObjectId)
 
-        // delete child from superior element
-        for (let [, value] of newMap) {
-            if (value.children && value.children.includes(procedureObjectId)) {
-                value.children = value.children.filter(id => id !== procedureObjectId)
-            }
-        }
+        // Wait for deleteRecursively to finish before updating state
+        deleteRecursively(procedureObjectId).then(() => {
+            setProcedureObjectMapState(newMap)
+        })
 
-        setProcedureObjectMapState(newMap)
-
-        // Show success
-        setMessage({type: "success", text: "Procedure-Object deleted"})
     }
 
     // Sector: Modify ProcedureObjectMap: End --------------------------------------------------------------
@@ -207,6 +239,10 @@ export default function CreateProcedure() {
             children: isBlockElement ? [] : undefined
         }
 
+        // Add to list
+        const newMap = new Map(procedureObjectMapState)
+        const rootItem = newMap.get(rootMapId)
+
         if (isBlockElement) {
             // create BlockProcedure + step in Backend
             let response_create = { payload: { status: 400 } }
@@ -225,16 +261,16 @@ export default function CreateProcedure() {
                 // set backendId
                 newProcedureObject.backendId = response_create.payload.body.id
                 setMessage({ type: "success", text: "Procedure-Object created" })
+                newMap.set(newId, newProcedureObject)
+                rootItem.children.push(newId)
             } else {
                 setMessage({ type: "danger", text: "Error while creating Procedure-Object" })
             }
+        } else {
+            newMap.set(newId, newProcedureObject)
+            rootItem.children.push(newId)
         }
 
-        // Add to list
-        const newMap = new Map(procedureObjectMapState)
-        newMap.set(newId, newProcedureObject)
-        const rootItem = newMap.get(rootMapId)
-        rootItem.children.push(newId)
         setProcedureObjectMapState(newMap)
 
         // Activate button again
@@ -513,6 +549,7 @@ export default function CreateProcedure() {
                 const procedureObject = newMap.get(childId)
                 if (procedureObject && procedureObject.stored) {
                     let obj = {}
+                    obj[procedureObject.type.key + "_id"] = procedureObject.backendId
                     if(procedureObject.type.key === ProcedureTypes.BlockElement.key){
                         const innerBlockProcedureObjects = procedureObject.children.map((procedureObjectId) => newMap.get(procedureObjectId))
                         let inner_procedure = []
@@ -523,9 +560,7 @@ export default function CreateProcedure() {
                                 inner_procedure.push(inner_obj)
                             }
                         }
-                        obj[procedureObject.type.key + "_id"] = inner_procedure
-                    }else{
-                        obj[procedureObject.type.key + "_id"] = procedureObject.backendId
+                        obj[procedureObject.type.key] = inner_procedure
                     }
                     planned_procedure.push(obj)
                 }
