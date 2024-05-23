@@ -11,7 +11,8 @@ import { getTexts, selectTexts } from "../../redux/reducers/textSlice";
 import { getConditions, selectConditions } from "../../redux/reducers/conditionSlice";
 import { getQuestionnaires, selectQuestionnaires } from "../../redux/reducers/questionnaireSlice";
 import { getPauses, selectPauses } from "../../redux/reducers/pauseSlice";
-import { getStudySetupInfo, selectStudySetupInfo, updateStudy, getProcedureConfig, selectStudyProcedure } from "../../redux/reducers/studySlice";
+import { getStudySetupInfo, selectStudySetupInfo, updateStudy, getProcedureConfig, selectStudyProcedure, createSingleProcedureConfigStep } from "../../redux/reducers/studySlice";
+import { createBlock, deleteBlock } from "../../redux/reducers/blockSlice";
 
 import StudyCreationLayout, { CreationSteps } from "./StudyCreationLayout";
 import ProcedureAlert from "./ProcedureAlert";
@@ -135,6 +136,14 @@ export default function CreateProcedure() {
     const deleteProcedureObject = (procedureObjectId) => {
         const newMap = new Map(procedureObjectMapState)
 
+        // delete procedureObject from backend
+        // TODO only delete backEnd if stored
+        // TODO case block element
+        // TODO case procedureObject
+        // TODO only delete frontEnd if backend successfull
+        // TODO show different messages
+         
+
         // recursive delete dependent children
         const deleteRecursively = (id) => {
             const procedureObject = newMap.get(id)
@@ -158,8 +167,6 @@ export default function CreateProcedure() {
 
         setProcedureObjectMapState(newMap)
 
-        // TODO: delete from backend
-
         // Show success
         setMessage({type: "success", text: "Procedure-Object deleted"})
     }
@@ -173,7 +180,7 @@ export default function CreateProcedure() {
     // ----------------------------------------------------------------------------------------------------------------
     // Sector: Render and create ProcedureObjects: Start --------------------------------------------------------------
 
-    const createProcedureStep = (event, procedureType) => {
+    const createProcedureStep = async (event, procedureType) => {
         event.preventDefault()
 
         // React Button event => disable, bcause buggy
@@ -201,7 +208,26 @@ export default function CreateProcedure() {
         }
 
         if (isBlockElement) {
-            // TODO add to backend
+            // create BlockProcedure + step in Backend
+            let response_create = { payload: { status: 400 } }
+            response_create = await dispatch(createBlock(newProcedureObject.content))
+            console.log("Create Block", response_create)
+            let response_step = { payload: { status: 400 } }
+            response_step = await dispatch(createSingleProcedureConfigStep({
+                "procedureConfigId": procedureObjectMapState.get(rootMapId).backendId,
+                "procedureConfigStep": {
+                    "counterbalance": newProcedureObject.counterbalance,
+                    "block_id": response_create.payload.body.id
+                }
+            }))
+            // if response successful status 200
+            if (response_create.payload.status === 200 && response_step.payload.status === 200) {
+                // set backendId
+                newProcedureObject.backendId = response_create.payload.body.id
+                setMessage({ type: "success", text: "Procedure-Object created" })
+            } else {
+                setMessage({ type: "danger", text: "Error while creating Procedure-Object" })
+            }
         }
 
         // Add to list

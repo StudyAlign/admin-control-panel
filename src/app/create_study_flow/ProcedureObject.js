@@ -321,10 +321,8 @@ const ProcedureObject = forwardRef((props, ref) => {
             }))
         }
 
-        console.log(response_step)
-
         // if response successful status 200
-        if (response_create.payload.status === 200) {
+        if (response_create.payload.status === 200 && response_step.payload.status === 200) {
             // set backendId
             setBackendId(response_create.payload.body.id)
             // set stored to update frontend
