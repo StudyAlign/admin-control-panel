@@ -54,6 +54,8 @@ export default function CreateProcedure() {
     // States
     const [procedureObjectMapState, setProcedureObjectMapState] = useState(initialProcedureMap) // nested state   
     const [selectedAccordionKey, setSelectedAccordionKey] = useState(null) // Collapse Reference State
+    const [isSetupDone, setIsSetupDone] = useState(false) // Setup State
+
     // Message State
     const [message, setMessage] = useState({
         type: "none", // "success"/"danger"/"warning"/"info"
@@ -95,21 +97,144 @@ export default function CreateProcedure() {
         dispatch(getProcedureConfig(study_id))
     }, [])
 
-    // Set Backend ID to root element
-    const hasRunRef = useRef(false);
     useEffect(() => {
-        if (procedureConfig != null && !hasRunRef.current) {
-            let newMap = new Map(procedureObjectMapState)
-            newMap.get(rootMapId).backendId = procedureConfig.id
+        if (!isSetupDone && texts != null && questions != null && pauses != null && conditions != null && procedureConfig != null){
+
+            // set rootId
+            const newMap = new Map(procedureObjectMapState)
+            const rootItem = newMap.get(rootMapId)
+            rootItem.backendId = procedureConfig.id
+
+            // load saved procedure steps
+            const gatherSteps = (steps) => {
+                let procedure = []
+                let texts_c = [...texts]
+                let conditions_c = [...conditions]
+                let pauses_c = [...pauses]
+                let questions_c = [...questions]
+                for(let step of steps){
+                    // structure obj
+                    let newContent = {
+                        id: undefined,
+                        title: undefined,
+                        type: undefined,
+                        backendId: undefined,
+                        counterbalance: step["counterbalance"],
+                        content: undefined,
+                        stored: true,
+                        children: undefined
+                    }
+                    if (step["text_id"] != null) {
+                        let idx = texts_c.findIndex(obj => {
+                            return obj.id === step["text_id"]
+                        })
+                        if (idx > -1) {
+                            newContent.id = "t" + step["text_id"].toString()
+                            newContent.title = ProcedureTypes.TextPage.label + " - " + newContent.id
+                            newContent.type = ProcedureTypes.TextPage
+                            newContent.backendId = step["text_id"]
+                            let empty_content = ProcedureTypes.TextPage.emptyContent
+                            for(let [key,] of Object.entries(ProcedureTypes.TextPage.emptyContent)){
+                                empty_content[key] = texts_c[idx][key]
+                            }
+                            newContent.content = empty_content
+                            // push new content
+                            procedure.push(newContent)
+                            texts_c.splice(idx, 1)
+                        }
+                    }
+                    else if (step["condition_id"] != null) {
+                        let idx = conditions_c.findIndex(obj => {
+                            return obj.id === step["condition_id"]
+                        })
+                        if (idx > -1) {
+                            newContent.id = "c" + step["condition_id"].toString()
+                            newContent.title = ProcedureTypes.Condition.label + " - " + newContent.id
+                            newContent.type = ProcedureTypes.Condition
+                            newContent.backendId = step["condition_id"]
+                            let empty_content = ProcedureTypes.Condition.emptyContent
+                            for(let [key,] of Object.entries(ProcedureTypes.Condition.emptyContent)){
+                                empty_content[key] = conditions_c[idx][key]
+                            }
+                            newContent.content = empty_content
+                            // push new content
+                            procedure.push(newContent)
+                            conditions_c.splice(idx, 1)
+                        }
+                    }
+                    else if (step["questionnaire_id"] != null) {
+                        let idx = questions_c.findIndex(obj => {
+                            return obj.id === step["questionnaire_id"]
+                        })
+                        if (idx > -1) {
+                            newContent.id = "q" + step["questionnaire_id"].toString()
+                            newContent.title = ProcedureTypes.Questionnaire.label + " - " + newContent.id
+                            newContent.type = ProcedureTypes.Questionnaire
+                            newContent.backendId = step["questionnaire_id"]
+                            let empty_content = ProcedureTypes.Questionnaire.emptyContent
+                            for(let [key,] of Object.entries(ProcedureTypes.Questionnaire.emptyContent)){
+                                empty_content[key] = questions_c[idx][key]
+                            }
+                            newContent.content = empty_content
+                            // push new content
+                            procedure.push(newContent)
+                            questions_c.splice(idx, 1)
+                        }
+                    }
+                    else if (step["pause_id"] != null) {
+                        let idx = pauses_c.findIndex(obj => {
+                            return obj.id === step["pause_id"]
+                        })
+                        if (idx > -1) {
+                            newContent.id = "p" + step["pause_id"].toString()
+                            newContent.title = ProcedureTypes.Pause.label + " - " + newContent.id
+                            newContent.type = ProcedureTypes.Pause
+                            newContent.backendId = step["pause_id"]
+                            let empty_content = ProcedureTypes.Pause.emptyContent
+                            for(let [key,] of Object.entries(ProcedureTypes.Pause.emptyContent)){
+                                empty_content[key] = pauses_c[idx][key]
+                            }
+                            newContent.content = empty_content
+                            // push new content
+                            procedure.push(newContent)
+                            pauses_c.splice(idx, 1)
+                        }
+                    }
+                    else if (step["block_id"] != null) {
+                        if(step["block_id"] > -1){
+                            newContent.id = "b" + step["block_id"].toString()
+                            newContent.title = ProcedureTypes.BlockElement.label + " - " + newContent.id
+                            newContent.type = ProcedureTypes.BlockElement
+                            newContent.backendId = step["block_id"]
+                            let empty_content = ProcedureTypes.BlockElement.emptyContent
+                            empty_content.study_id = step["block"]["study_id"]
+                            newContent.content = empty_content
+                            newContent.children = step["block"]["procedure_config_steps"]
+                            // push new content
+                            procedure.push(newContent)
+                        }
+                    }
+                }
+                return procedure
+            }
+
+            let rootElements = gatherSteps(procedureConfig.procedure_config_steps)
+
+            console.log("Initial Procedure Map", rootElements)
+
+            for(let rootElement of rootElements){
+                newMap.set(rootElement.id, rootElement)
+                rootItem.children.push(rootElement.id)
+            }
+
+            console.log("Initial Procedure Map", newMap)
+
+            // update initial map
             setProcedureObjectMapState(newMap)
-            // delete later
-            console.log("initial", procedureConfig)
-            // Mark that the code has run
-            hasRunRef.current = true;
+            // Set isSetupDone to true after the setup is done
+            setIsSetupDone(true)
         }
-        // delete later
-        console.log("changed", procedureConfig)
-    }, [procedureConfig])
+    }, [texts, questions, pauses, conditions, procedureConfig, isSetupDone])
 
     // Sector: TODO / Backend: End --------------------------------------------------------------
     // ------------------------------------------------------------------------------------------

@@ -39,7 +39,6 @@ export const deleteBlock = createAsyncThunk(
             return
         }
         try {
-            console.log("deleteBlock:", blockId)
             const response = await apiWithAuth(deleteProcedureConfigBlockApi, blockId, dispatch)
             return response;
         } catch (err) {

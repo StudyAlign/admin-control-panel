@@ -123,7 +123,6 @@ export function createProcedureConfigBlockApi(procedureConfigBlock) {
 }
 
 export function deleteProcedureConfigBlockApi(procedureConfigBlockId) {
-    console.log("deleteProcedureConfigBlockApi:", procedureConfigBlockId)
     return sal.deleteProcedureConfigBlock(procedureConfigBlockId);
 }
 
