@@ -111,6 +111,7 @@ export default function CreateProcedure() {
                 let pauses_c = [...pauses]
                 let questions_c = [...questions]
                 for(let step of steps){
+                    console.log("Step", step["id"], ProcedureTypes)
                     // structure obj
                     let newContent = {
                         id: undefined,
@@ -132,7 +133,7 @@ export default function CreateProcedure() {
                             newContent.title = ProcedureTypes.TextPage.label + " - " + newContent.id
                             newContent.type = ProcedureTypes.TextPage
                             newContent.backendId = step["text_id"]
-                            let empty_content = ProcedureTypes.TextPage.emptyContent
+                            let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.TextPage.emptyContent))
                             for(let [key,] of Object.entries(ProcedureTypes.TextPage.emptyContent)){
                                 empty_content[key] = texts_c[idx][key]
                             }
@@ -151,7 +152,7 @@ export default function CreateProcedure() {
                             newContent.title = ProcedureTypes.Condition.label + " - " + newContent.id
                             newContent.type = ProcedureTypes.Condition
                             newContent.backendId = step["condition_id"]
-                            let empty_content = ProcedureTypes.Condition.emptyContent
+                            let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.Condition.emptyContent))
                             for(let [key,] of Object.entries(ProcedureTypes.Condition.emptyContent)){
                                 empty_content[key] = conditions_c[idx][key]
                             }
@@ -170,7 +171,7 @@ export default function CreateProcedure() {
                             newContent.title = ProcedureTypes.Questionnaire.label + " - " + newContent.id
                             newContent.type = ProcedureTypes.Questionnaire
                             newContent.backendId = step["questionnaire_id"]
-                            let empty_content = ProcedureTypes.Questionnaire.emptyContent
+                            let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.Questionnaire.emptyContent))
                             for(let [key,] of Object.entries(ProcedureTypes.Questionnaire.emptyContent)){
                                 empty_content[key] = questions_c[idx][key]
                             }
@@ -189,7 +190,7 @@ export default function CreateProcedure() {
                             newContent.title = ProcedureTypes.Pause.label + " - " + newContent.id
                             newContent.type = ProcedureTypes.Pause
                             newContent.backendId = step["pause_id"]
-                            let empty_content = ProcedureTypes.Pause.emptyContent
+                            let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.Pause.emptyContent))
                             for(let [key,] of Object.entries(ProcedureTypes.Pause.emptyContent)){
                                 empty_content[key] = pauses_c[idx][key]
                             }
@@ -205,10 +206,10 @@ export default function CreateProcedure() {
                             newContent.title = ProcedureTypes.BlockElement.label + " - " + newContent.id
                             newContent.type = ProcedureTypes.BlockElement
                             newContent.backendId = step["block_id"]
-                            let empty_content = ProcedureTypes.BlockElement.emptyContent
+                            let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.BlockElement.emptyContent))
                             empty_content.study_id = step["block"]["study_id"]
                             newContent.content = JSON.parse(JSON.stringify(empty_content))
-                            newContent.children = step["block"]["procedure_config_steps"]
+                            newContent.children = gatherSteps(step["block"]["procedure_config_steps"])
                             // push new content
                             procedure.push(newContent)
                         }
@@ -217,21 +218,46 @@ export default function CreateProcedure() {
                 return procedure
             }
 
+            // get every ProcedureObject and nested children
             let rootElements = gatherSteps(procedureConfig.procedure_config_steps)
 
-            console.log("Initial Procedure Map", rootElements)
+            // extract blockElements and childElements and childIds
+            let blockElements = rootElements.filter(element => element.type === ProcedureTypes.BlockElement)
+            let childElements = []
 
+            for(let blockElement of blockElements){
+                let childrenIds = []
+                for(let childElement of blockElement.children){
+                    childrenIds.push(childElement.id)
+                    childElements.push(childElement)
+                }
+                // replace children with childrenIds
+                blockElement.children = childrenIds
+            }
+
+            // set root ProcedureObjects
             for(let rootElement of rootElements){
-                newMap.set(rootElement.id, rootElement)
+                if(rootElement.type === ProcedureTypes.BlockElement){
+                    // set BlockElement instead of rootElement
+                    newMap.set(rootElement.id, blockElements[0])
+                    blockElements.shift()
+                }else{
+                    newMap.set(rootElement.id, rootElement)
+                }
                 rootItem.children.push(rootElement.id)
             }
 
-            console.log("Initial Procedure Map", newMap)
+            // set all nested ProcedureObjects
+            for(let childElement of childElements){
+                newMap.set(childElement.id, childElement)
+            }
 
             // update initial map
             setProcedureObjectMapState(newMap)
             // Set isSetupDone to true after the setup is done
             setIsSetupDone(true)
+            // Show success
+            setMessage({ type: "success", text: "Procedure is loaded" })
         }
     }, [texts, questions, pauses, conditions, procedureConfig, isSetupDone])
 
@@ -239,7 +265,7 @@ export default function CreateProcedure() {
         console.log("Update Procedure Backend", config)
         let response = await dispatch(updateProcedure({
             "procedureConfigId": procedureObjectMapState.get(rootMapId).backendId,
-            "procedureConfigSteps": config
+            "procedureConfigSteps": { "procedure_config_steps": config }
         }))
         console.log("Update Procedure Backend", response)
     }
@@ -357,7 +383,7 @@ export default function CreateProcedure() {
         const newId = Date.now()
         
         // Set study id
-        let empty_content = procedureType.emptyContent
+        let empty_content = JSON.parse(JSON.stringify(procedureType.emptyContent))
         empty_content.study_id = study_id
 
         // Create new ProcedureObject
@@ -373,6 +399,10 @@ export default function CreateProcedure() {
             stored: isBlockElement ? true : false,
             children: isBlockElement ? [] : undefined
         }
+
+        console.log("Create Procedure Step Type", ProcedureTypes)
+        console.log("Create Procedure Step Type now", procedureType)
+        console.log("Create Procedure Step", newProcedureObject)
 
         // Add to list
         const newMap = new Map(procedureObjectMapState)
@@ -688,6 +718,7 @@ export default function CreateProcedure() {
                     // obj[procedureObject.type.key + "_id"] = procedureObject.backendId
                     obj["id"] = procedureObject.stepId
                     if(procedureObject.type.key === ProcedureTypes.BlockElement.key){
+                        obj[procedureObject.type.key + "_id"] = procedureObject.backendId
                         const innerBlockProcedureObjects = procedureObject.children.map((procedureObjectId) => newMap.get(procedureObjectId))
                         let inner_procedure = []
                         for(let innerProcedureObject of innerBlockProcedureObjects){
