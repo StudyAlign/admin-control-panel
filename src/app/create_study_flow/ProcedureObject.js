@@ -255,7 +255,7 @@ const ProcedureObject = forwardRef((props, ref) => {
     
     
     // -----------------------------------------------------------------------------------------------------------------
-    // Sector: TODO update ProcedureObject backend: Start --------------------------------------------------------------
+    // Sector: update ProcedureObject backend: Start --------------------------------------------------------------
 
     const contentComplete = () => {
         let required = Object.keys(props.type.emptyContent).filter(k => k !== "study_id")
@@ -333,6 +333,7 @@ const ProcedureObject = forwardRef((props, ref) => {
             props.setMessage({ type: "success", text: "Procedure-Object created" })
         } else {
             props.setMessage({ type: "danger", text: "Error while creating Procedure-Object" })
+            setUpdated(true)
         }
     }
 
@@ -395,7 +396,7 @@ const ProcedureObject = forwardRef((props, ref) => {
         }
     }
 
-    // Sector: TODO update ProcedureObject backend: End --------------------------------------------------------------
+    // Sector: update ProcedureObject backend: End --------------------------------------------------------------
     // ---------------------------------------------------------------------------------------------------------------
 
     

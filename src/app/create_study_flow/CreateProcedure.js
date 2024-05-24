@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
-import { Button, Card, Col, Container, Row, Accordion } from "react-bootstrap";
+import { Button, Card, Col, Container, Row, Accordion, Modal } from "react-bootstrap";
 import { Trash3 } from "react-bootstrap-icons";
 import { DragHandleComponent, List, Item } from "react-sortful";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,7 +11,7 @@ import { getTexts, selectTexts, deleteText } from "../../redux/reducers/textSlic
 import { getConditions, selectConditions, deleteCondition } from "../../redux/reducers/conditionSlice";
 import { getQuestionnaires, selectQuestionnaires, deleteQuestionnaire } from "../../redux/reducers/questionnaireSlice";
 import { getPauses, selectPauses, deletePause } from "../../redux/reducers/pauseSlice";
-import { getStudySetupInfo, selectStudySetupInfo, updateStudy, getProcedureConfig, selectStudyProcedure, createSingleProcedureConfigStep, updateProcedure } from "../../redux/reducers/studySlice";
+import { getProcedureConfig, selectStudyProcedure, createSingleProcedureConfigStep, updateProcedure } from "../../redux/reducers/studySlice";
 import { createBlock, deleteBlock } from "../../redux/reducers/blockSlice";
 
 import StudyCreationLayout, { CreationSteps } from "./StudyCreationLayout";
@@ -55,6 +55,7 @@ export default function CreateProcedure() {
     const [procedureObjectMapState, setProcedureObjectMapState] = useState(initialProcedureMap) // nested state   
     const [selectedAccordionKey, setSelectedAccordionKey] = useState(null) // Collapse Reference State
     const [isSetupDone, setIsSetupDone] = useState(false) // Setup State
+    const [showModal, setShowModal] = useState(false) // Modal State
 
     // Message State
     const [message, setMessage] = useState({
@@ -82,7 +83,6 @@ export default function CreateProcedure() {
     const conditions = useSelector(selectConditions)
     const pauses = useSelector(selectPauses)
     const questions = useSelector(selectQuestionnaires)
-    const studySetupInfo = useSelector(selectStudySetupInfo)
     const procedureConfig = useSelector(selectStudyProcedure)
 
     useEffect(  () => {
@@ -90,7 +90,6 @@ export default function CreateProcedure() {
         dispatch(getConditions(study_id))
         dispatch(getQuestionnaires(study_id))
         dispatch(getPauses(study_id))
-        dispatch(getStudySetupInfo(study_id))
         dispatch(getProcedureConfig(study_id))
     }, [])
 
@@ -111,7 +110,6 @@ export default function CreateProcedure() {
                 let pauses_c = [...pauses]
                 let questions_c = [...questions]
                 for(let step of steps){
-                    console.log("Step", step["id"], ProcedureTypes)
                     // structure obj
                     let newContent = {
                         id: undefined,
@@ -262,12 +260,10 @@ export default function CreateProcedure() {
     }, [texts, questions, pauses, conditions, procedureConfig, isSetupDone])
 
     const updateProcedureBackend = async (config) => {
-        console.log("Update Procedure Backend", config)
         let response = await dispatch(updateProcedure({
             "procedureConfigId": procedureObjectMapState.get(rootMapId).backendId,
             "procedureConfigSteps": { "procedure_config_steps": config }
         }))
-        console.log("Update Procedure Backend", response)
     }
 
     // Sector: Backend: End --------------------------------------------------------------
@@ -315,7 +311,6 @@ export default function CreateProcedure() {
                     response = await dispatch(deletePause(backendId))
                 }
                 // delete later
-                console.log("Delete Backend", response)
                 if (response.payload.status !== 204) {
                     return false
                 }
@@ -400,10 +395,6 @@ export default function CreateProcedure() {
             children: isBlockElement ? [] : undefined
         }
 
-        console.log("Create Procedure Step Type", ProcedureTypes)
-        console.log("Create Procedure Step Type now", procedureType)
-        console.log("Create Procedure Step", newProcedureObject)
-
         // Add to list
         const newMap = new Map(procedureObjectMapState)
         const rootItem = newMap.get(rootMapId)
@@ -420,7 +411,6 @@ export default function CreateProcedure() {
                     "block_id": response_create.payload.body.id
                 }
             }))
-            console.log("Create Block", response_create, response_step)
             // if response successful status 200
             if (response_create.payload.status === 200 && response_step.payload.status === 200) {
                 // set backendId
@@ -470,11 +460,9 @@ export default function CreateProcedure() {
         // recursive create procedure objects
         const createBlock = (procedureObject, index) => {
             // Create reference to element
-            let ref = procedureObjectRefs.current.get(procedureObject.id)
-            if (!ref) {
-                ref = React.createRef()
-                procedureObjectRefs.current.set(procedureObject.id, ref)
-            }
+
+            let ref = React.createRef()
+            procedureObjectRefs.current.set(procedureObject.id, ref)
 
             if (procedureObject.children !== undefined) {
                 const childProcedureObjects = procedureObject.children.map((procedureObjectId) => procedureObjectMapState.get(procedureObjectId))
@@ -638,9 +626,9 @@ export default function CreateProcedure() {
             }
 
             setProcedureObjectMapState(newMap)
-            console.log("DragEnd")
             // update backend
             updateProcedureBackend(getPlannedProcedure(newMap))
+            console.log(procedureObjectRefs)
         },
         [procedureObjectMapState]
     )
@@ -794,22 +782,14 @@ export default function CreateProcedure() {
     // Navigate currently deactivated
     const handleProceed = async (event) => {
         event.preventDefault()
-        let planned_procedure = getPlannedProcedure(procedureObjectMapState)
-        let stillNotStored = getNotStoredSteps()
-        // await dispatch(updateStudy({
-        //     "studyId": study_id,
-        //     "study": {
-        //         "planned_procedure": planned_procedure,
-        //         "current_setup_step": "procedure"
-        //     }
-        // }))
-        // await dispatch(getStudySetupInfo(study_id))
-        // navigate("/create/"+study_id+"/integrations")
-        console.log("Proceed to Integrations")
-        console.log("Not Stored Steps", stillNotStored)
-        console.log(procedureObjectMapState)
-        console.log(planned_procedure)
-        updateProcedureBackend(planned_procedure)
+        // save in Backend
+        await updateProcedureBackend(getPlannedProcedure(procedureObjectMapState))
+        // if not stored steps is not empty
+        if (getNotStoredSteps().length > 0) {
+            setShowModal(true)
+        } else {
+            navigate("/create/"+ study_id + "/integrations") 
+        } 
     }
 
     // Sector: Handle leave CreateProcedure Page: End --------------------------------------------------------------
@@ -819,50 +799,71 @@ export default function CreateProcedure() {
 
     
     return (
-        <StudyCreationLayout step={CreationSteps.Procedure}>
-            <Container>
+        <>
+            <StudyCreationLayout step={CreationSteps.Procedure}>
+                <Container>
 
-                <Row className='mt-3'>
-                    <div style={{ height: 50, width: '100%' }}>
-                        <ProcedureAlert message={message}/>
-                    </div>
-                </Row>
+                    <Row className='mt-3'>
+                        <div style={{ height: 50, width: '100%' }}>
+                            <ProcedureAlert message={message} />
+                        </div>
+                    </Row>
 
-                <Row className='mt-3'>
-                    {procedureStepButtons()}
-                </Row>
+                    <Row className='mt-3'>
+                        {procedureStepButtons()}
+                    </Row>
 
-                <Row className='mt-3'>
-                    <Card>
-                        <Card.Header> Procedure Order </Card.Header>
-                        <Card.Body>
-                            <div className={styles.ProcedureOrder}>
-                                <List
-                                    className={styles.wrapper}
-                                    renderDropLine={renderDropLineElement}
-                                    renderGhost={renderGhostElement}
-                                    renderStackedGroup={renderStackedGroupElement}
-                                    onDragEnd={onDragEnd}
-                                    onDragStart={onDragStart}
-                                >
-                                    <Accordion
-                                        onSelect={(eventKey) => onCollapseListener(eventKey)}
-                                        defaultActiveKey="0"
-                                        flush 
+                    <Row className='mt-3'>
+                        <Card>
+                            <Card.Header> Procedure Order </Card.Header>
+                            <Card.Body>
+                                <div className={styles.ProcedureOrder}>
+                                    <List
+                                        className={styles.wrapper}
+                                        renderDropLine={renderDropLineElement}
+                                        renderGhost={renderGhostElement}
+                                        renderStackedGroup={renderStackedGroupElement}
+                                        onDragEnd={onDragEnd}
+                                        onDragStart={onDragStart}
                                     >
-                                        {procedureObjects}
-                                    </Accordion>
-                                </List>
-                            </div>
-                        </Card.Body>
-                    </Card>
-                </Row>
+                                        <Accordion
+                                            onSelect={(eventKey) => onCollapseListener(eventKey)}
+                                            defaultActiveKey="0"
+                                            flush
+                                        >
+                                            {procedureObjects}
+                                        </Accordion>
+                                    </List>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                    </Row>
 
-                <Row className='mt-3'>
-                    <Col> <Button size="lg" onClick={handleProceed}>Save and Proceed</Button> </Col>
-                </Row>
+                    <Row className='mt-3'>
+                        <Col> <Button size="lg" onClick={handleProceed}>Save and Proceed</Button> </Col>
+                    </Row>
 
-            </Container>
-        </StudyCreationLayout>
+                </Container>
+            </StudyCreationLayout>
+
+            <Modal show={showModal}>
+                <Modal.Header>
+                    <Modal.Title> Still Proceed? </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    You have not saved procedure objects
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="success" onClick={() => navigate("/create/"+ study_id + "/integrations") }>
+                        Proceed
+                    </Button>
+                </Modal.Footer>
+
+            </Modal>
+        </>
     )
 }
