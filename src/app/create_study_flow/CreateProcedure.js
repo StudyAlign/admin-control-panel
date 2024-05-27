@@ -11,7 +11,7 @@ import { getTexts, selectTexts, deleteText } from "../../redux/reducers/textSlic
 import { getConditions, selectConditions, deleteCondition } from "../../redux/reducers/conditionSlice";
 import { getQuestionnaires, selectQuestionnaires, deleteQuestionnaire } from "../../redux/reducers/questionnaireSlice";
 import { getPauses, selectPauses, deletePause } from "../../redux/reducers/pauseSlice";
-import { getProcedureConfig, selectStudyProcedure, createSingleProcedureConfigStep, updateProcedure } from "../../redux/reducers/studySlice";
+import { getProcedureConfig, selectStudyProcedure, createSingleProcedureConfigStep, updateProcedure, updateStudy, getStudySetupInfo } from "../../redux/reducers/studySlice";
 import { createBlock, deleteBlock } from "../../redux/reducers/blockSlice";
 
 import StudyCreationLayout, { CreationSteps } from "./StudyCreationLayout";
@@ -264,6 +264,7 @@ export default function CreateProcedure() {
             "procedureConfigId": procedureObjectMapState.get(rootMapId).backendId,
             "procedureConfigSteps": { "procedure_config_steps": config }
         }))
+        // Status
     }
 
     // Sector: Backend: End --------------------------------------------------------------
@@ -286,6 +287,7 @@ export default function CreateProcedure() {
             procedureObject.stepId = stepId
         }
         setProcedureObjectMapState(newMap)
+        //updateProcedureBackend(getPlannedProcedure(newMap))
     }
 
     // Delete ProcedureObject + nested children
@@ -779,6 +781,17 @@ export default function CreateProcedure() {
     // ---------------------------------------------------------------------------------------------------------------
     // Sector: Handle leave CreateProcedure Page: Start --------------------------------------------------------------
 
+    const navigateForward = async () => {
+        await dispatch(updateStudy({
+            "studyId": study_id,
+            "study": {
+                "current_setup_step": "procedure"
+            }
+        }))
+        await dispatch(getStudySetupInfo(study_id))
+        navigate("/create/" + study_id + "/integrations")
+    }
+
     // Navigate currently deactivated
     const handleProceed = async (event) => {
         event.preventDefault()
@@ -788,7 +801,7 @@ export default function CreateProcedure() {
         if (getNotStoredSteps().length > 0) {
             setShowModal(true)
         } else {
-            navigate("/create/"+ study_id + "/integrations") 
+            navigateForward()
         } 
     }
 
@@ -858,7 +871,7 @@ export default function CreateProcedure() {
                         Cancel
                     </Button>
                     <Button
-                        variant="success" onClick={() => navigate("/create/"+ study_id + "/integrations") }>
+                        variant="success" onClick={async () => await navigateForward()}>
                         Proceed
                     </Button>
                 </Modal.Footer>
