@@ -267,6 +267,10 @@ export default function CreateProcedure() {
         // Status
     }
 
+    const updateOnCreate = () => {
+        updateProcedureBackend(getPlannedProcedure(procedureObjectMapState))
+    }
+
     // Sector: Backend: End --------------------------------------------------------------
     // ------------------------------------------------------------------------------------------
 
@@ -287,7 +291,6 @@ export default function CreateProcedure() {
             procedureObject.stepId = stepId
         }
         setProcedureObjectMapState(newMap)
-        //updateProcedureBackend(getPlannedProcedure(newMap))
     }
 
     // Delete ProcedureObject + nested children
@@ -521,6 +524,8 @@ export default function CreateProcedure() {
                         setMessage={setMessage}
                         deleteProcedureObject={deleteProcedureObject}
                         updateProcedureMap={updateProcedureMap}
+                        updateOnCreate={updateOnCreate}
+                        // reloaded={/^[a-zA-Z]/.test(((procedureObject.id).toString()).charAt(0))} // check if reloaded element
                     />
                 </Item>
             )
@@ -628,9 +633,8 @@ export default function CreateProcedure() {
             }
 
             setProcedureObjectMapState(newMap)
-            // update backend
-            updateProcedureBackend(getPlannedProcedure(newMap))
-            console.log(procedureObjectRefs)
+            // update backend if dragged block is stored
+            if (procedureObject.stored) updateProcedureBackend(getPlannedProcedure(newMap))
         },
         [procedureObjectMapState]
     )

@@ -5,10 +5,10 @@ import { DeviceSsd, Trash3 } from "react-bootstrap-icons";
 import { useDispatch} from "react-redux";
 
 import { createSingleProcedureConfigStep } from "../../redux/reducers/studySlice"
-import { createText, deleteText, getTexts, updateText } from "../../redux/reducers/textSlice";
-import { createCondition, deleteCondition, getConditions, updateCondition } from "../../redux/reducers/conditionSlice";
-import { createQuestionnaire, deleteQuestionnaire, getQuestionnaires, updateQuestionnaire } from "../../redux/reducers/questionnaireSlice";
-import { createPause, deletePause, getPauses, updatePause } from "../../redux/reducers/pauseSlice";
+import { createText, updateText } from "../../redux/reducers/textSlice";
+import { createCondition, updateCondition } from "../../redux/reducers/conditionSlice";
+import { createQuestionnaire, updateQuestionnaire } from "../../redux/reducers/questionnaireSlice";
+import { createPause, updatePause } from "../../redux/reducers/pauseSlice";
 
 import styles from './CreateProcedure.module.css'
 
@@ -331,6 +331,8 @@ const ProcedureObject = forwardRef((props, ref) => {
             // set stored to update frontend
             setStored(true)
             props.setMessage({ type: "success", text: "Procedure-Object created" })
+            // update backend
+            props.updateOnCreate()
         } else {
             props.setMessage({ type: "danger", text: "Error while creating Procedure-Object" })
             setUpdated(true)
