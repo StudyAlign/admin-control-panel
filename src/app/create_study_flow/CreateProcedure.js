@@ -363,6 +363,19 @@ export default function CreateProcedure() {
 
     }
 
+    // change counterbalance state
+    const changeCounterbalance = (event, id) => {
+        event.preventDefault()
+        const newMap = new Map(procedureObjectMapState)
+        const procedureObject = newMap.get(id)
+        if (procedureObject) {
+            procedureObject.counterbalance = !procedureObject.counterbalance
+        }
+        setProcedureObjectMapState(newMap)
+        // update backend if stored
+        if (procedureObject.stored) updateProcedureBackend(getPlannedProcedure(newMap))
+    }
+
     // Sector: Modify ProcedureObjectMap: End --------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------
 
@@ -510,7 +523,12 @@ export default function CreateProcedure() {
                                         </Tooltip>
                                     }
                                 >
-                                    <Form.Check type="checkbox" className={styles.checkBox} />
+                                    <Form.Check
+                                        className={styles.checkBox}
+                                        type="checkbox"
+                                        checked={procedureObject.counterbalance}
+                                        onChange={(event) => changeCounterbalance(event, procedureObject.id)}
+                                    />
                                 </OverlayTrigger>
                         </div>
                     </Item>
@@ -550,7 +568,12 @@ export default function CreateProcedure() {
                                     </Tooltip>
                                 }
                             >
-                                <Form.Check type="checkbox" className={styles.checkBox} />
+                                <Form.Check
+                                    className={styles.checkBox}
+                                    type="checkbox"
+                                    checked={procedureObject.counterbalance}
+                                    onChange={(event) => changeCounterbalance(event, procedureObject.id)}
+                                />
                             </OverlayTrigger>
                         }
                     </div>
@@ -736,8 +759,8 @@ export default function CreateProcedure() {
                 if (procedureObject && procedureObject.stored) {
                     let obj = {}
                     // set main id
-                    // obj[procedureObject.type.key + "_id"] = procedureObject.backendId
                     obj["id"] = procedureObject.stepId
+                    obj["counterbalance"] = procedureObject.counterbalance
                     if(procedureObject.type.key === ProcedureTypes.BlockElement.key){
                         obj[procedureObject.type.key + "_id"] = procedureObject.backendId
                         const innerBlockProcedureObjects = procedureObject.children.map((procedureObjectId) => newMap.get(procedureObjectId))
@@ -746,8 +769,8 @@ export default function CreateProcedure() {
                             if(innerProcedureObject && innerProcedureObject.stored){
                                 let inner_obj = {}
                                 // set child id
-                                // inner_obj[innerProcedureObject.type.key + "_id"] = innerProcedureObject.backendId
                                 inner_obj["id"] = innerProcedureObject.stepId
+                                inner_obj["counterbalance"] = false // inside block elements counterbalance is not possible
                                 inner_procedure.push(inner_obj)
                             }
                         }
