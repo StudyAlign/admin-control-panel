@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
-import { Button, Card, Col, Container, Row, Accordion, Modal } from "react-bootstrap";
+import { Button, Card, Col, Container, Row, Accordion, Modal, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Trash3 } from "react-bootstrap-icons";
 import { DragHandleComponent, List, Item } from "react-sortful";
 import { useDispatch, useSelector } from "react-redux";
@@ -463,7 +463,7 @@ export default function CreateProcedure() {
             .children.map((procedureObjectId) => procedureObjectMapState.get(procedureObjectId))
 
         // recursive create procedure objects
-        const createBlock = (procedureObject, index) => {
+        const createBlock = (procedureObject, index, isChild = false) => {
             // Create reference to element
 
             let ref = React.createRef()
@@ -471,7 +471,7 @@ export default function CreateProcedure() {
 
             if (procedureObject.children !== undefined) {
                 const childProcedureObjects = procedureObject.children.map((procedureObjectId) => procedureObjectMapState.get(procedureObjectId))
-                const blockProcedureChildren = childProcedureObjects.map(createBlock)
+                const blockProcedureChildren = childProcedureObjects.map((childProcedureObject, childIndex) => createBlock(childProcedureObject, childIndex, true))
 
                 return (
                     <Item
@@ -481,29 +481,42 @@ export default function CreateProcedure() {
                         isGroup
                         isUsedCustomDragHandlers
                     >
-                        <div className={styles.block}>
-                            <div className={styles.blockHeader}>
-                                <DragHandleComponent className={styles.dragHandleBlock}>
-                                    <div className={styles.heading}>
-                                        {procedureObject.type.label}
-                                    </div>
-                                </DragHandleComponent>
-                                <Button
-                                    className={styles.deleteButton}
-                                    onClick={() => deleteProcedureObject(procedureObject.id)}
-                                    variant="danger"
-                                    size="sm"                                    
-                                >
-                                    <Trash3 />
-                                </Button>
+
+                        <div className={styles.checkBoxOverlay}>
+                            <div className={styles.block}>
+                                <div className={styles.blockHeader}>
+                                    <DragHandleComponent className={styles.dragHandleBlock}>
+                                        <div className={styles.heading}>
+                                            {procedureObject.type.label}
+                                        </div>
+                                    </DragHandleComponent>
+                                    <Button
+                                        className={styles.deleteButton}
+                                        onClick={() => deleteProcedureObject(procedureObject.id)}
+                                        variant="danger"
+                                        size="sm"
+                                    >
+                                        <Trash3 />
+                                    </Button>
+                                </div>
+                                {blockProcedureChildren}
                             </div>
-                            {blockProcedureChildren}
+
+                            <OverlayTrigger
+                                    placement="top"
+                                    overlay={
+                                        <Tooltip id={"tooltip-top"}>
+                                            Counterbalance
+                                        </Tooltip>
+                                    }
+                                >
+                                    <Form.Check type="checkbox" className={styles.checkBox} />
+                                </OverlayTrigger>
                         </div>
                     </Item>
 
                 )
             }
-
             return (
                 <Item
                     key={procedureObject.id}
@@ -511,27 +524,41 @@ export default function CreateProcedure() {
                     index={index}
                     isUsedCustomDragHandlers
                 >
-                    <ProcedureObject
-                        ref={ref}
-                        id={procedureObject.id}
-                        backendId={procedureObject.backendId}
-                        stepId={procedureObject.stepId}
-                        rootBackendId={procedureObjectMapState.get(rootMapId).backendId}
-                        counterbalance={procedureObject.counterbalance}
-                        content={procedureObject.content}
-                        type={procedureObject.type}
-                        stored={procedureObject.stored}
-                        setMessage={setMessage}
-                        deleteProcedureObject={deleteProcedureObject}
-                        updateProcedureMap={updateProcedureMap}
-                        updateOnCreate={updateOnCreate}
+                    <div className={styles.checkBoxOverlay}>
+                        <ProcedureObject
+                            ref={ref}
+                            id={procedureObject.id}
+                            backendId={procedureObject.backendId}
+                            stepId={procedureObject.stepId}
+                            rootBackendId={procedureObjectMapState.get(rootMapId).backendId}
+                            counterbalance={procedureObject.counterbalance}
+                            content={procedureObject.content}
+                            type={procedureObject.type}
+                            stored={procedureObject.stored}
+                            setMessage={setMessage}
+                            deleteProcedureObject={deleteProcedureObject}
+                            updateProcedureMap={updateProcedureMap}
+                            updateOnCreate={updateOnCreate}
                         // reloaded={/^[a-zA-Z]/.test(((procedureObject.id).toString()).charAt(0))} // check if reloaded element
-                    />
+                        />
+                        {true && !isChild &&
+                            <OverlayTrigger
+                                placement="top"
+                                overlay={
+                                    <Tooltip id={"tooltip-top"}>
+                                        Counterbalance
+                                    </Tooltip>
+                                }
+                            >
+                                <Form.Check type="checkbox" className={styles.checkBox} />
+                            </OverlayTrigger>
+                        }
+                    </div>
                 </Item>
             )
         }
 
-        return topLevelProcedureObjects.map(createBlock)
+        return topLevelProcedureObjects.map((procedureObject, index) => createBlock(procedureObject, index))
     }, [procedureObjectMapState])
 
     // Sector: Render and create ProcedureObjects: End --------------------------------------------------------------
