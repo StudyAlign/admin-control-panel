@@ -6,16 +6,19 @@ import {getTexts, selectTexts} from "../../redux/reducers/textSlice";
 import {getConditions, selectConditions} from "../../redux/reducers/conditionSlice";
 import {getPauses, selectPauses} from "../../redux/reducers/pauseSlice";
 import {
+    getProcedureConfig,
     getStudy,
     getStudySetupInfo,
     selectStudy,
     selectStudySetupInfo,
+    selectStudyProcedure,
     updateStudy,
     generateProceduresWithSteps, generateParticipants, populateSurveyParticipants,
 } from "../../redux/reducers/studySlice";
 import {useDispatch, useSelector} from "react-redux";
 import LoadingScreen from "../../components/LoadingScreen";
 import {reformatDate} from "../../components/CommonFunctions";
+import ShowProcedure from "./ShowProcedure";
 
 
 export default function CreateCheck() {
@@ -124,13 +127,7 @@ export default function CreateCheck() {
             <Row className="mt-3"> <hr/> </Row>
             <Row> <h3> Procedure </h3></Row>
             <Row>
-                <ListGroup>
-                    {
-                        studySetupInfo.planned_procedure.map((orderObject, index) => {
-                         return getProcedureStep(orderObject, index)
-                        })
-                    }
-                </ListGroup>
+                <ShowProcedure study_id={study_id} />
             </Row>
             <Row className="mt-3"> <hr/> </Row>
             <Row className='mt-0' xs="auto">

@@ -55,6 +55,7 @@ export default function CreateProcedure() {
     const [procedureObjectMapState, setProcedureObjectMapState] = useState(initialProcedureMap) // nested state   
     const [selectedAccordionKey, setSelectedAccordionKey] = useState(null) // Collapse Reference State
     const [isSetupDone, setIsSetupDone] = useState(false) // Setup State
+    const [isDispatched, setIsDispatched] = useState(false) // Dispatch State
     const [showModal, setShowModal] = useState(false) // Modal State
 
     // Message State
@@ -85,17 +86,22 @@ export default function CreateProcedure() {
     const questions = useSelector(selectQuestionnaires)
     const procedureConfig = useSelector(selectStudyProcedure)
 
-    useEffect(  () => {
-        dispatch(getTexts(study_id))
-        dispatch(getConditions(study_id))
-        dispatch(getQuestionnaires(study_id))
-        dispatch(getPauses(study_id))
-        dispatch(getProcedureConfig(study_id))
+    useEffect(() => {
+        Promise.all([
+            dispatch(getTexts(study_id)),
+            dispatch(getConditions(study_id)),
+            dispatch(getQuestionnaires(study_id)),
+            dispatch(getPauses(study_id)),
+            dispatch(getProcedureConfig(study_id))
+        ]).then(() => {
+            // All dispatch calls are done
+            setIsDispatched(true)
+        })
     }, [])
 
     // After everything is loaded
     useEffect(() => {
-        if (!isSetupDone && texts != null && questions != null && pauses != null && conditions != null && procedureConfig != null){
+        if (isDispatched && !isSetupDone && texts != null && questions != null && pauses != null && conditions != null && procedureConfig != null){
 
             // set rootId
             const newMap = new Map(procedureObjectMapState)
@@ -257,7 +263,7 @@ export default function CreateProcedure() {
             // Show success
             setMessage({ type: "success", text: "Procedure is loaded" })
         }
-    }, [texts, questions, pauses, conditions, procedureConfig, isSetupDone])
+    }, [texts, questions, pauses, conditions, procedureConfig, isSetupDone, isDispatched])
 
     const updateProcedureBackend = async (config) => {
         let response = await dispatch(updateProcedure({
@@ -850,6 +856,7 @@ export default function CreateProcedure() {
     const handleProceed = async (event) => {
         event.preventDefault()
         // save in Backend
+        await dispatch(getProcedureConfig(study_id))
         await updateProcedureBackend(getPlannedProcedure(procedureObjectMapState))
         // if not stored steps is not empty
         if (getNotStoredSteps().length > 0) {
