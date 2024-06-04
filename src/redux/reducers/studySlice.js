@@ -229,6 +229,9 @@ export const studySlice = createSlice({
     initialState,
     reducers: {
         // REDUCERS THAT DO NOT DEPEND ON API CALLS GO HERE
+        resetStudySetupInfo: (state, _action) => {
+            state.studySetupInfo = null
+        },
     },
     extraReducers: (builder) => {
         builder

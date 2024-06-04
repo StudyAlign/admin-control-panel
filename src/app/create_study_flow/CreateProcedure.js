@@ -483,8 +483,9 @@ export default function CreateProcedure() {
 
         // recursive create procedure objects
         const createBlock = (procedureObject, index, isChild = false) => {
-            // Create reference to element
+            if(!procedureObject) return
 
+            // Create reference to element
             let ref = React.createRef()
             procedureObjectRefs.current.set(procedureObject.id, ref)
 
@@ -856,7 +857,6 @@ export default function CreateProcedure() {
     const handleProceed = async (event) => {
         event.preventDefault()
         // save in Backend
-        await dispatch(getProcedureConfig(study_id))
         await updateProcedureBackend(getPlannedProcedure(procedureObjectMapState))
         // if not stored steps is not empty
         if (getNotStoredSteps().length > 0) {

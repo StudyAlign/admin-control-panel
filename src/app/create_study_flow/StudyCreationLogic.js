@@ -1,6 +1,6 @@
 import {useParams} from "react-router";
 import {useDispatch, useSelector} from "react-redux";
-import {getStudySetupInfo, selectStudyApiStatus, selectStudySetupInfo} from "../../redux/reducers/studySlice";
+import {studySlice, getStudySetupInfo, selectStudyApiStatus, selectStudySetupInfo, resetStudySetupInfo} from "../../redux/reducers/studySlice";
 import React, {useEffect} from "react";
 import {Navigate, Outlet, useLocation} from "react-router-dom";
 import LoadingScreen from "../../components/LoadingScreen";
@@ -20,8 +20,12 @@ export default function StudyCreationLogic(props) {
 
     const studySetupInfo = useSelector(selectStudySetupInfo)
     const studyApiStatus = useSelector(selectStudyApiStatus)
+
     useEffect( () => {
-        dispatch(getStudySetupInfo(study_id));
+        dispatch(getStudySetupInfo(study_id))
+        return () => {
+            dispatch(studySlice.actions.resetStudySetupInfo())
+        }
     }, [])
 
     const next_step = (current_step) => {
