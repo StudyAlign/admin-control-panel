@@ -136,13 +136,17 @@ function ShowProdecureObject(props) {
         return header
     }
 
+    const getColor = (procedureType) => {
+        return procedureType.color
+    }
+    
     // Sector: ProcedureObject content forms: End --------------------------------------------------------------
     // ---------------------------------------------------------------------------------------------------------
 
     return (
         <div className={styles.procedureElement}>
             <Accordion.Item eventKey={props.id} className={styles.accordionItem}>
-                <Accordion.Header>{getHeader(props.type, props.content)}</Accordion.Header>
+                <Accordion.Header style={{borderBottom: `1px solid ${getColor(props.type)}`}}>{getHeader(props.type, props.content)}</Accordion.Header>
                 <Accordion.Body>
                     {getForm(props.type, props.content)}
                 </Accordion.Body>
