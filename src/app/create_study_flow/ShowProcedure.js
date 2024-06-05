@@ -3,11 +3,11 @@ import { Accordion, Form } from "react-bootstrap";
 import { List, Item } from "react-sortful";
 import { useDispatch, useSelector } from "react-redux";
 
-import { getTexts, selectTexts } from "../../redux/reducers/textSlice";
-import { getConditions, selectConditions } from "../../redux/reducers/conditionSlice";
-import { getQuestionnaires, selectQuestionnaires } from "../../redux/reducers/questionnaireSlice";
-import { getPauses, selectPauses } from "../../redux/reducers/pauseSlice";
-import { getProcedureConfig, selectStudyProcedure } from "../../redux/reducers/studySlice";
+// import { getTexts, selectTexts } from "../../redux/reducers/textSlice";
+// import { getConditions, selectConditions } from "../../redux/reducers/conditionSlice";
+// import { getQuestionnaires, selectQuestionnaires } from "../../redux/reducers/questionnaireSlice";
+// import { getPauses, selectPauses } from "../../redux/reducers/pauseSlice";
+import { getProcedureConfigOverview, selectStudyProcedureOverview } from "../../redux/reducers/studySlice";
 
 import { ProcedureTypes } from "./ProcedureObject";
 
@@ -155,221 +155,152 @@ function ShowProdecureObject(props) {
     )
 }
 
-// ---------------------------------------------------------------------------------------------------
-// Sector: Initial Procedure Map: Start --------------------------------------------------------------
-
 // Root ID
 const rootMapId = 'root'
 
-// Initial list map
-const initialProcedureMap = new Map([
-    [
-        rootMapId,
-        { id: rootMapId, backendId: undefined, children: [] },
-    ],
-])
-
-// Sector: Initial Procedure Map: End --------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------
-
-
 export default function ShowProcedure(props) {
 
-    const { study_id } = props
-    
-    // ---------------------------------------------------------------------------------------------------------
-    // Sector: React States: Start --------------------------------------------------------------
-
-    // States
-    const [procedureObjectMapState, setProcedureObjectMapState] = useState(initialProcedureMap) // nested state   
-    const [isSetupDone, setIsSetupDone] = useState(false) // Setup State
-    const [isDispatched, setIsDispatched] = useState(false) // Dispatch State
-    const [loading, setLoading] = useState(true)
-
-    // Sector: React States: End --------------------------------------------------------------
-    // ------------------------------------------------------------------------------------------------------
+    const { procedureId } = props
 
     // --------------------------------------------------------------------------------------------
     // Sector: Backend-Calls: Start --------------------------------------------------------------
 
     const dispatch = useDispatch()
 
-    const texts = useSelector(selectTexts)
-    const conditions = useSelector(selectConditions)
-    const pauses = useSelector(selectPauses)
-    const questions = useSelector(selectQuestionnaires)
-    const procedureConfig = useSelector(selectStudyProcedure)
+    const procedureConfigOverview = useSelector(selectStudyProcedureOverview)
 
     useEffect(() => {
-        Promise.all([
-            dispatch(getTexts(study_id)),
-            dispatch(getConditions(study_id)),
-            dispatch(getQuestionnaires(study_id)),
-            dispatch(getPauses(study_id)),
-            dispatch(getProcedureConfig(study_id))
-        ]).then(() => {
-            // All dispatch calls are done
-            setIsDispatched(true)
-        })
+        dispatch(getProcedureConfigOverview(procedureId))
     }, [])
 
-    // After everything is loaded
-    useEffect(() => {
-        if (isDispatched && !isSetupDone && texts != null && questions != null && pauses != null && conditions != null && procedureConfig != null) {
+    // return if not loaded yet
+    if(procedureConfigOverview == null) {
+        return (
+            <div>
+                Loading... (Try refreshing the page if this takes too long)
+            </div>)
+    }
 
-            // set rootId
-            const newMap = new Map(procedureObjectMapState)
-            const rootItem = newMap.get(rootMapId)
-            rootItem.backendId = procedureConfig.id
+    // set rootId
+    const procedureObjectMapState = new Map([
+        [
+            rootMapId,
+            { id: rootMapId, backendId: procedureId, children: [] },
+        ],
+    ])
+    const rootItem = procedureObjectMapState.get(rootMapId)
 
-            // load saved procedure steps
-            const gatherSteps = (steps) => {
-                let procedure = []
-                let texts_c = [...texts]
-                let conditions_c = [...conditions]
-                let pauses_c = [...pauses]
-                let questions_c = [...questions]
-                for (let step of steps) {
-                    // structure obj
-                    let newContent = {
-                        id: undefined,
-                        title: undefined,
-                        type: undefined,
-                        counterbalance: step["counterbalance"],
-                        content: undefined,
-                        children: undefined
-                    }
-                    if (step["text_id"] != null) {
-                        let idx = texts_c.findIndex(obj => {
-                            return obj.id === step["text_id"]
-                        })
-                        if (idx > -1) {
-                            newContent.id = "t" + step["text_id"].toString()
-                            newContent.title = ProcedureTypes.TextPage.label + " - " + newContent.id
-                            newContent.type = ProcedureTypes.TextPage
-                            let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.TextPage.emptyContent))
-                            for (let [key,] of Object.entries(ProcedureTypes.TextPage.emptyContent)) {
-                                empty_content[key] = texts_c[idx][key]
-                            }
-                            newContent.content = JSON.parse(JSON.stringify(empty_content))
-                            // push new content
-                            procedure.push(newContent)
-                            texts_c.splice(idx, 1)
-                        }
-                    }
-                    else if (step["condition_id"] != null) {
-                        let idx = conditions_c.findIndex(obj => {
-                            return obj.id === step["condition_id"]
-                        })
-                        if (idx > -1) {
-                            newContent.id = "c" + step["condition_id"].toString()
-                            newContent.title = ProcedureTypes.Condition.label + " - " + newContent.id
-                            newContent.type = ProcedureTypes.Condition
-                            let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.Condition.emptyContent))
-                            for (let [key,] of Object.entries(ProcedureTypes.Condition.emptyContent)) {
-                                empty_content[key] = conditions_c[idx][key]
-                            }
-                            newContent.content = JSON.parse(JSON.stringify(empty_content))
-                            // push new content
-                            procedure.push(newContent)
-                            conditions_c.splice(idx, 1)
-                        }
-                    }
-                    else if (step["questionnaire_id"] != null) {
-                        let idx = questions_c.findIndex(obj => {
-                            return obj.id === step["questionnaire_id"]
-                        })
-                        if (idx > -1) {
-                            newContent.id = "q" + step["questionnaire_id"].toString()
-                            newContent.title = ProcedureTypes.Questionnaire.label + " - " + newContent.id
-                            newContent.type = ProcedureTypes.Questionnaire
-                            let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.Questionnaire.emptyContent))
-                            for (let [key,] of Object.entries(ProcedureTypes.Questionnaire.emptyContent)) {
-                                empty_content[key] = questions_c[idx][key]
-                            }
-                            newContent.content = JSON.parse(JSON.stringify(empty_content))
-                            // push new content
-                            procedure.push(newContent)
-                            questions_c.splice(idx, 1)
-                        }
-                    }
-                    else if (step["pause_id"] != null) {
-                        let idx = pauses_c.findIndex(obj => {
-                            return obj.id === step["pause_id"]
-                        })
-                        if (idx > -1) {
-                            newContent.id = "p" + step["pause_id"].toString()
-                            newContent.title = ProcedureTypes.Pause.label + " - " + newContent.id
-                            newContent.type = ProcedureTypes.Pause
-                            let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.Pause.emptyContent))
-                            for (let [key,] of Object.entries(ProcedureTypes.Pause.emptyContent)) {
-                                empty_content[key] = pauses_c[idx][key]
-                            }
-                            newContent.content = JSON.parse(JSON.stringify(empty_content))
-                            // push new content
-                            procedure.push(newContent)
-                            pauses_c.splice(idx, 1)
-                        }
-                    }
-                    else if (step["block_id"] != null) {
-                        if (step["block_id"] > -1) {
-                            newContent.id = "b" + step["block_id"].toString()
-                            newContent.title = ProcedureTypes.BlockElement.label + " - " + newContent.id
-                            newContent.type = ProcedureTypes.BlockElement
-                            let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.BlockElement.emptyContent))
-                            empty_content.study_id = step["block"]["study_id"]
-                            newContent.content = JSON.parse(JSON.stringify(empty_content))
-                            newContent.children = gatherSteps(step["block"]["procedure_config_steps"])
-                            // push new content
-                            procedure.push(newContent)
-                        }
-                    }
+    const gatherArray = (steps) => {
+        let procedure = []
+        for (let step of steps) {
+            let newContent = {
+                id: undefined,
+                title: undefined,
+                type: undefined,
+                backendId: undefined,
+                stepId: step["id"],
+                counterbalance: step["counterbalance"],
+                content: undefined,
+                stored: true,
+                children: undefined
+            }
+            if (step["text_id"]) {
+                newContent.id = "t" + step["text_id"].toString()
+                newContent.title = ProcedureTypes.TextPage.label + " - " + newContent.id
+                newContent.type = ProcedureTypes.TextPage
+                newContent.backendId = step["text_id"]
+                let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.TextPage.emptyContent))
+                for (let [key,] of Object.entries(ProcedureTypes.TextPage.emptyContent)) {
+                    empty_content[key] = step["text"][key]
                 }
-                return procedure
-            }
-
-            // get every ProcedureObject and nested children
-            let rootElements = gatherSteps(procedureConfig.procedure_config_steps)
-
-            // extract blockElements and childElements and childIds
-            let blockElements = rootElements.filter(element => element.type === ProcedureTypes.BlockElement)
-            let childElements = []
-
-            for (let blockElement of blockElements) {
-                let childrenIds = []
-                for (let childElement of blockElement.children) {
-                    childrenIds.push(childElement.id)
-                    childElements.push(childElement)
+                newContent.content = JSON.parse(JSON.stringify(empty_content))
+                // push new content
+                procedure.push(newContent)
+            } else if (step["condition_id"]) {
+                newContent.id = "c" + step["condition_id"].toString()
+                newContent.title = ProcedureTypes.Condition.label + " - " + newContent.id
+                newContent.type = ProcedureTypes.Condition
+                newContent.backendId = step["condition_id"]
+                let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.Condition.emptyContent))
+                for (let [key,] of Object.entries(ProcedureTypes.Condition.emptyContent)) {
+                    empty_content[key] = step["condition"][key]
                 }
-                // replace children with childrenIds
-                blockElement.children = childrenIds
-            }
-
-            // set root ProcedureObjects
-            for (let rootElement of rootElements) {
-                if (rootElement.type === ProcedureTypes.BlockElement) {
-                    // set BlockElement instead of rootElement
-                    newMap.set(rootElement.id, blockElements[0])
-                    blockElements.shift()
-                } else {
-                    newMap.set(rootElement.id, rootElement)
+                newContent.content = JSON.parse(JSON.stringify(empty_content))
+                // push new content
+                procedure.push(newContent)
+            } else if (step["questionnaire_id"]) {
+                newContent.id = "q" + step["questionnaire_id"].toString()
+                newContent.title = ProcedureTypes.Questionnaire.label + " - " + newContent.id
+                newContent.type = ProcedureTypes.Questionnaire
+                newContent.backendId = step["questionnaire_id"]
+                let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.Questionnaire.emptyContent))
+                for (let [key,] of Object.entries(ProcedureTypes.Questionnaire.emptyContent)) {
+                    empty_content[key] = step["questionnaire"][key]
                 }
-                rootItem.children.push(rootElement.id)
+                newContent.content = JSON.parse(JSON.stringify(empty_content))
+                // push new content
+                procedure.push(newContent)
+            } else if (step["pause_id"]) {
+                newContent.id = "p" + step["pause_id"].toString()
+                newContent.title = ProcedureTypes.Pause.label + " - " + newContent.id
+                newContent.type = ProcedureTypes.Pause
+                newContent.backendId = step["pause_id"]
+                let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.Pause.emptyContent))
+                for (let [key,] of Object.entries(ProcedureTypes.Pause.emptyContent)) {
+                    empty_content[key] = step["pause"][key]
+                }
+                newContent.content = JSON.parse(JSON.stringify(empty_content))
+                // push new content
+                procedure.push(newContent)
+            } else if (step["block_id"]) {
+                newContent.id = "b" + step["block_id"].toString()
+                newContent.title = ProcedureTypes.BlockElement.label + " - " + newContent.id
+                newContent.type = ProcedureTypes.BlockElement
+                newContent.backendId = step["block_id"]
+                let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.BlockElement.emptyContent))
+                empty_content.study_id = step["block"]["study_id"]
+                newContent.content = JSON.parse(JSON.stringify(empty_content))
+                newContent.children = gatherArray(step["block"]["procedure_config_steps"])
+                // push new content
+                procedure.push(newContent)
             }
-
-            // set all nested ProcedureObjects
-            for (let childElement of childElements) {
-                newMap.set(childElement.id, childElement)
-            }
-
-            // update initial map
-            setProcedureObjectMapState(newMap)
-            // Set isSetupDone to true after the setup is done
-            setIsSetupDone(true)
-            // Set loading to false after setup is done
-            setLoading(false)
         }
-    }, [texts, questions, pauses, conditions, procedureConfig, isSetupDone, isDispatched])
+        return procedure
+    }
+
+    let rootElements = gatherArray(procedureConfigOverview.procedure_config_steps)
+
+    // extract blockElements and childElements and childIds
+    let blockElements = rootElements.filter(element => element.type === ProcedureTypes.BlockElement)
+    let childElements = []
+
+    for (let blockElement of blockElements) {
+        let childrenIds = []
+        for (let childElement of blockElement.children) {
+            childrenIds.push(childElement.id)
+            childElements.push(childElement)
+        }
+        // replace children with childrenIds
+        blockElement.children = childrenIds
+    }
+
+    // set root ProcedureObjects
+    for (let rootElement of rootElements) {
+        if (rootElement.type === ProcedureTypes.BlockElement) {
+            // set BlockElement instead of rootElement
+            procedureObjectMapState.set(rootElement.id, blockElements[0])
+            blockElements.shift()
+        } else {
+            procedureObjectMapState.set(rootElement.id, rootElement)
+        }
+        rootItem.children.push(rootElement.id)
+    }
+
+    // set all nested ProcedureObjects
+    for (let childElement of childElements) {
+        procedureObjectMapState.set(childElement.id, childElement)
+    }
+
 
     // Sector: Backend-Calls: End --------------------------------------------------------------
     // -----------------------------------------------------------------------------------------
@@ -378,7 +309,7 @@ export default function ShowProcedure(props) {
     // ----------------------------------------------------------------------------------------------------------------
     // Sector: Render ProcedureObjects: Start --------------------------------------------------------------
 
-    const procedureObjects = useMemo(() => {
+    const procedureObjects = () => {
 
         // Get top level procudure objects
         const topLevelProcedureObjects = procedureObjectMapState
@@ -450,7 +381,7 @@ export default function ShowProcedure(props) {
         }
 
         return topLevelProcedureObjects.map((procedureObject, index) => createBlock(procedureObject, index))
-    }, [procedureObjectMapState])
+    }
 
     // Sector: Render ProcedureObjects: End --------------------------------------------------------------
     // --------------------------------------------------------------------------------------------------------------
@@ -462,14 +393,7 @@ export default function ShowProcedure(props) {
             style={injectedProps.style}
         />
     )
-    
-    if(loading) {
-        return (
-            <div>
-                Loading... (Try refreshing the page if this takes too long)
-            </div>)
-    }
-    
+
     return (
         <div className={styles.ProcedureOrder}>
             <List
@@ -481,7 +405,7 @@ export default function ShowProcedure(props) {
                     defaultActiveKey="0"
                     flush
                 >
-                    {procedureObjects}
+                    {procedureObjects()}
                 </Accordion>
             </List>
         </div>

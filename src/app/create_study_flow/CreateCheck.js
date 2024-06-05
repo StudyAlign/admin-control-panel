@@ -31,6 +31,7 @@ export default function CreateCheck() {
     const texts = useSelector(selectTexts)
     const conditions = useSelector(selectConditions)
     const pauses = useSelector(selectPauses)
+    const procedureConfig = useSelector(selectStudyProcedure)
 
     useEffect(  () => {
         dispatch(getStudy(study_id)).then(() => {
@@ -39,6 +40,7 @@ export default function CreateCheck() {
         dispatch(getTexts(study_id))
         dispatch(getConditions(study_id))
         dispatch(getPauses(study_id))
+        dispatch(getProcedureConfig(study_id))
     }, [])
 
     if (study == null || studySetupInfo == null
@@ -127,7 +129,7 @@ export default function CreateCheck() {
             <Row className="mt-3"> <hr/> </Row>
             <Row> <h3> Procedure </h3></Row>
             <Row>
-                <ShowProcedure study_id={study_id} />
+                <ShowProcedure procedureId={procedureConfig.id} />
             </Row>
             <Row className="mt-3"> <hr/> </Row>
             <Row className='mt-0' xs="auto">
