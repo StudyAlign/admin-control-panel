@@ -214,6 +214,9 @@ class StudyAlignLib {
     getProcedureConfig(procedureConfigId) {
         return this.basicRead("procedure-configs/" + procedureConfigId);
     }
+    getProcedureConfigOverview(procedureConfigId) {
+        return this.basicRead("procedure-configs/" + procedureConfigId + "/overview");
+    }
     createProcedureConfigBlock(block) {
         return this.basicCreate("procedure-configs/block", block);
     }

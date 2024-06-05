@@ -7,11 +7,11 @@ import { useDispatch, useSelector } from "react-redux";
 import arrayMove from "array-move";
 import classnames from "classnames";
 
-import { getTexts, selectTexts, deleteText } from "../../redux/reducers/textSlice";
-import { getConditions, selectConditions, deleteCondition } from "../../redux/reducers/conditionSlice";
-import { getQuestionnaires, selectQuestionnaires, deleteQuestionnaire } from "../../redux/reducers/questionnaireSlice";
-import { getPauses, selectPauses, deletePause } from "../../redux/reducers/pauseSlice";
-import { getProcedureConfig, selectStudyProcedure, createSingleProcedureConfigStep, updateProcedure, updateStudy, getStudySetupInfo } from "../../redux/reducers/studySlice";
+import { deleteText } from "../../redux/reducers/textSlice";
+import { deleteCondition } from "../../redux/reducers/conditionSlice";
+import { deleteQuestionnaire } from "../../redux/reducers/questionnaireSlice";
+import { deletePause } from "../../redux/reducers/pauseSlice";
+import { studySlice, getProcedureConfig, selectStudyProcedure, createSingleProcedureConfigStep, updateProcedure, updateStudy, getStudySetupInfo, getProcedureConfigOverview, selectStudyProcedureOverview } from "../../redux/reducers/studySlice";
 import { createBlock, deleteBlock } from "../../redux/reducers/blockSlice";
 
 import StudyCreationLayout, { CreationSteps } from "./StudyCreationLayout";
@@ -80,43 +80,27 @@ export default function CreateProcedure() {
     const { study_id } = useParams()
     const navigate = useNavigate()
 
-    const texts = useSelector(selectTexts)
-    const conditions = useSelector(selectConditions)
-    const pauses = useSelector(selectPauses)
-    const questions = useSelector(selectQuestionnaires)
     const procedureConfig = useSelector(selectStudyProcedure)
+    const procedureConfigOverview = useSelector(selectStudyProcedureOverview)
 
     useEffect(() => {
         Promise.all([
-            dispatch(getTexts(study_id)),
-            dispatch(getConditions(study_id)),
-            dispatch(getQuestionnaires(study_id)),
-            dispatch(getPauses(study_id)),
             dispatch(getProcedureConfig(study_id))
         ]).then(() => {
-            // All dispatch calls are done
             setIsDispatched(true)
         })
     }, [])
 
-    // After everything is loaded
     useEffect(() => {
-        if (isDispatched && !isSetupDone && texts != null && questions != null && pauses != null && conditions != null && procedureConfig != null){
-
+        if (!isSetupDone && procedureConfigOverview != null) {
             // set rootId
             const newMap = new Map(procedureObjectMapState)
             const rootItem = newMap.get(rootMapId)
             rootItem.backendId = procedureConfig.id
 
-            // load saved procedure steps
-            const gatherSteps = (steps) => {
+            const gatherArray = (steps) => {
                 let procedure = []
-                let texts_c = [...texts]
-                let conditions_c = [...conditions]
-                let pauses_c = [...pauses]
-                let questions_c = [...questions]
-                for(let step of steps){
-                    // structure obj
+                for (let step of steps) {
                     let newContent = {
                         id: undefined,
                         title: undefined,
@@ -128,110 +112,79 @@ export default function CreateProcedure() {
                         stored: true,
                         children: undefined
                     }
-                    if (step["text_id"] != null) {
-                        let idx = texts_c.findIndex(obj => {
-                            return obj.id === step["text_id"]
-                        })
-                        if (idx > -1) {
-                            newContent.id = "t" + step["text_id"].toString()
-                            newContent.title = ProcedureTypes.TextPage.label + " - " + newContent.id
-                            newContent.type = ProcedureTypes.TextPage
-                            newContent.backendId = step["text_id"]
-                            let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.TextPage.emptyContent))
-                            for(let [key,] of Object.entries(ProcedureTypes.TextPage.emptyContent)){
-                                empty_content[key] = texts_c[idx][key]
-                            }
-                            newContent.content = JSON.parse(JSON.stringify(empty_content))
-                            // push new content
-                            procedure.push(newContent)
-                            texts_c.splice(idx, 1)
+                    if (step["text_id"]) {
+                        newContent.id = "t" + step["text_id"].toString()
+                        newContent.title = ProcedureTypes.TextPage.label + " - " + newContent.id
+                        newContent.type = ProcedureTypes.TextPage
+                        newContent.backendId = step["text_id"]
+                        let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.TextPage.emptyContent))
+                        for (let [key,] of Object.entries(ProcedureTypes.TextPage.emptyContent)) {
+                            empty_content[key] = step["text"][key]
                         }
-                    }
-                    else if (step["condition_id"] != null) {
-                        let idx = conditions_c.findIndex(obj => {
-                            return obj.id === step["condition_id"]
-                        })
-                        if (idx > -1) {
-                            newContent.id = "c" + step["condition_id"].toString()
-                            newContent.title = ProcedureTypes.Condition.label + " - " + newContent.id
-                            newContent.type = ProcedureTypes.Condition
-                            newContent.backendId = step["condition_id"]
-                            let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.Condition.emptyContent))
-                            for(let [key,] of Object.entries(ProcedureTypes.Condition.emptyContent)){
-                                empty_content[key] = conditions_c[idx][key]
-                            }
-                            newContent.content = JSON.parse(JSON.stringify(empty_content))
-                            // push new content
-                            procedure.push(newContent)
-                            conditions_c.splice(idx, 1)
+                        newContent.content = JSON.parse(JSON.stringify(empty_content))
+                        // push new content
+                        procedure.push(newContent)
+                    } else if (step["condition_id"]) {
+                        newContent.id = "c" + step["condition_id"].toString()
+                        newContent.title = ProcedureTypes.Condition.label + " - " + newContent.id
+                        newContent.type = ProcedureTypes.Condition
+                        newContent.backendId = step["condition_id"]
+                        let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.Condition.emptyContent))
+                        for (let [key,] of Object.entries(ProcedureTypes.Condition.emptyContent)) {
+                            empty_content[key] = step["condition"][key]
                         }
-                    }
-                    else if (step["questionnaire_id"] != null) {
-                        let idx = questions_c.findIndex(obj => {
-                            return obj.id === step["questionnaire_id"]
-                        })
-                        if (idx > -1) {
-                            newContent.id = "q" + step["questionnaire_id"].toString()
-                            newContent.title = ProcedureTypes.Questionnaire.label + " - " + newContent.id
-                            newContent.type = ProcedureTypes.Questionnaire
-                            newContent.backendId = step["questionnaire_id"]
-                            let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.Questionnaire.emptyContent))
-                            for(let [key,] of Object.entries(ProcedureTypes.Questionnaire.emptyContent)){
-                                empty_content[key] = questions_c[idx][key]
-                            }
-                            newContent.content = JSON.parse(JSON.stringify(empty_content))
-                            // push new content
-                            procedure.push(newContent)
-                            questions_c.splice(idx, 1)
+                        newContent.content = JSON.parse(JSON.stringify(empty_content))
+                        // push new content
+                        procedure.push(newContent)
+                    } else if (step["questionnaire_id"]) {
+                        newContent.id = "q" + step["questionnaire_id"].toString()
+                        newContent.title = ProcedureTypes.Questionnaire.label + " - " + newContent.id
+                        newContent.type = ProcedureTypes.Questionnaire
+                        newContent.backendId = step["questionnaire_id"]
+                        let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.Questionnaire.emptyContent))
+                        for (let [key,] of Object.entries(ProcedureTypes.Questionnaire.emptyContent)) {
+                            empty_content[key] = step["questionnaire"][key]
                         }
-                    }
-                    else if (step["pause_id"] != null) {
-                        let idx = pauses_c.findIndex(obj => {
-                            return obj.id === step["pause_id"]
-                        })
-                        if (idx > -1) {
-                            newContent.id = "p" + step["pause_id"].toString()
-                            newContent.title = ProcedureTypes.Pause.label + " - " + newContent.id
-                            newContent.type = ProcedureTypes.Pause
-                            newContent.backendId = step["pause_id"]
-                            let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.Pause.emptyContent))
-                            for(let [key,] of Object.entries(ProcedureTypes.Pause.emptyContent)){
-                                empty_content[key] = pauses_c[idx][key]
-                            }
-                            newContent.content = JSON.parse(JSON.stringify(empty_content))
-                            // push new content
-                            procedure.push(newContent)
-                            pauses_c.splice(idx, 1)
+                        newContent.content = JSON.parse(JSON.stringify(empty_content))
+                        // push new content
+                        procedure.push(newContent)
+                    } else if (step["pause_id"]) {
+                        newContent.id = "p" + step["pause_id"].toString()
+                        newContent.title = ProcedureTypes.Pause.label + " - " + newContent.id
+                        newContent.type = ProcedureTypes.Pause
+                        newContent.backendId = step["pause_id"]
+                        let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.Pause.emptyContent))
+                        for (let [key,] of Object.entries(ProcedureTypes.Pause.emptyContent)) {
+                            empty_content[key] = step["pause"][key]
                         }
-                    }
-                    else if (step["block_id"] != null) {
-                        if(step["block_id"] > -1){
-                            newContent.id = "b" + step["block_id"].toString()
-                            newContent.title = ProcedureTypes.BlockElement.label + " - " + newContent.id
-                            newContent.type = ProcedureTypes.BlockElement
-                            newContent.backendId = step["block_id"]
-                            let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.BlockElement.emptyContent))
-                            empty_content.study_id = step["block"]["study_id"]
-                            newContent.content = JSON.parse(JSON.stringify(empty_content))
-                            newContent.children = gatherSteps(step["block"]["procedure_config_steps"])
-                            // push new content
-                            procedure.push(newContent)
-                        }
+                        newContent.content = JSON.parse(JSON.stringify(empty_content))
+                        // push new content
+                        procedure.push(newContent)
+                    } else if (step["block_id"]) {
+                        newContent.id = "b" + step["block_id"].toString()
+                        newContent.title = ProcedureTypes.BlockElement.label + " - " + newContent.id
+                        newContent.type = ProcedureTypes.BlockElement
+                        newContent.backendId = step["block_id"]
+                        let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.BlockElement.emptyContent))
+                        empty_content.study_id = step["block"]["study_id"]
+                        newContent.content = JSON.parse(JSON.stringify(empty_content))
+                        newContent.children = gatherArray(step["block"]["procedure_config_steps"])
+                        // push new content
+                        procedure.push(newContent)
                     }
                 }
                 return procedure
             }
 
-            // get every ProcedureObject and nested children
-            let rootElements = gatherSteps(procedureConfig.procedure_config_steps)
-
+            let rootElements = gatherArray(procedureConfigOverview.procedure_config_steps)
+            
             // extract blockElements and childElements and childIds
             let blockElements = rootElements.filter(element => element.type === ProcedureTypes.BlockElement)
             let childElements = []
 
-            for(let blockElement of blockElements){
+            for (let blockElement of blockElements) {
                 let childrenIds = []
-                for(let childElement of blockElement.children){
+                for (let childElement of blockElement.children) {
                     childrenIds.push(childElement.id)
                     childElements.push(childElement)
                 }
@@ -240,19 +193,19 @@ export default function CreateProcedure() {
             }
 
             // set root ProcedureObjects
-            for(let rootElement of rootElements){
-                if(rootElement.type === ProcedureTypes.BlockElement){
+            for (let rootElement of rootElements) {
+                if (rootElement.type === ProcedureTypes.BlockElement) {
                     // set BlockElement instead of rootElement
                     newMap.set(rootElement.id, blockElements[0])
                     blockElements.shift()
-                }else{
+                } else {
                     newMap.set(rootElement.id, rootElement)
                 }
                 rootItem.children.push(rootElement.id)
             }
 
             // set all nested ProcedureObjects
-            for(let childElement of childElements){
+            for (let childElement of childElements) {
                 newMap.set(childElement.id, childElement)
             }
 
@@ -263,7 +216,13 @@ export default function CreateProcedure() {
             // Show success
             setMessage({ type: "success", text: "Procedure is loaded" })
         }
-    }, [texts, questions, pauses, conditions, procedureConfig, isSetupDone, isDispatched])
+    }, [procedureConfigOverview])
+
+    useEffect(() => {
+        if (isDispatched && procedureConfig != null){
+            dispatch(getProcedureConfigOverview(procedureConfig.id))
+        }
+    }, [procedureConfig, isSetupDone, isDispatched])
 
     const updateProcedureBackend = async (config) => {
         let response = await dispatch(updateProcedure({
@@ -857,6 +816,7 @@ export default function CreateProcedure() {
     const handleProceed = async (event) => {
         event.preventDefault()
         // save in Backend
+        dispatch(studySlice.actions.resetProcedureOverview())
         await updateProcedureBackend(getPlannedProcedure(procedureObjectMapState))
         // if not stored steps is not empty
         if (getNotStoredSteps().length > 0) {

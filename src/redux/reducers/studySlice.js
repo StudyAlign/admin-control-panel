@@ -8,6 +8,7 @@ import {
     updateStudyApi,
     deleteStudyApi,
     getProcedureConfigMainApi, // Get Procedure Config
+    getProcedureConfigOverviewApi, // Get Procedure Config Overview
     createSingleProcedureConfigStepApi, // Create Procedure Config Step
     updateProcedureConfigApi, // Update Procedure Config
     generateProceduresWithStepsApi,
@@ -21,6 +22,7 @@ const initialState = {
     study: null,
     studySetupInfo: null,
     studyProcedure: null, // Procedure Config State
+    procedureOverview: null, // Procedure Config Overview State
     api: IDLE,
     error: null,
     status: null,
@@ -158,6 +160,23 @@ export const getProcedureConfig = createAsyncThunk(
     }
 );
 
+// get procedure config
+export const getProcedureConfigOverview = createAsyncThunk(
+    'getProcedureConfigOverview',
+    async (procedureConfigId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(getProcedureConfigOverviewApi, procedureConfigId, dispatch)
+            return response
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
 // update procedure config
 export const updateProcedure = createAsyncThunk(
     'updateProcedure',
@@ -231,6 +250,9 @@ export const studySlice = createSlice({
         // REDUCERS THAT DO NOT DEPEND ON API CALLS GO HERE
         resetStudySetupInfo: (state, _action) => {
             state.studySetupInfo = null
+        },
+        resetProcedureOverview: (state, _action) => {
+            state.procedureOverview = null
         },
     },
     extraReducers: (builder) => {
@@ -320,6 +342,21 @@ export const studySlice = createSlice({
                     state.currentRequestId = undefined
                 }
             })
+            // Procedure Config Overview
+            .addCase(getProcedureConfigOverview.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(getProcedureConfigOverview.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                    state.procedureOverview = action.payload.body
+                }
+            })
+            //
             // Procedure Config Cases
             .addCase(getProcedureConfig.pending, (state, action) => {
                 state.api = LOADING
@@ -425,6 +462,10 @@ export const selectStudyApiStatus = (state) => {
 
 export const selectStudyProcedure = (state) => {
     return state.studies.studyProcedure
+}
+
+export const selectStudyProcedureOverview = (state) => {
+    return state.studies.procedureOverview
 }
 
 export default studySlice.reducer;

@@ -118,6 +118,10 @@ export function getProcedureConfigApi(procedureConfigId) {
     return sal.getProcedureConfig(procedureConfigId);
 }
 
+export function getProcedureConfigOverviewApi(procedureConfigId) {
+    return sal.getProcedureConfigOverview(procedureConfigId);
+}
+
 export function createProcedureConfigBlockApi(procedureConfigBlock) {
     return sal.createProcedureConfigBlock(procedureConfigBlock);
 }

@@ -25,6 +25,7 @@ export default function StudyCreationLogic(props) {
         dispatch(getStudySetupInfo(study_id))
         return () => {
             dispatch(studySlice.actions.resetStudySetupInfo())
+            dispatch(studySlice.actions.resetProcedureOverview())
         }
     }, [])
 
