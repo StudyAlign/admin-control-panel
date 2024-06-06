@@ -13,7 +13,11 @@ import {
     selectStudySetupInfo,
     selectStudyProcedure,
     updateStudy,
-    generateProceduresWithSteps, generateParticipants, populateSurveyParticipants,
+    generateProceduresWithSteps,
+    generateParticipants,
+    populateSurveyParticipants,
+    selectStudyProcedureOverview,
+    getProcedureConfigOverview,
 } from "../../redux/reducers/studySlice";
 import {useDispatch, useSelector} from "react-redux";
 import LoadingScreen from "../../components/LoadingScreen";
@@ -32,19 +36,24 @@ export default function CreateCheck() {
     const conditions = useSelector(selectConditions)
     const pauses = useSelector(selectPauses)
     const procedureConfig = useSelector(selectStudyProcedure)
+    const procedureConfigOverview = useSelector(selectStudyProcedureOverview)
 
     useEffect(  () => {
-        dispatch(getStudy(study_id)).then(() => {
-            dispatch(getStudySetupInfo(study_id))
+        dispatch(getStudy(study_id))
+        dispatch(getStudySetupInfo(study_id))
+        dispatch(getProcedureConfig(study_id)).then((response) => {
+            if (response.payload.body.id) {
+                dispatch(getProcedureConfigOverview(response.payload.body.id))
+            }
         })
         dispatch(getTexts(study_id))
         dispatch(getConditions(study_id))
         dispatch(getPauses(study_id))
-        dispatch(getProcedureConfig(study_id))
+
     }, [])
 
     if (study == null || studySetupInfo == null
-        || texts == null || conditions == null || pauses == null) {
+        || texts == null || conditions == null || pauses == null || procedureConfigOverview == null) {
         return <LoadingScreen/>
     }
 
@@ -129,7 +138,7 @@ export default function CreateCheck() {
             <Row className="mt-3"> <hr/> </Row>
             <Row> <h3> Procedure </h3></Row>
             <Row>
-                <ShowProcedure procedureId={procedureConfig.id} />
+                <ShowProcedure procedureId={procedureConfig && procedureConfig.id} />
             </Row>
             <Row className="mt-3"> <hr/> </Row>
             <Row className='mt-0' xs="auto">

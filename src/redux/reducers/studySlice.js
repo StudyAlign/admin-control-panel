@@ -276,12 +276,10 @@ export const studySlice = createSlice({
             })
             .addCase(getStudy.fulfilled, (state, action) => {
                 const { requestId } = action.meta
-                if (state.api === LOADING && state.currentRequestId === requestId) {
-                    state.api = IDLE
-                    state.status = action.payload.status
-                    state.currentRequestId = undefined
-                    state.study = action.payload.body
-                }
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
+                state.study = action.payload.body
             })
             .addCase(getStudySetupInfo.pending, (state, action) => {
                 state.api = LOADING
@@ -289,12 +287,10 @@ export const studySlice = createSlice({
             })
             .addCase(getStudySetupInfo.fulfilled, (state, action) => {
                 const { requestId } = action.meta
-                if (state.api === LOADING && state.currentRequestId === requestId) {
-                    state.api = IDLE
-                    state.status = action.payload.status
-                    state.currentRequestId = undefined
-                    state.studySetupInfo = action.payload.body
-                }
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
+                state.studySetupInfo = action.payload.body
             })
             .addCase(getStudySetupInfo.rejected, (state, action) => {
                 const { requestId } = action.meta
@@ -349,12 +345,10 @@ export const studySlice = createSlice({
             })
             .addCase(getProcedureConfigOverview.fulfilled, (state, action) => {
                 const { requestId } = action.meta
-                if (state.api === LOADING && state.currentRequestId === requestId) {
-                    state.api = IDLE
-                    state.status = action.payload.status
-                    state.currentRequestId = undefined
-                    state.procedureOverview = action.payload.body
-                }
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
+                state.procedureOverview = action.payload.body
             })
             //
             // Procedure Config Cases
@@ -364,12 +358,10 @@ export const studySlice = createSlice({
             })
             .addCase(getProcedureConfig.fulfilled, (state, action) => {
                 const { requestId } = action.meta
-                if (state.api === LOADING && state.currentRequestId === requestId) {
-                    state.api = IDLE
-                    state.status = action.payload.status
-                    state.currentRequestId = undefined
-                    state.studyProcedure = action.payload.body
-                }
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
+                state.studyProcedure = action.payload.body
             })
             //
             // Add Procedure Config step Cases

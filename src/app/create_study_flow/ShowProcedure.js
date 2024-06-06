@@ -170,7 +170,9 @@ export default function ShowProcedure(props) {
     const procedureConfigOverview = useSelector(selectStudyProcedureOverview)
 
     useEffect(() => {
-        dispatch(getProcedureConfigOverview(procedureId))
+        if (procedureConfigOverview == null) {
+            dispatch(getProcedureConfigOverview(procedureId))
+        }
     }, [])
 
     // return if not loaded yet
