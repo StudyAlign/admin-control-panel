@@ -6,7 +6,7 @@ import Procedure from "./Procedure";
 import InteractionData from "./InteractionData";
 import {useNavigate, useParams} from "react-router";
 import {useDispatch, useSelector} from "react-redux";
-import {deleteStudy, getStudy, selectStudy} from "../../redux/reducers/studySlice";
+import { studySlice, deleteStudy, getStudy, selectStudy} from "../../redux/reducers/studySlice";
 import {Button, Col, Dropdown, Modal, Row} from "react-bootstrap";
 import {ThreeDots} from "react-bootstrap-icons";
 
@@ -20,6 +20,10 @@ export default function StudyOverviewLayout() {
     const study = useSelector(selectStudy)
     useEffect(() => {
         dispatch(getStudy(study_id));
+        return () => {
+            dispatch(studySlice.actions.resetStudySetupInfo())
+            dispatch(studySlice.actions.resetProcedureOverview())
+        }
     }, [])
 
     if(study === null) {
