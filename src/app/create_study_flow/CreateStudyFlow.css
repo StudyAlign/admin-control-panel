@@ -51,11 +51,15 @@
     position: relative;
 }
 
-.sidebar-item,
-.sidebar-item:hover {
+.sidebar-item{
     color: black;
     font-size: 16pt;
     margin-bottom: 5px;
+}
+
+.sidebar-item:hover {
+    color: #224396;
+    cursor: pointer;
 }
 
 .sidebar-item-selected,

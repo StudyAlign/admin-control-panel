@@ -23,6 +23,8 @@ import CreateProcedure from "./app/create_study_flow/CreateProcedure";
 import StudyCreationLogic from "./app/create_study_flow/StudyCreationLogic"
 import CreateIntegrations from "./app/create_study_flow/CreateIntegrations";
 import CreateCheck from "./app/create_study_flow/CreateCheck";
+import EditInformation from './app/create_study_flow/EditInformation';
+import { StudyStatus } from './app/create_study_flow/StudyCreationLayout';
 
 
 export default function App() {
@@ -48,11 +50,20 @@ export default function App() {
 
                         <Route path="create"            element={<CreateInformation/>} />
                         <Route path="create/:study_id"  element={<StudyCreationLogic/>}>
-                            <Route path="procedure"     element={<CreateProcedure/>} />
-                            <Route path="integrations"  element={<CreateIntegrations/>} />
+                            <Route path="information"   element={<EditInformation status={StudyStatus.Creation}/>} />
+                            <Route path="procedure"     element={<CreateProcedure status={StudyStatus.Creation}/>} />
+                            <Route path="integrations"  element={<CreateIntegrations status={StudyStatus.Creation}/>} />
                             <Route path="check"         element={<CreateCheck/>} />
                             <Route path="*"             element={<h1>ERROR</h1>} />
                         </Route>
+
+                        {/* <Route path="edit/:study_id"  element={<StudyEditLogic/>}>
+                            <Route path="information"   element={<EditInformation status={StudyStatus.Active}/>} />
+                            <Route path="procedure"     element={<CreateProcedure status={StudyStatus.Active}/>} />
+                            <Route path="integrations"  element={<CreateIntegrations status={StudyStatus.Active}/>} />
+                            <Route path="check"         element={<CreateCheck/>} />
+                            <Route path="*"             element={<h1>ERROR</h1>} />
+                        </Route> */}
                     </Route>
 
                     <Route path="/login"            element={<Login/>} />

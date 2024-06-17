@@ -43,7 +43,7 @@ const initialProcedureMap = new Map([
 
 
 
-export default function CreateProcedure() {
+export default function CreateProcedure(props) {
 
 
 

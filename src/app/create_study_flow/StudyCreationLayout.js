@@ -2,6 +2,20 @@ import React from "react";
 import Topbar from "../../components/Topbar";
 import SidebarLayout from "./SidebarLayout";
 
+export const StudyStatus = {
+    Creation: 0,
+    Active: 1,
+}
+
+export const CreationOrder = [
+    "study",
+    "information",
+    "procedure",
+    "integrations",
+    "check",
+    "done"
+]
+
 export const CreationSteps = {
     Information: 0,
     Procedure: 1,

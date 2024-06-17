@@ -4,19 +4,12 @@ import {studySlice, getStudySetupInfo, selectStudyApiStatus, selectStudySetupInf
 import React, {useEffect} from "react";
 import {Navigate, Outlet, useLocation} from "react-router-dom";
 import LoadingScreen from "../../components/LoadingScreen";
+import { CreationOrder } from "./StudyCreationLayout";
 
 export default function StudyCreationLogic(props) {
     const dispatch = useDispatch()
     const { study_id } = useParams()
     const location = useLocation()
-
-    const creationOrder = [
-        "study",
-        "procedure",
-        "integrations",
-        "check",
-        "done"
-    ]
 
     const studySetupInfo = useSelector(selectStudySetupInfo)
     const studyApiStatus = useSelector(selectStudyApiStatus)
@@ -30,8 +23,9 @@ export default function StudyCreationLogic(props) {
     }, [])
 
     const next_step = (current_step) => {
-        let idx = creationOrder.indexOf(current_step)
-        return creationOrder[idx+1]
+        let idx = CreationOrder.indexOf(current_step)
+        if(idx === 0) idx += 1 // TODO: Remove after Backend Change
+        return CreationOrder[idx+1]
     }
 
     const get_step = (path) => {
