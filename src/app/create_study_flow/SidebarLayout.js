@@ -5,7 +5,7 @@ import { useDispatch } from "react-redux";
 
 import "./CreateStudyFlow.css"
 import { CreationSteps } from "./StudyCreationLayout";
-import { updateStudy, getStudySetupInfo } from "../../redux/reducers/studySlice";
+import { studySlice, updateStudy, getStudySetupInfo } from "../../redux/reducers/studySlice";
 import { CreationOrder } from "./StudyCreationLayout";
 
 export default function SidebarLayout(props){

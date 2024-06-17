@@ -30,7 +30,7 @@ import styles from "./CreateProcedure.module.css";
 const rootMapId = 'root'
 
 // Initial list map
-const initialProcedureMap = new Map([
+const createInitialProcedureMap = () => new Map([
     [
         rootMapId,
         { id: rootMapId, backendId: undefined, children: [] },
@@ -52,7 +52,7 @@ export default function CreateProcedure(props) {
     // Sector: React States and References: Start --------------------------------------------------------------
 
     // States
-    const [procedureObjectMapState, setProcedureObjectMapState] = useState(initialProcedureMap) // nested state   
+    const [procedureObjectMapState, setProcedureObjectMapState] = useState(createInitialProcedureMap) // nested state  
     const [selectedAccordionKey, setSelectedAccordionKey] = useState(null) // Collapse Reference State
     const [isSetupDone, setIsSetupDone] = useState(false) // Setup State
     const [isDispatched, setIsDispatched] = useState(false) // Dispatch State
@@ -85,7 +85,7 @@ export default function CreateProcedure(props) {
 
     useEffect(() => {
         Promise.all([
-            dispatch(getProcedureConfig(study_id))
+            dispatch(getProcedureConfig(study_id)),
         ]).then(() => {
             setIsDispatched(true)
         })
