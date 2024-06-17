@@ -1,14 +1,24 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
+import { Button, Col, Dropdown, Modal, Row } from "react-bootstrap";
+import { ThreeDots } from "react-bootstrap-icons";
+
 import Topbar from "../../components/Topbar";
 import SidebarLayout from "./SidebarLayout";
 import Overview from "./Overview";
 import Procedure from "./Procedure";
 import InteractionData from "./InteractionData";
-import {useNavigate, useParams} from "react-router";
-import {useDispatch, useSelector} from "react-redux";
-import { studySlice, deleteStudy, getStudy, selectStudy} from "../../redux/reducers/studySlice";
-import {Button, Col, Dropdown, Modal, Row} from "react-bootstrap";
-import {ThreeDots} from "react-bootstrap-icons";
+
+import {
+    studySlice,
+    deleteStudy,
+    getStudy,
+    updateStudy,
+    getStudySetupInfo,
+    selectStudy
+} from "../../redux/reducers/studySlice";
+
 
 // TODO Maybe refactor layout so that the use is similar to the CreateStudyLayout
 export default function StudyOverviewLayout() {
@@ -53,10 +63,16 @@ export default function StudyOverviewLayout() {
         return content
     }
 
-    const handleEdit = (event) => {
+    const handleEdit = async (event) => {
         event.preventDefault()
-        console.log("[Edit] Not implemented yet")
-        //TODO Edit
+        await dispatch(updateStudy({
+            "studyId": study_id,
+            "study": {
+                "current_setup_step": "study"
+            }
+        }))
+        await dispatch(getStudySetupInfo(study_id))
+        navigate("/edit/" + study_id + "/information")
     }
 
     const handleDuplicate = (event) => {

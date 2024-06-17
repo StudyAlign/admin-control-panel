@@ -11,10 +11,20 @@ import { deleteText } from "../../redux/reducers/textSlice";
 import { deleteCondition } from "../../redux/reducers/conditionSlice";
 import { deleteQuestionnaire } from "../../redux/reducers/questionnaireSlice";
 import { deletePause } from "../../redux/reducers/pauseSlice";
-import { studySlice, getProcedureConfig, selectStudyProcedure, createSingleProcedureConfigStep, updateProcedure, updateStudy, getStudySetupInfo, getProcedureConfigOverview, selectStudyProcedureOverview } from "../../redux/reducers/studySlice";
+import {
+    studySlice,
+    getProcedureConfig,
+    selectStudyProcedure,
+    createSingleProcedureConfigStep,
+    updateProcedure,
+    updateStudy,
+    getStudySetupInfo,
+    getProcedureConfigOverview,
+    selectStudyProcedureOverview
+} from "../../redux/reducers/studySlice";
 import { createBlock, deleteBlock } from "../../redux/reducers/blockSlice";
 
-import StudyCreationLayout, { CreationSteps } from "./StudyCreationLayout";
+import StudyCreationLayout, { CreationSteps, StudyStatus } from "./StudyCreationLayout";
 import ProcedureAlert from "./ProcedureAlert";
 import ProcedureObject, { ProcedureTypes } from "./ProcedureObject";
 
@@ -45,13 +55,13 @@ const createInitialProcedureMap = () => new Map([
 
 export default function CreateProcedure(props) {
 
-
-
+    const { status } = props
 
     // ---------------------------------------------------------------------------------------------------------
     // Sector: React States and References: Start --------------------------------------------------------------
 
     // States
+    const [disabled] = useState(status === StudyStatus.Active ? true : false)
     const [procedureObjectMapState, setProcedureObjectMapState] = useState(createInitialProcedureMap) // nested state  
     const [selectedAccordionKey, setSelectedAccordionKey] = useState(null) // Collapse Reference State
     const [isSetupDone, setIsSetupDone] = useState(false) // Setup State
@@ -464,7 +474,7 @@ export default function CreateProcedure(props) {
                         <div className={styles.checkBoxOverlay}>
                             <div className={styles.block}>
                                 <div className={styles.blockHeader}>
-                                    <DragHandleComponent className={styles.dragHandleBlock}>
+                                    <DragHandleComponent className={disabled ? styles.dragHandleBlockNotAllowed : styles.dragHandleBlock}>
                                         <div className={styles.heading}>
                                             {procedureObject.type.label}
                                         </div>
@@ -523,6 +533,7 @@ export default function CreateProcedure(props) {
                             deleteProcedureObject={deleteProcedureObject}
                             updateProcedureMap={updateProcedureMap}
                             updateOnCreate={updateOnCreate}
+                            disabled={disabled}
                         // reloaded={/^[a-zA-Z]/.test(((procedureObject.id).toString()).charAt(0))} // check if reloaded element
                         />
                         {true && !isChild &&
@@ -844,8 +855,13 @@ export default function CreateProcedure(props) {
                     </Row>
 
                     <Row className='mt-3'>
-                        {procedureStepButtons()}
+                        {disabled ? (
+                            <p style={{ color: 'red' }}>*You can only change the content in the existing order</p>
+                        ) : (
+                            procedureStepButtons()
+                        )}
                     </Row>
+
 
                     <Row className='mt-3'>
                         <Card>
@@ -859,6 +875,7 @@ export default function CreateProcedure(props) {
                                         renderStackedGroup={renderStackedGroupElement}
                                         onDragEnd={onDragEnd}
                                         onDragStart={onDragStart}
+                                        isDisabled={disabled}
                                     >
                                         <Accordion
                                             onSelect={(eventKey) => onCollapseListener(eventKey)}

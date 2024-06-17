@@ -76,6 +76,10 @@
     /* Block cursor */
     cursor: grab;
 }
+.dragHandleBlockNotAllowed {
+    /* Block cursor */
+    cursor: not-allowed;
+}
 .dragHandleBlock:active {
     cursor: grabbing;
 }
@@ -86,6 +90,13 @@
     height: 16px;
     fill: black;
     cursor: grab;
+}
+.dragHandleNotAllowed svg {
+    /* Drag Handle Design */
+    margin: 4px;
+    height: 16px;
+    fill: black;
+    cursor: not-allowed;
 }
 .dragHandle svg:active {
     cursor: grabbing;

@@ -20,7 +20,7 @@ import {
 } from "./redux/reducers/authSlice";
 import CreateInformation from "./app/create_study_flow/CreateInformation";
 import CreateProcedure from "./app/create_study_flow/CreateProcedure";
-import StudyCreationLogic from "./app/create_study_flow/StudyCreationLogic"
+import StudyCreationLogic from "./app/create_study_flow/StudyCreationLogic";
 import CreateIntegrations from "./app/create_study_flow/CreateIntegrations";
 import CreateCheck from "./app/create_study_flow/CreateCheck";
 import EditInformation from './app/create_study_flow/EditInformation';
@@ -57,13 +57,13 @@ export default function App() {
                             <Route path="*"             element={<h1>ERROR</h1>} />
                         </Route>
 
-                        {/* <Route path="edit/:study_id"  element={<StudyEditLogic/>}>
+                        <Route path="edit/:study_id"  element={<StudyCreationLogic/>}>
                             <Route path="information"   element={<EditInformation status={StudyStatus.Active}/>} />
                             <Route path="procedure"     element={<CreateProcedure status={StudyStatus.Active}/>} />
                             <Route path="integrations"  element={<CreateIntegrations status={StudyStatus.Active}/>} />
                             <Route path="check"         element={<CreateCheck/>} />
                             <Route path="*"             element={<h1>ERROR</h1>} />
-                        </Route> */}
+                        </Route>
                     </Route>
 
                     <Route path="/login"            element={<Login/>} />

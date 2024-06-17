@@ -228,6 +228,7 @@ const ProcedureObject = forwardRef((props, ref) => {
 
     const dispatch = useDispatch()
 
+    const [disabled] = useState(props.disabled)
     const [content, setContent] = useState(props.content)
     const [backendId, setBackendId] = useState(props.backendId) // BackendId of ProcedureObject
     const [stepId, setStepId] = useState(props.stepId) // StepId of ProcedureObject
@@ -478,7 +479,7 @@ const ProcedureObject = forwardRef((props, ref) => {
     
     return (
         <div className={styles.procedureElement}>
-            <DragHandleComponent className={styles.dragHandle}>
+            <DragHandleComponent className={disabled ? styles.dragHandleNotAllowed : styles.dragHandle}>
                 {dotsSVG}
             </DragHandleComponent>
 

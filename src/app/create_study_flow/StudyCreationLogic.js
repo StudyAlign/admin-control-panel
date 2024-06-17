@@ -1,8 +1,16 @@
-import {useParams} from "react-router";
-import {useDispatch, useSelector} from "react-redux";
-import {studySlice, getStudySetupInfo, selectStudyApiStatus, selectStudySetupInfo, resetStudySetupInfo} from "../../redux/reducers/studySlice";
-import React, {useEffect} from "react";
-import {Navigate, Outlet, useLocation} from "react-router-dom";
+import { useParams } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
+import React, { useEffect } from "react";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+
+import {
+    studySlice,
+    getStudySetupInfo,
+    selectStudyApiStatus,
+    selectStudySetupInfo,
+    resetStudySetupInfo
+} from "../../redux/reducers/studySlice";
+
 import LoadingScreen from "../../components/LoadingScreen";
 import { CreationOrder } from "./StudyCreationLayout";
 
@@ -24,7 +32,7 @@ export default function StudyCreationLogic(props) {
 
     const next_step = (current_step) => {
         let idx = CreationOrder.indexOf(current_step)
-        //if(idx === 0) idx += 1 // TODO: Remove after Backend Change
+        if(idx === 0) idx += 1 // TODO: Remove after Backend Change
         return CreationOrder[idx+1]
     }
 

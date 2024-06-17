@@ -67,6 +67,9 @@ const code = "" +
     "</script> \n"
 
 export default function CreateIntegrations(props) {
+
+    const { status } = props
+
     const { study_id } = useParams()
     const navigate = useNavigate()
     const dispatch = useDispatch()

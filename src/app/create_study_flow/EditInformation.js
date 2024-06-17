@@ -95,7 +95,7 @@ export default function EditInformation(props) {
             }
         }))
         await dispatch(getStudySetupInfo(study_id))
-        navigate("/create/" + study_id + "/procedure")
+        navigate("/edit/" + study_id + "/procedure")
     }
 
     return(
