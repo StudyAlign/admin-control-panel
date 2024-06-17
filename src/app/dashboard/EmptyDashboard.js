@@ -1,7 +1,8 @@
 import React from "react";
 import {Button} from "react-bootstrap";
-import "./Dashboard.css";
 import {useNavigate} from "react-router";
+
+import "./Dashboard.css";
 
 export default function EmptyDashboard() {
     const navigate = useNavigate();

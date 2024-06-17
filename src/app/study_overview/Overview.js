@@ -1,9 +1,12 @@
 import React from "react";
-import {Button} from "react-bootstrap";
-import "./StudyOverview.css"
-import {useDispatch} from "react-redux";
-import {getStudy, updateStudy} from "../../redux/reducers/studySlice";
-import {reformatDate} from "../../components/CommonFunctions";
+import { Button } from "react-bootstrap";
+import { useDispatch} from "react-redux";
+
+import { getStudy, updateStudy } from "../../redux/reducers/studySlice";
+
+import { reformatDate } from "../../components/CommonFunctions";
+
+import "./StudyOverview.css";
 
 export default function Overview(props) {
     const dispatch = useDispatch()

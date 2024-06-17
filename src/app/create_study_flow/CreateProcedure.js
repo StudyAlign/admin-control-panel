@@ -5,6 +5,7 @@ import { Trash3 } from "react-bootstrap-icons";
 import { DragHandleComponent, List, Item } from "react-sortful";
 import { useDispatch, useSelector } from "react-redux";
 import arrayMove from "array-move";
+
 import classnames from "classnames";
 
 import { deleteText } from "../../redux/reducers/textSlice";

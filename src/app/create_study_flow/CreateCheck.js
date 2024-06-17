@@ -1,10 +1,10 @@
-import {useNavigate, useParams} from "react-router";
-import StudyCreationLayout, {CreationSteps} from "./StudyCreationLayout";
-import React, {useEffect} from "react";
-import {Container, Row, Col, ListGroup, Card, Button} from "react-bootstrap";
-import {getTexts, selectTexts} from "../../redux/reducers/textSlice";
-import {getConditions, selectConditions} from "../../redux/reducers/conditionSlice";
-import {getPauses, selectPauses} from "../../redux/reducers/pauseSlice";
+import { useNavigate, useParams } from "react-router";
+import { Container, Row, Col, Card, Button } from "react-bootstrap";
+import React, { useEffect } from "react";
+
+import { getTexts, selectTexts } from "../../redux/reducers/textSlice";
+import { getConditions, selectConditions } from "../../redux/reducers/conditionSlice";
+import { getPauses, selectPauses } from "../../redux/reducers/pauseSlice";
 import {
     getProcedureConfig,
     getStudy,
@@ -19,10 +19,12 @@ import {
     selectStudyProcedureOverview,
     getProcedureConfigOverview,
 } from "../../redux/reducers/studySlice";
-import {useDispatch, useSelector} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+
 import LoadingScreen from "../../components/LoadingScreen";
-import {reformatDate} from "../../components/CommonFunctions";
+import { reformatDate } from "../../components/CommonFunctions";
 import ShowProcedure from "./ShowProcedure";
+import StudyCreationLayout, { CreationSteps } from "./StudyCreationLayout";
 
 
 export default function CreateCheck() {

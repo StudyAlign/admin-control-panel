@@ -1,9 +1,11 @@
 import React from "react";
-import {useNavigate} from "react-router";
-import {Container, Row, Col, Button} from "react-bootstrap";
-import {PeopleFill} from "react-bootstrap-icons";
-import "./Dashboard.css"
-import {reformatDate} from "../../components/CommonFunctions";
+import { useNavigate } from "react-router";
+import { Container, Row, Col, Button } from "react-bootstrap";
+import { PeopleFill } from "react-bootstrap-icons";
+
+import { reformatDate } from "../../components/CommonFunctions";
+
+import "./Dashboard.css";
 
 export default function StudyBox(props) {
     const navigate = useNavigate();

@@ -22,12 +22,23 @@ import {
 
 // TODO Maybe refactor layout so that the use is similar to the CreateStudyLayout
 export default function StudyOverviewLayout() {
-    const dispatch = useDispatch()
+
+    const editEnum = {
+        Closed: 0,
+        Running: 1,
+        NotOpen: 2,
+    }
+
     const { study_id, page } = useParams()
+
+    const dispatch = useDispatch()
     const navigate = useNavigate()
+
     const [deleteModal, setDeleteModal] = useState(false)
+    const [editState, setEditState] = useState(-1)
 
     const study = useSelector(selectStudy)
+
     useEffect(() => {
         dispatch(getStudy(study_id));
         return () => {
@@ -35,6 +46,20 @@ export default function StudyOverviewLayout() {
             dispatch(studySlice.actions.resetProcedureOverview())
         }
     }, [])
+
+    useEffect(() => {
+        if (study) {
+            if (study.is_active) {
+                setEditState(editEnum.Running)
+            } else {
+                setEditState(editEnum.Closed)
+                // Compare Date
+                if(new Date(study.startDate.split('T')[0]) > new Date()) {
+                    setEditState(editEnum.NotOpen)
+                }
+            }
+        }
+    }, [study])
 
     if(study === null) {
         return (
@@ -72,7 +97,12 @@ export default function StudyOverviewLayout() {
             }
         }))
         await dispatch(getStudySetupInfo(study_id))
-        navigate("/edit/" + study_id + "/information")
+        // choose edit path
+        if(editState === editEnum.Running) {
+            navigate("/edit/" + study_id + "/information")
+        } else if (editState === editEnum.NotOpen) {
+            navigate("/create/" + study_id + "/information")
+        }
     }
 
     const handleDuplicate = (event) => {
@@ -108,7 +138,9 @@ export default function StudyOverviewLayout() {
                             </Dropdown.Toggle>
 
                             <Dropdown.Menu>
-                                <Dropdown.Item onClick={handleEdit}>Edit</Dropdown.Item>
+                                {editState === editEnum.Running || editState === editEnum.NotOpen ? (
+                                    <Dropdown.Item onClick={handleEdit}>Edit</Dropdown.Item>
+                                ) : null}
                                 <Dropdown.Item onClick={handleDuplicate}>Duplicate</Dropdown.Item>
                                 <Dropdown.Item onClick={handleExport}>Export</Dropdown.Item>
                                 <Dropdown.Divider/>

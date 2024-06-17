@@ -3,10 +3,6 @@ import { Accordion, Form } from "react-bootstrap";
 import { List, Item } from "react-sortful";
 import { useDispatch, useSelector } from "react-redux";
 
-// import { getTexts, selectTexts } from "../../redux/reducers/textSlice";
-// import { getConditions, selectConditions } from "../../redux/reducers/conditionSlice";
-// import { getQuestionnaires, selectQuestionnaires } from "../../redux/reducers/questionnaireSlice";
-// import { getPauses, selectPauses } from "../../redux/reducers/pauseSlice";
 import { getProcedureConfigOverview, selectStudyProcedureOverview } from "../../redux/reducers/studySlice";
 
 import { ProcedureTypes } from "./ProcedureObject";

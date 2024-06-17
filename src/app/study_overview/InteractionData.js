@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "react-bootstrap";
 import { useParams } from "react-router";
 import { useTable } from "react-table";
+
 import "./StudyOverview.css"
 
 export default function InteractionData() {

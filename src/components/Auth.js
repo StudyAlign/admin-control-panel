@@ -1,8 +1,9 @@
-import React, {useEffect, useState} from "react";
-import {
-    Navigate, Outlet, useLocation,
-} from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
+
+import {unwrapResult} from "@reduxjs/toolkit";
+
 import {
     me,
     selectUser,
@@ -11,8 +12,9 @@ import {
     authSlice,
     selectIsAuthenticated
 } from "../redux/reducers/authSlice";
+
 import LoadingScreen from "./LoadingScreen";
-import {unwrapResult} from "@reduxjs/toolkit";
+
 
 const {createContext} = require("react");
 const {useContext} = require("react");

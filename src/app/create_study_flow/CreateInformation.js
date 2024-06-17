@@ -1,12 +1,13 @@
-import React, {useState} from "react";
-import StudyCreationLayout, {CreationSteps} from "./StudyCreationLayout";
-import {Button, Col, Row, Container, Form} from "react-bootstrap";
-import {useDispatch, useSelector} from "react-redux";
-import {useAuth} from "../../components/Auth";
-import {createStudy, selectStudy} from "../../redux/reducers/studySlice";
-import {useNavigate} from "react-router";
+import React, { useState } from "react";
+import { Button, Col, Row, Container, Form } from "react-bootstrap";
+import { useDispatch, useSelector } from "react-redux";
+import { Navigate, useLocation } from "react-router-dom";
+
+import { createStudy, selectStudy } from "../../redux/reducers/studySlice";
+
+import { useAuth } from "../../components/Auth";
 import LoadingScreen from "../../components/LoadingScreen";
-import {Navigate, useLocation} from "react-router-dom";
+import StudyCreationLayout, { CreationSteps } from "./StudyCreationLayout";
 
 export default function CreateInformation() {
     const dispatch = useDispatch()

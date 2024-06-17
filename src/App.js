@@ -1,23 +1,12 @@
 import React, {createContext, useEffect, useState} from 'react';
-import './App.css';
-import 'bootstrap/dist/css/bootstrap.css';
-
-import {
-    BrowserRouter,
-    Routes,
-    Route
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {useDispatch, useSelector, useStore} from "react-redux";
 
 import Login from './app/login/Login';
 import ForgotPW from './app/login/ForgotPW';
 import ResetPW from './app/login/ResetPW';
 import Dashboard from './app/dashboard/Dashboard';
 import StudyOverviewLayout from "./app/study_overview/StudyOverviewLayout";
-import RequireAuth, {AuthRoute, AuthProvider, useAuth} from "./components/Auth";
-import {useDispatch, useSelector, useStore} from "react-redux";
-import {
-    authSlice,
-} from "./redux/reducers/authSlice";
 import CreateInformation from "./app/create_study_flow/CreateInformation";
 import CreateProcedure from "./app/create_study_flow/CreateProcedure";
 import StudyCreationLogic from "./app/create_study_flow/StudyCreationLogic";
@@ -25,6 +14,13 @@ import CreateIntegrations from "./app/create_study_flow/CreateIntegrations";
 import CreateCheck from "./app/create_study_flow/CreateCheck";
 import EditInformation from './app/create_study_flow/EditInformation';
 import { StudyStatus } from './app/create_study_flow/StudyCreationLayout';
+
+import RequireAuth, {AuthRoute, AuthProvider, useAuth} from "./components/Auth";
+
+import { authSlice } from "./redux/reducers/authSlice";
+
+import './App.css';
+import 'bootstrap/dist/css/bootstrap.css';
 
 
 export default function App() {

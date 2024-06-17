@@ -3,10 +3,11 @@ import { Container, Row, Col, Nav } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router";
 import { useDispatch } from "react-redux";
 
-import "./CreateStudyFlow.css"
 import { CreationSteps } from "./StudyCreationLayout";
-import { studySlice, updateStudy, getStudySetupInfo } from "../../redux/reducers/studySlice";
+import { updateStudy, getStudySetupInfo } from "../../redux/reducers/studySlice";
 import { CreationOrder } from "./StudyCreationLayout";
+
+import "./CreateStudyFlow.css";
 
 export default function SidebarLayout(props){
 

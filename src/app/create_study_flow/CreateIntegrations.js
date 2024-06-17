@@ -1,9 +1,11 @@
-import React, {useState} from "react";
-import StudyCreationLayout, {CreationSteps} from "./StudyCreationLayout";
-import {useNavigate, useParams} from "react-router";
-import {Button, Col, Container, Form, Row} from "react-bootstrap";
-import {getStudySetupInfo, selectStudySetupInfo, updateStudy} from "../../redux/reducers/studySlice";
-import {useDispatch, useSelector} from "react-redux";
+import React, { useState } from "react";
+import { useNavigate, useParams } from "react-router";
+import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { useDispatch, useSelector } from "react-redux";
+
+import { getStudySetupInfo, selectStudySetupInfo, updateStudy } from "../../redux/reducers/studySlice";
+
+import StudyCreationLayout, { CreationSteps } from "./StudyCreationLayout";
 
 const url = process.env.REACT_APP_STUDY_ALIGN_URL || "http://localhost:8000/";
 

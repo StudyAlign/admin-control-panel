@@ -1,8 +1,10 @@
 import React, {useEffect} from "react";
 import {Container, Row, Col, Button, NavLink} from "react-bootstrap";
-import "./Dashboard.css";
-import StudyBox from "./StudyBox";
 import {useNavigate} from "react-router";
+
+import StudyBox from "./StudyBox";
+
+import "./Dashboard.css";
 
 export default function FilledDashboard(props) {
     const navigate = useNavigate();
