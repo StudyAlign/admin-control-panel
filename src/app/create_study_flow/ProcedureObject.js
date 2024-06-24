@@ -508,9 +508,11 @@ const ProcedureObject = forwardRef((props, ref) => {
                 </Button>
             </OverlayTrigger>
 
-            <Button variant="danger" size="sm" onClick={() => props.deleteProcedureObject(props.id)} className={styles.deleteButton}>
-                <Trash3 />
-            </Button>
+            {!disabled &&
+                <Button variant="danger" size="sm" onClick={() => props.deleteProcedureObject(props.id)} className={styles.deleteButton}>
+                    <Trash3 />
+                </Button>
+            }
 
         </div>
     )

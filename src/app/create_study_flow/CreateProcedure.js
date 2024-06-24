@@ -480,18 +480,20 @@ export default function CreateProcedure(props) {
                                             {procedureObject.type.label}
                                         </div>
                                     </DragHandleComponent>
-                                    <Button
-                                        className={styles.deleteButton}
-                                        onClick={() => deleteProcedureObject(procedureObject.id)}
-                                        variant="danger"
-                                        size="sm"
-                                    >
-                                        <Trash3 />
-                                    </Button>
+                                    {!disabled &&
+                                        <Button
+                                            className={styles.deleteButton}
+                                            onClick={() => deleteProcedureObject(procedureObject.id)}
+                                            variant="danger"
+                                            size="sm"
+                                        >
+                                            <Trash3 />
+                                        </Button>
+                                    }
                                 </div>
                                 {blockProcedureChildren}
                             </div>
-
+                            
                             <OverlayTrigger
                                     placement="top"
                                     overlay={
@@ -505,8 +507,9 @@ export default function CreateProcedure(props) {
                                         type="checkbox"
                                         checked={procedureObject.counterbalance}
                                         onChange={(event) => changeCounterbalance(event, procedureObject.id)}
+                                        disabled={disabled}
                                     />
-                                </OverlayTrigger>
+                            </OverlayTrigger>
                         </div>
                     </Item>
 
@@ -551,6 +554,7 @@ export default function CreateProcedure(props) {
                                     type="checkbox"
                                     checked={procedureObject.counterbalance}
                                     onChange={(event) => changeCounterbalance(event, procedureObject.id)}
+                                    disabled={disabled}
                                 />
                             </OverlayTrigger>
                         }
