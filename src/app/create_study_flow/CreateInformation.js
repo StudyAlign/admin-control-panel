@@ -99,7 +99,7 @@ export default function CreateInformation() {
                         <Col>
                             <Form.Group className="mb-3" controlId="formEndDate">
                                 <Form.Label>End Date</Form.Label>
-                                <Form.Control required type="date" placeholder="End Date" value={endDate} onChange={handleEndDate}/>
+                                <Form.Control required type="date" placeholder="End Date" min={startDate} value={endDate} onChange={handleEndDate}/>
                             </Form.Group>
                         </Col>
                     </Row>

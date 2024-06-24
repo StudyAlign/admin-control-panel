@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button, Col, Row, Container, Form } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router";
@@ -30,6 +30,8 @@ export default function EditInformation(props) {
     const [description, setDescription] = useState('')
     const [consent, setConsent] = useState('')
 
+    const endDateRef = useRef('')
+
     const study = useSelector(selectStudy)
     const studySetupInfo = useSelector(selectStudySetupInfo)
 
@@ -43,6 +45,7 @@ export default function EditInformation(props) {
             setTitle(study.name)
             setStartDate(study.startDate.split('T')[0])
             setEndDate(study.endDate.split('T')[0])
+            endDateRef.current = study.endDate.split('T')[0]
             setAmountParticipants(studySetupInfo.planned_number_participants)
             setDescription(study.description)
             setConsent(study.consent)
@@ -106,7 +109,7 @@ export default function EditInformation(props) {
                     <Row>
                         <Form.Group className="mb-3" controlId="formTitle">
                             <Form.Label>Title</Form.Label>
-                            <Form.Control disabled={disabled} required type="text" placeholder="Title" value={title} onChange={handleTitle}/>
+                            <Form.Control required type="text" placeholder="Title" value={title} onChange={handleTitle}/>
                         </Form.Group>
                     </Row>
 
@@ -120,7 +123,8 @@ export default function EditInformation(props) {
                         <Col>
                             <Form.Group className="mb-3" controlId="formEndDate">
                                 <Form.Label>End Date</Form.Label>
-                                <Form.Control disabled={disabled} required type="date" placeholder="End Date" value={endDate} onChange={handleEndDate}/>
+                                <Form.Control min={disabled ? (new Date(endDateRef.current) > new Date() ? (new Date()).toISOString().split('T')[0] : endDateRef.current) : startDate}
+                                    required type="date" placeholder="End Date" value={endDate} onChange={handleEndDate}/>
                             </Form.Group>
                         </Col>
                     </Row>
