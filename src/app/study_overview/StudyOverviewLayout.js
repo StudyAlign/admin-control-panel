@@ -4,19 +4,27 @@ import { useDispatch, useSelector } from "react-redux";
 import { Button, Col, Dropdown, Modal, Row } from "react-bootstrap";
 import { ThreeDots } from "react-bootstrap-icons";
 
+import { saveAs } from "file-saver";
+import * as yaml from "js-yaml";
+
 import Topbar from "../../components/Topbar";
 import SidebarLayout from "./SidebarLayout";
 import Overview from "./Overview";
 import Procedure from "./Procedure";
 import InteractionData from "./InteractionData";
+import LoadingScreen from "../../components/LoadingScreen";
 
 import {
     studySlice,
     deleteStudy,
+    getProcedureConfig,
     getStudy,
-    updateStudy,
     getStudySetupInfo,
-    selectStudy
+    selectStudy,
+    selectStudySetupInfo,
+    updateStudy,
+    selectStudyProcedureOverview,
+    getProcedureConfigOverview,
 } from "../../redux/reducers/studySlice";
 
 
@@ -35,12 +43,21 @@ export default function StudyOverviewLayout() {
     const navigate = useNavigate()
 
     const [deleteModal, setDeleteModal] = useState(false)
+    const [exportModal, setExportModal] = useState(false)
     const [editState, setEditState] = useState(-1)
 
     const study = useSelector(selectStudy)
+    const studySetupInfo = useSelector(selectStudySetupInfo)
+    const procedureConfigOverview = useSelector(selectStudyProcedureOverview)
 
     useEffect(() => {
-        dispatch(getStudy(study_id));
+        dispatch(getStudy(study_id))
+        dispatch(getStudySetupInfo(study_id))
+        dispatch(getProcedureConfig(study_id)).then((response) => {
+            if (response.payload.body.id) {
+                dispatch(getProcedureConfigOverview(response.payload.body.id))
+            }
+        })
         return () => {
             dispatch(studySlice.actions.resetStudySetupInfo())
             dispatch(studySlice.actions.resetProcedureOverview())
@@ -69,6 +86,16 @@ export default function StudyOverviewLayout() {
             </>
         )
     }
+
+    if (study == null || studySetupInfo == null || procedureConfigOverview == null) {
+        return (
+            <>
+                <Topbar/>
+                <LoadingScreen/>
+            </>
+        )
+    }
+
 
 
     const getContent = (page) => {
@@ -111,10 +138,39 @@ export default function StudyOverviewLayout() {
         //TODO Duplicate
     }
 
-    const handleExport = (event) => {
+    const handleExport = (event, type) => {
         event.preventDefault()
-        console.log("[Export] Not implemented yet")
-        //TODO Export
+        // gather study
+        const updatedStudy = { 
+            ...study,
+            planned_number_participants: studySetupInfo.planned_number_participants
+        }
+        const studyExport = {
+            study: updatedStudy,
+            procedure_config_steps: procedureConfigOverview.procedure_config_steps
+        }
+        
+        // Export
+        let data
+        let fileName
+        let mimeType
+
+        if (type === 0) { // JSON
+            data = JSON.stringify(studyExport, null, 2)
+            fileName = "study_export_" + study.name + ".json"
+            mimeType = "application/json"
+        } else if (type === 1) { // YAML
+            data = yaml.dump(studyExport)
+            fileName = "study_export_" + study.name + ".yaml"
+            mimeType = "application/x-yaml"
+        }
+
+        // close modal
+        setExportModal(false)
+
+        // Create a blob and trigger download
+        const blob = new Blob([data], { type: mimeType })
+        saveAs(blob, fileName)
     }
 
     const handleDelete = async (event) => {
@@ -142,7 +198,7 @@ export default function StudyOverviewLayout() {
                                     <Dropdown.Item onClick={handleEdit}>Edit</Dropdown.Item>
                                 ) : null}
                                 <Dropdown.Item onClick={handleDuplicate}>Duplicate</Dropdown.Item>
-                                <Dropdown.Item onClick={handleExport}>Export</Dropdown.Item>
+                                <Dropdown.Item onClick={() => setExportModal(true)}>Export Study</Dropdown.Item>
                                 <Dropdown.Divider/>
                                 <Dropdown.Item onClick={() => setDeleteModal(true)} style={{color: "red"}}>Delete</Dropdown.Item>
                             </Dropdown.Menu>
@@ -151,6 +207,23 @@ export default function StudyOverviewLayout() {
                 </Row>
                 {getContent(page)}
             </SidebarLayout>
+
+            <Modal show={exportModal}>
+                <Modal.Header>
+                    <Modal.Title> Export Study </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Decide export format for "{study.name}"!
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="success" onClick={(event) => handleExport(event, 0)}>
+                        JSON
+                    </Button>
+                    <Button variant="success" onClick={(event) => handleExport(event, 1)}>
+                        YAML
+                    </Button>
+                </Modal.Footer>
+            </Modal>
 
             <Modal show={deleteModal}>
                 <Modal.Header>
@@ -167,7 +240,6 @@ export default function StudyOverviewLayout() {
                         Delete
                     </Button>
                 </Modal.Footer>
-
             </Modal>
         </>
     )
