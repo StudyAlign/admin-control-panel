@@ -68,6 +68,10 @@
     font-weight: bold;
 }
 
+.nav-link:focus {
+    color: black;
+}
+
 .study-title {
     color: #494949;
     font-size: 32pt;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import React, { useEffect, useState, useMemo, useCallback, useRef, createContext, useContext } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Button, Card, Col, Container, Row, Accordion, Modal, Form, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Trash3 } from "react-bootstrap-icons";
@@ -31,6 +31,29 @@ import ProcedureObject, { ProcedureTypes } from "./ProcedureObject";
 
 import styles from "./CreateProcedure.module.css";
 
+// ---------------------------------------------------------------------------------------------------
+// Sector: Empty Procedure Order --------------------------------------------------------------
+
+export const EmptyProcedureOrder = createContext()
+
+export const EmptyProcedureOrderProvider = ({ children }) => {
+    const [emptyOrder, setEmptyOrder] = useState(false)
+    const [emptyOrderListener, setEmptyOrderListener] = useState(true)
+    return (
+        <EmptyProcedureOrder.Provider value={{
+            emptyOrder,
+            setEmptyOrder,
+            emptyOrderListener,
+            setEmptyOrderListener
+        }}>
+            {children}
+        </EmptyProcedureOrder.Provider>
+    )
+}
+
+// Sector: Empty Procedure Order --------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+
 
 
 
@@ -51,15 +74,14 @@ const createInitialProcedureMap = () => new Map([
 // Sector: Initial Procedure Map: End --------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
-
-
-
 export default function CreateProcedure(props) {
 
     const { status } = props
 
     // ---------------------------------------------------------------------------------------------------------
     // Sector: React States and References: Start --------------------------------------------------------------
+
+    const { emptyOrder, setEmptyOrder, emptyOrderListener ,setEmptyOrderListener } = useContext(EmptyProcedureOrder)
 
     // States
     const [disabled] = useState(status === StudyStatus.Active ? true : false)
@@ -356,6 +378,88 @@ export default function CreateProcedure(props) {
     // -----------------------------------------------------------------------------------------------------
 
 
+    // ---------------------------------------------------------------------------------------------------
+    // Sector: Evaluate ProcedureMap: Start --------------------------------------------------------------
+
+    const getPlannedProcedure = (newMap) => {
+        let planned_procedure = []
+        const root = newMap.get(rootMapId)
+        if (root.children) {
+            for (let childId of root.children) {
+                const procedureObject = newMap.get(childId)
+                if (procedureObject && procedureObject.stored) {
+                    let obj = {}
+                    // set main id
+                    obj["id"] = procedureObject.stepId
+                    obj["counterbalance"] = procedureObject.counterbalance
+                    if(procedureObject.type.key === ProcedureTypes.BlockElement.key){
+                        obj[procedureObject.type.key + "_id"] = procedureObject.backendId
+                        const innerBlockProcedureObjects = procedureObject.children.map((procedureObjectId) => newMap.get(procedureObjectId))
+                        let inner_procedure = []
+                        for(let innerProcedureObject of innerBlockProcedureObjects){
+                            if(innerProcedureObject && innerProcedureObject.stored){
+                                let inner_obj = {}
+                                // set child id
+                                inner_obj["id"] = innerProcedureObject.stepId
+                                inner_obj["counterbalance"] = false // inside block elements counterbalance is not possible
+                                inner_procedure.push(inner_obj)
+                            }
+                        }
+                        obj[procedureObject.type.key] = inner_procedure
+                    }
+                    planned_procedure.push(obj)
+                }
+            }
+        }
+        // Convert the array to an object
+        return planned_procedure
+    }
+
+    const getNotStoredSteps = () => {
+        let notStored = []
+        const newMap = new Map(procedureObjectMapState)
+        const root = newMap.get(rootMapId)
+        if (root.children) {
+            for (let childId of root.children) {
+                const procedureObject = newMap.get(childId)
+                if (procedureObject && !procedureObject.stored) {
+                    notStored.push(procedureObject)
+                }
+                if (procedureObject && procedureObject.type.key === ProcedureTypes.BlockElement.key) {
+                    const innerBlockProcedureObjects = procedureObject.children.map((procedureObjectId) => newMap.get(procedureObjectId))
+                    for (let innerProcedureObject of innerBlockProcedureObjects) {
+                        if (innerProcedureObject && !innerProcedureObject.stored) {
+                            notStored.push(innerProcedureObject)
+                        }
+                    }
+                }
+            }
+        }
+        return notStored
+    }
+
+    const onCollapseListener = (eventKey) => {
+        // if event key = null => Accordion is closed => current state is last closed Accordion
+        // if event key is not state and both are not null => current state represents last closed Accordion
+        let closedEvent = eventKey === null || (selectedAccordionKey !== eventKey && selectedAccordionKey !== null && eventKey !== null)
+
+        if(closedEvent && selectedAccordionKey !== null){
+            const ref = procedureObjectRefs.current.get(selectedAccordionKey);
+            if (ref && ref.current) {
+                ref.current.handleClose();
+            }
+        }
+
+        // check if the selected Accordion is already open
+        const isAlreadyOpen = selectedAccordionKey === eventKey;
+    
+        // update state with selected Accordion key
+        setSelectedAccordionKey(isAlreadyOpen ? null : eventKey);
+    }
+
+    // Sector: Evaluate ProcedureMap: End --------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------------
+
 
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -445,6 +549,13 @@ export default function CreateProcedure(props) {
     }
 
     const procedureObjects = useMemo(() => {
+
+        // set empty order listener
+        if(getPlannedProcedure(procedureObjectMapState).length === 0){
+            if(!emptyOrderListener) setEmptyOrderListener(true)
+        } else {
+            if(emptyOrderListener) setEmptyOrderListener(false)
+        }
 
         // Get top level procudure objects
         const topLevelProcedureObjects = procedureObjectMapState
@@ -726,91 +837,6 @@ export default function CreateProcedure(props) {
     // Sector: Drag and drop: End --------------------------------------------------------------
     // -----------------------------------------------------------------------------------------
 
-
-
-
-    // ---------------------------------------------------------------------------------------------------
-    // Sector: Evaluate ProcedureMap: Start --------------------------------------------------------------
-
-    const getPlannedProcedure = (newMap) => {
-        let planned_procedure = []
-        const root = newMap.get(rootMapId)
-        if (root.children) {
-            for (let childId of root.children) {
-                const procedureObject = newMap.get(childId)
-                if (procedureObject && procedureObject.stored) {
-                    let obj = {}
-                    // set main id
-                    obj["id"] = procedureObject.stepId
-                    obj["counterbalance"] = procedureObject.counterbalance
-                    if(procedureObject.type.key === ProcedureTypes.BlockElement.key){
-                        obj[procedureObject.type.key + "_id"] = procedureObject.backendId
-                        const innerBlockProcedureObjects = procedureObject.children.map((procedureObjectId) => newMap.get(procedureObjectId))
-                        let inner_procedure = []
-                        for(let innerProcedureObject of innerBlockProcedureObjects){
-                            if(innerProcedureObject && innerProcedureObject.stored){
-                                let inner_obj = {}
-                                // set child id
-                                inner_obj["id"] = innerProcedureObject.stepId
-                                inner_obj["counterbalance"] = false // inside block elements counterbalance is not possible
-                                inner_procedure.push(inner_obj)
-                            }
-                        }
-                        obj[procedureObject.type.key] = inner_procedure
-                    }
-                    planned_procedure.push(obj)
-                }
-            }
-        }
-        // Convert the array to an object
-        return planned_procedure
-    }
-
-    const getNotStoredSteps = () => {
-        let notStored = []
-        const newMap = new Map(procedureObjectMapState)
-        const root = newMap.get(rootMapId)
-        if (root.children) {
-            for (let childId of root.children) {
-                const procedureObject = newMap.get(childId)
-                if (procedureObject && !procedureObject.stored) {
-                    notStored.push(procedureObject)
-                }
-                if (procedureObject && procedureObject.type.key === ProcedureTypes.BlockElement.key) {
-                    const innerBlockProcedureObjects = procedureObject.children.map((procedureObjectId) => newMap.get(procedureObjectId))
-                    for (let innerProcedureObject of innerBlockProcedureObjects) {
-                        if (innerProcedureObject && !innerProcedureObject.stored) {
-                            notStored.push(innerProcedureObject)
-                        }
-                    }
-                }
-            }
-        }
-        return notStored
-    }
-
-    const onCollapseListener = (eventKey) => {
-        // if event key = null => Accordion is closed => current state is last closed Accordion
-        // if event key is not state and both are not null => current state represents last closed Accordion
-        let closedEvent = eventKey === null || (selectedAccordionKey !== eventKey && selectedAccordionKey !== null && eventKey !== null)
-
-        if(closedEvent && selectedAccordionKey !== null){
-            const ref = procedureObjectRefs.current.get(selectedAccordionKey);
-            if (ref && ref.current) {
-                ref.current.handleClose();
-            }
-        }
-
-        // check if the selected Accordion is already open
-        const isAlreadyOpen = selectedAccordionKey === eventKey;
-    
-        // update state with selected Accordion key
-        setSelectedAccordionKey(isAlreadyOpen ? null : eventKey);
-    }
-
-    // Sector: Evaluate ProcedureMap: End --------------------------------------------------------------
-    // -------------------------------------------------------------------------------------------------
-
     
     
     
@@ -825,6 +851,7 @@ export default function CreateProcedure(props) {
             }
         }))
         await dispatch(getStudySetupInfo(study_id))
+        setEmptyOrderListener(false)
         navigate("/create/" + study_id + "/integrations")
     }
 
@@ -833,19 +860,22 @@ export default function CreateProcedure(props) {
         event.preventDefault()
         // save in Backend
         dispatch(studySlice.actions.resetProcedureOverview())
-        await updateProcedureBackend(getPlannedProcedure(procedureObjectMapState))
+        const plannedOrder = getPlannedProcedure(procedureObjectMapState)
+        await updateProcedureBackend(plannedOrder)
         // if not stored steps is not empty
         if (getNotStoredSteps().length > 0) {
             setShowModal(true)
         } else {
-            navigateForward()
+            if (plannedOrder.length === 0) {
+                setEmptyOrder(true)
+            } else {
+                await navigateForward()
+            }
         } 
     }
 
     // Sector: Handle leave CreateProcedure Page: End --------------------------------------------------------------
     // -------------------------------------------------------------------------------------------------------------
-
-
 
     
     return (
@@ -902,9 +932,23 @@ export default function CreateProcedure(props) {
                 </Container>
             </StudyCreationLayout>
 
+            <Modal show={emptyOrder}>
+                <Modal.Header>
+                    <Modal.Title> Cannot proceed! </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    You need at least one Procedure-Object in the procedure order
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="warning" onClick={() => setEmptyOrder(false)}>
+                        OK
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
             <Modal show={showModal}>
                 <Modal.Header>
-                    <Modal.Title> Still Proceed? </Modal.Title>
+                    <Modal.Title> Still proceed? </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     You have not saved procedure objects
@@ -918,8 +962,8 @@ export default function CreateProcedure(props) {
                         Proceed
                     </Button>
                 </Modal.Footer>
-
             </Modal>
         </>
     )
 }
+

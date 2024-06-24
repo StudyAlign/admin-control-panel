@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Container, Row, Col, Nav } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router";
 import { useDispatch } from "react-redux";
@@ -6,10 +6,14 @@ import { useDispatch } from "react-redux";
 import { CreationSteps } from "./StudyCreationLayout";
 import { updateStudy, getStudySetupInfo } from "../../redux/reducers/studySlice";
 import { CreationOrder } from "./StudyCreationLayout";
+import { EmptyProcedureOrder, EmptyProcedureOrderProvider } from "./CreateProcedure";
 
 import "./CreateStudyFlow.css";
 
+
 export default function SidebarLayout(props){
+
+    const { setEmptyOrder, emptyOrderListener } = useContext(EmptyProcedureOrder)
 
     const { study_id } = useParams()
     const dispatch = useDispatch()
@@ -27,6 +31,12 @@ export default function SidebarLayout(props){
         // return if the step is already selected
         if (props.step + 1 === CreationOrder.indexOf(navTo)) {
             event.preventDefault()
+            return
+        }
+        // return if the order is empty
+        if (props.step === CreationSteps.Procedure && emptyOrderListener) {
+            event.preventDefault()
+            setEmptyOrder(true)
             return
         }
         // else update and navigate
