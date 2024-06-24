@@ -13,6 +13,7 @@ import StudyCreationLogic from "./app/create_study_flow/StudyCreationLogic";
 import CreateIntegrations from "./app/create_study_flow/CreateIntegrations";
 import CreateCheck from "./app/create_study_flow/CreateCheck";
 import EditInformation from './app/create_study_flow/EditInformation';
+import ImportStudy from './app/create_study_flow/ImportStudy';
 import { StudyStatus } from './app/create_study_flow/StudyCreationLayout';
 
 import RequireAuth, {AuthRoute, AuthProvider, useAuth} from "./components/Auth";
@@ -44,6 +45,7 @@ export default function App() {
                         <Route path="/"                         element={<Dashboard/>} />
                         <Route path="/study/:study_id/:page"    element={<StudyOverviewLayout/>} />
 
+                        <Route path="import"            element={<ImportStudy/>} />
                         <Route path="create"            element={<EmptyProcedureOrderProvider><CreateInformation/></EmptyProcedureOrderProvider>} />
                         <Route path="create/:study_id"  element={<EmptyProcedureOrderProvider><StudyCreationLogic/></EmptyProcedureOrderProvider>}>
                             <Route path="information"   element={<EditInformation status={StudyStatus.Creation}/>} />

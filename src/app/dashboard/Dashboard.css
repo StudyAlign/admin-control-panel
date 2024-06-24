@@ -87,3 +87,10 @@
 .date-label {
     margin-top: 12px;
 }
+
+.button-center {
+    justify-content: center;
+    display: flex;
+    padding: auto;
+    gap: 10px;
+}

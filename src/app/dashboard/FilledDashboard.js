@@ -20,6 +20,11 @@ export default function FilledDashboard(props) {
         navigate("/create")
     }
 
+    const handleClickImportStudy = (event) => {
+        event.preventDefault()
+        navigate("/import")
+    }
+
     let running_studies = []
     let finished_studies = []
     let recent_studies = []
@@ -64,8 +69,9 @@ export default function FilledDashboard(props) {
                             {finished_studies}
                         </Col>
                     </Row>
-                    <Row className="justify-content-center">
+                    <Row className="button-center">
                         <Button className="button1" onClick={handleClickCreateStudy}> Create Study </Button>
+                        <Button className="button1" onClick={handleClickImportStudy}> Import Study </Button>
                     </Row>
                 </Container>
             </div>
