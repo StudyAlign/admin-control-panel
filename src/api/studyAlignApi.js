@@ -102,7 +102,6 @@ export function generateProceduresWithStepsApi(args) {
 
 export function addParticipantsApi(args) {
     return sal.addParticipants(args.studyId, args.amount);
-
 }
 
 export function exportStudySchemaApi(studyId) {

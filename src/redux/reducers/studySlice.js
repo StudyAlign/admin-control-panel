@@ -83,6 +83,21 @@ export const getStudySetupInfo = createAsyncThunk(
     }
 );
 
+export const duplicateStudy = createAsyncThunk(
+    'duplicateStudy',
+    async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            return await apiWithAuth(duplicateStudyApi, studyId, dispatch)
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
 export const createStudy = createAsyncThunk(
     'createStudy',
     async (arg, { dispatch, getState, rejectWithValue, requestId}) => {
@@ -261,6 +276,21 @@ export const generateParticipants = createAsyncThunk(
     }
 );
 
+export const addParticipants = createAsyncThunk(
+    'addParticipants',
+    async (args, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            return await apiWithAuth(addParticipantsApi, args, dispatch)
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
 // DEPRECATED
 // export const populateSurveyParticipants = createAsyncThunk(
 //     'populateSurveyParticipants',
@@ -319,6 +349,17 @@ export const studySlice = createSlice({
                 state.status = action.payload.status
                 state.currentRequestId = undefined
                 state.study = action.payload.body
+            })
+            // duplicate study
+            .addCase(duplicateStudy.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(duplicateStudy.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
             })
             .addCase(getStudySetupInfo.pending, (state, action) => {
                 state.api = LOADING
@@ -460,6 +501,17 @@ export const studySlice = createSlice({
                 }
             })
             //
+            // Add Participants Cases
+            .addCase(addParticipants.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(addParticipants.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
+            })
             .addCase(generateProceduresWithSteps.pending, (state, action) => {
                 state.api = LOADING
                 state.currentRequestId = action.meta.requestId

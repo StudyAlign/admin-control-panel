@@ -162,6 +162,7 @@ export default function ImportStudy() {
         try {
             const data = content.trim().startsWith('{') ? JSON.parse(content) : yaml.load(content)
             setParsedData(data)
+            console.log(data)
             setText(JSON.stringify(data, null, 2))
         } catch (error) {
             setShowModal(modalStates.PARSING)
@@ -183,7 +184,32 @@ export default function ImportStudy() {
     const handleCreate = async (event) => {
         event.preventDefault()
 
-        const studySchema = JSON.parse(text)
+        let studySchema = ''
+        try {
+            studySchema = JSON.parse(text)
+            // for each condition, check if it is a valid condition
+            if(studySchema?.procedure_config?.procedure_config_steps){
+                let mainIndex = 0
+                studySchema.procedure_config.procedure_config_steps.forEach(step => {
+                    console.log(step)
+                    if(step?.condition) {
+                        studySchema.procedure_config.procedure_config_steps[mainIndex].condition = JSON.parse(JSON.stringify(studySchema.procedure_config.procedure_config_steps[mainIndex].condition))
+                    } else if(step?.block) {
+                        let blockIndex = 0
+                        step.block.procedure_config_steps.forEach(blockStep => {
+                            if(blockStep?.condition) {
+                                studySchema.procedure_config.procedure_config_steps[mainIndex].block.procedure_config_steps[blockIndex].condition = JSON.parse(JSON.stringify(studySchema.procedure_config.procedure_config_steps[mainIndex].block.procedure_config_steps[blockIndex].condition))
+                            }
+                            blockIndex++
+                        })
+                    }
+                    mainIndex++
+                })
+            }
+        } catch (error) {
+            setShowModal(modalStates.PARSING)
+            return
+        }
 
         const response = await dispatch(importStudySchema(studySchema))
         if (response.payload.status === 200) {

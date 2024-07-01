@@ -8,7 +8,8 @@ import {
     selectStudy,
     selectStudySetupInfo,
     getStudy,
-    getStudySetupInfo
+    getStudySetupInfo,
+    addParticipants
 } from "../../redux/reducers/studySlice";
 
 import LoadingScreen from "../../components/LoadingScreen";
@@ -31,6 +32,7 @@ export default function EditInformation(props) {
     const [consent, setConsent] = useState('')
 
     const endDateRef = useRef('')
+    const amountParticipantsRef = useRef('')
 
     const study = useSelector(selectStudy)
     const studySetupInfo = useSelector(selectStudySetupInfo)
@@ -47,6 +49,7 @@ export default function EditInformation(props) {
             setEndDate(study.endDate.split('T')[0])
             endDateRef.current = study.endDate.split('T')[0]
             setAmountParticipants(studySetupInfo.planned_number_participants)
+            amountParticipantsRef.current = studySetupInfo.planned_number_participants
             setDescription(study.description)
             setConsent(study.consent)
         }
@@ -82,6 +85,12 @@ export default function EditInformation(props) {
 
     const handleSubmit = async (event) => {
         event.preventDefault()
+        if (disabled && amountParticipants > amountParticipantsRef.current) {
+            await dispatch(addParticipants({
+                "studyId": study_id,
+                "amount": amountParticipants - amountParticipantsRef.current
+            }))
+        }
         await dispatch(updateStudy({
             "studyId": study_id,
             "study": {
@@ -131,8 +140,8 @@ export default function EditInformation(props) {
 
                     <Row>
                         <Form.Group className="mb-3" controlId="formParticipants">
-                            <Form.Label>Amount Participants</Form.Label>
-                            <Form.Control required type="number" placeholder="Amount Participants" value={amountParticipants} onChange={handleParticipants}/>
+                            <Form.Label>Amount Participants {disabled && <span style={{color:"red"}}>(at least {amountParticipantsRef.current})</span>}</Form.Label>
+                            <Form.Control min={disabled ? amountParticipantsRef.current : 0} required type="number" placeholder="Amount Participants" value={amountParticipants} onChange={handleParticipants}/>
                         </Form.Group>
                     </Row>
 

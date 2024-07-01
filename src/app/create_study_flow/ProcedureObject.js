@@ -295,14 +295,23 @@ const ProcedureObject = forwardRef((props, ref) => {
             }))
         }
         else if(props.type === ProcedureTypes.Condition) {
-            response_create = await dispatch(createCondition(content))
-            response_step = await dispatch(createSingleProcedureConfigStep({
-                "procedureConfigId": props.rootBackendId,
-                "procedureConfigStep" : {
-                    "counterbalance" : props.counterbalance,
-                    "condition_id" : response_create.payload.body.id
-                }
-            }))
+            // try to parse config into object
+            try {
+                const conditionContent = {...content}
+                conditionContent.config = JSON.parse(content.config)
+                console.log(conditionContent)
+                response_create = await dispatch(createCondition(conditionContent))
+                response_step = await dispatch(createSingleProcedureConfigStep({
+                    "procedureConfigId": props.rootBackendId,
+                    "procedureConfigStep" : {
+                        "counterbalance" : props.counterbalance,
+                        "condition_id" : response_create.payload.body.id
+                    }
+                }))
+            } catch (error) {
+                props.setMessage({type: "danger", text: "Error while parsing config to JSON"})
+                return
+            }
         }
         else if(props.type === ProcedureTypes.Questionnaire) {
             response_create = await dispatch(createQuestionnaire(content))
@@ -367,11 +376,18 @@ const ProcedureObject = forwardRef((props, ref) => {
                 }}))
         }
         else if (props.type === ProcedureTypes.Condition) {
-            response = await dispatch(updateCondition({conditionId: backendId, condition: {
+            try {
+                const conditionConfig = JSON.parse(content.config)
+                console.log(conditionConfig)
+                response = await dispatch(updateCondition({conditionId: backendId, condition: {
                     "name": content.name,
-                    "config": content.config,
+                    "config": conditionConfig,
                     "url": content.url
                 }}))
+            } catch (error) {
+                props.setMessage({type: "danger", text: "Error while parsing config to JSON"})
+                return
+            } 
         }
         else if (props.type === ProcedureTypes.Questionnaire) {
             response = await dispatch(updateQuestionnaire({questionnaireId: backendId, questionnaire: {

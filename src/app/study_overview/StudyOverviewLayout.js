@@ -26,7 +26,8 @@ import {
     selectStudyProcedureOverview,
     getProcedureConfigOverview,
     exportStudySchema,
-    selectStudyExport
+    selectStudyExport,
+    duplicateStudy
 } from "../../redux/reducers/studySlice";
 
 
@@ -127,10 +128,12 @@ export default function StudyOverviewLayout() {
         }
     }
 
-    const handleDuplicate = (event) => {
+    const handleDuplicate = async (event) => {
         event.preventDefault()
-        console.log("[Duplicate] Not implemented yet")
-        //TODO Duplicate
+        
+        await dispatch(duplicateStudy(study_id)).then((newStudy) => {
+            navigate("/create/" + newStudy.payload.body.id + "/information")
+        })
     }
 
     const handleExport = (event, type) => {

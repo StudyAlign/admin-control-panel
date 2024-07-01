@@ -175,7 +175,7 @@ export default function CreateProcedure(props) {
                         newContent.backendId = step["condition_id"]
                         let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.Condition.emptyContent))
                         for (let [key,] of Object.entries(ProcedureTypes.Condition.emptyContent)) {
-                            empty_content[key] = step["condition"][key]
+                            empty_content[key] = typeof step["condition"][key] === 'object' ? JSON.stringify(step["condition"][key]) : step["condition"][key]
                         }
                         newContent.content = JSON.parse(JSON.stringify(empty_content))
                         // push new content
