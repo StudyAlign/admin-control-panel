@@ -25,7 +25,7 @@ import {
 } from "../../redux/reducers/studySlice";
 import { createBlock, deleteBlock } from "../../redux/reducers/blockSlice";
 
-import StudyCreationLayout, { CreationSteps, StudyStatus } from "./StudyCreationLayout";
+import StudyCreationLayout, { CreationSteps, StudyStatus } from "./navigation_logic/StudyCreationLayout";
 import ProcedureAlert from "./ProcedureAlert";
 import ProcedureObject, { ProcedureTypes } from "./ProcedureObject";
 

@@ -4,11 +4,11 @@ import { useNavigate, useParams } from "react-router";
 import { useDispatch } from "react-redux";
 
 import { CreationSteps } from "./StudyCreationLayout";
-import { studySlice, updateStudy, getStudySetupInfo } from "../../redux/reducers/studySlice";
+import { studySlice, updateStudy, getStudySetupInfo } from "../../../redux/reducers/studySlice";
 import { CreationOrder } from "./StudyCreationLayout";
-import { EmptyProcedureOrder } from "./CreateProcedure";
+import { EmptyProcedureOrder } from "../CreateProcedure";
 
-import "./CreateStudyFlow.css";
+import "../CreateStudyFlow.css";
 
 
 export default function SidebarLayout(props){

@@ -7,7 +7,7 @@ import { createStudy, selectStudy } from "../../redux/reducers/studySlice";
 
 import { useAuth } from "../../components/Auth";
 import LoadingScreen from "../../components/LoadingScreen";
-import StudyCreationLayout, { CreationSteps } from "./StudyCreationLayout";
+import StudyCreationLayout, { CreationSteps } from "./navigation_logic/StudyCreationLayout";
 
 export default function CreateInformation() {
     const dispatch = useDispatch()

@@ -24,7 +24,7 @@ import { useDispatch, useSelector } from "react-redux";
 import LoadingScreen from "../../components/LoadingScreen";
 import { reformatDate } from "../../components/CommonFunctions";
 import ShowProcedure from "./ShowProcedure";
-import StudyCreationLayout, { CreationSteps } from "./StudyCreationLayout";
+import StudyCreationLayout, { CreationSteps } from "./navigation_logic/StudyCreationLayout";
 
 
 export default function CreateCheck() {

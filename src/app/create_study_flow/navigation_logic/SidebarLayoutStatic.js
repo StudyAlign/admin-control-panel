@@ -3,7 +3,7 @@ import { Container, Row, Col, Nav } from "react-bootstrap";
 
 import { CreationSteps } from "./StudyCreationLayout";
 
-import "./CreateStudyFlow.css"
+import "../CreateStudyFlow.css"
 
 export default function SidebarLayoutStatic(props){
 

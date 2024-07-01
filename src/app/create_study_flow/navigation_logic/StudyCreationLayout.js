@@ -1,5 +1,5 @@
 import React from "react";
-import Topbar from "../../components/Topbar";
+import Topbar from "../../../components/Topbar";
 import SidebarLayout from "./SidebarLayout";
 import SidebarLayoutStatic from "./SidebarLayoutStatic";
 

@@ -9,12 +9,12 @@ import Dashboard from './app/dashboard/Dashboard';
 import StudyOverviewLayout from "./app/study_overview/StudyOverviewLayout";
 import CreateInformation from "./app/create_study_flow/CreateInformation";
 import CreateProcedure, { EmptyProcedureOrderProvider } from "./app/create_study_flow/CreateProcedure";
-import StudyCreationLogic from "./app/create_study_flow/StudyCreationLogic";
+import StudyCreationLogic from "./app/create_study_flow/navigation_logic/StudyCreationLogic";
 import CreateIntegrations from "./app/create_study_flow/CreateIntegrations";
 import CreateCheck from "./app/create_study_flow/CreateCheck";
 import EditInformation from './app/create_study_flow/EditInformation';
 import ImportStudy from './app/create_study_flow/ImportStudy';
-import { StudyStatus } from './app/create_study_flow/StudyCreationLayout';
+import { StudyStatus } from './app/create_study_flow/navigation_logic/StudyCreationLayout';
 
 import RequireAuth, {AuthRoute, AuthProvider, useAuth} from "./components/Auth";
 

@@ -13,7 +13,7 @@ import {
 } from "../../redux/reducers/studySlice";
 
 import LoadingScreen from "../../components/LoadingScreen";
-import StudyCreationLayout, { CreationSteps, StudyStatus } from "./StudyCreationLayout";
+import StudyCreationLayout, { CreationSteps, StudyStatus } from "./navigation_logic/StudyCreationLayout";
 
 export default function EditInformation(props) {
 

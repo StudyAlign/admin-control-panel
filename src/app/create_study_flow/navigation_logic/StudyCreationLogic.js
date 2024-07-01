@@ -9,9 +9,9 @@ import {
     selectStudyApiStatus,
     selectStudySetupInfo,
     resetStudySetupInfo
-} from "../../redux/reducers/studySlice";
+} from "../../../redux/reducers/studySlice";
 
-import LoadingScreen from "../../components/LoadingScreen";
+import LoadingScreen from "../../../components/LoadingScreen";
 import { CreationOrder } from "./StudyCreationLayout";
 
 export default function StudyCreationLogic(props) {

@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { getStudySetupInfo, selectStudySetupInfo, updateStudy } from "../../redux/reducers/studySlice";
 
-import StudyCreationLayout, { CreationSteps } from "./StudyCreationLayout";
+import StudyCreationLayout, { CreationSteps } from "./navigation_logic/StudyCreationLayout";
 
 const url = process.env.REACT_APP_STUDY_ALIGN_URL || "http://localhost:8000/";
 
