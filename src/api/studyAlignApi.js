@@ -100,9 +100,27 @@ export function generateProceduresWithStepsApi(args) {
     return sal.generateProceduresWithSteps(args.studyId, args.procedureScheme);
 }
 
-export function populateSurveyParticipantsApi(studyId) {
-    return sal.populateSurveyParticipants(studyId);
+export function addParticipantsApi(args) {
+    return sal.addParticipants(args.studyId, args.amount);
+
 }
+
+export function exportStudySchemaApi(studyId) {
+    return sal.exportStudySchema(studyId);
+}
+
+export function importStudySchemaApi(args) {
+    return sal.importStudySchema(args.studyId, args.studySchema);
+}
+
+export function duplicateStudyApi(studyId) {
+    return sal.duplicateStudy(studyId);
+}
+
+// DEPRECATED
+// export function populateSurveyParticipantsApi(studyId) {
+//     return sal.populateSurveyParticipants(studyId);
+// }
 
 export function generateParticipantsApi(args) {
     return sal.generateParticipants(args.studyId, args.amount);

@@ -122,7 +122,18 @@ export default function CreateProcedure(props) {
         ]).then(() => {
             setIsDispatched(true)
         })
+
+        
     }, [])
+
+    useEffect(() => {
+        // set empty order listener
+        if(getPlannedProcedure(procedureObjectMapState).length === 0){
+            if(!emptyOrderListener) setEmptyOrderListener(true)
+        } else {
+            if(emptyOrderListener) setEmptyOrderListener(false)
+        }
+    }, [procedureObjectMapState])
 
     useEffect(() => {
         if (!isSetupDone && procedureConfigOverview != null) {
@@ -549,13 +560,6 @@ export default function CreateProcedure(props) {
     }
 
     const procedureObjects = useMemo(() => {
-
-        // set empty order listener
-        if(getPlannedProcedure(procedureObjectMapState).length === 0){
-            if(!emptyOrderListener) setEmptyOrderListener(true)
-        } else {
-            if(emptyOrderListener) setEmptyOrderListener(false)
-        }
 
         // Get top level procudure objects
         const topLevelProcedureObjects = procedureObjectMapState

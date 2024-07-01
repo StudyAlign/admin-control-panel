@@ -11,9 +11,13 @@ import {
     getProcedureConfigOverviewApi, // Get Procedure Config Overview
     createSingleProcedureConfigStepApi, // Create Procedure Config Step
     updateProcedureConfigApi, // Update Procedure Config
+    exportStudySchemaApi,
+    importStudySchemaApi,
+    duplicateStudyApi,
     generateProceduresWithStepsApi,
     generateParticipantsApi,
-    populateSurveyParticipantsApi,
+    // populateSurveyParticipantsApi, // DEPRECATED
+    addParticipantsApi,
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
 
@@ -23,6 +27,7 @@ const initialState = {
     studySetupInfo: null,
     studyProcedure: null, // Procedure Config State
     procedureOverview: null, // Procedure Config Overview State
+    studyExport: null,
     api: IDLE,
     error: null,
     status: null,
@@ -194,6 +199,21 @@ export const updateProcedure = createAsyncThunk(
     }
 );
 
+export const exportStudySchema = createAsyncThunk(
+    'exportStudySchema',
+    async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            return await apiWithAuth(exportStudySchemaApi, studyId, dispatch)
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
 export const generateProceduresWithSteps = createAsyncThunk(
     'generateProceduresWithSteps',
     async (args, { dispatch, getState, rejectWithValue, requestId}) => {
@@ -226,21 +246,22 @@ export const generateParticipants = createAsyncThunk(
     }
 );
 
-export const populateSurveyParticipants = createAsyncThunk(
-    'populateSurveyParticipants',
-    async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
-        const { api, currentRequestId } = getState().studies
-        if (api !== LOADING || requestId !== currentRequestId) {
-            return
-        }
-        try {
-            const response = await apiWithAuth(populateSurveyParticipantsApi, studyId, dispatch)
-            return response;
-        } catch (err) {
-            return rejectWithValue(err)
-        }
-    }
-);
+// DEPRECATED
+// export const populateSurveyParticipants = createAsyncThunk(
+//     'populateSurveyParticipants',
+//     async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
+//         const { api, currentRequestId } = getState().studies
+//         if (api !== LOADING || requestId !== currentRequestId) {
+//             return
+//         }
+//         try {
+//             const response = await apiWithAuth(populateSurveyParticipantsApi, studyId, dispatch)
+//             return response;
+//         } catch (err) {
+//             return rejectWithValue(err)
+//         }
+//     }
+// );
 
 // reducers
 export const studySlice = createSlice({
@@ -253,6 +274,9 @@ export const studySlice = createSlice({
         },
         resetProcedureOverview: (state, _action) => {
             state.procedureOverview = null
+        },
+        resetStudyExport: (state, _action) => {
+            state.studyExport = null
         },
     },
     extraReducers: (builder) => {
@@ -393,6 +417,19 @@ export const studySlice = createSlice({
                 }
             })
             //
+            // Export Study Schema Cases
+            .addCase(exportStudySchema.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(exportStudySchema.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
+                state.studyExport = action.payload.body
+            })
+            //
             .addCase(generateProceduresWithSteps.pending, (state, action) => {
                 state.api = LOADING
                 state.currentRequestId = action.meta.requestId
@@ -417,18 +454,18 @@ export const studySlice = createSlice({
                     state.currentRequestId = undefined
                 }
             })
-            .addCase(populateSurveyParticipants.pending, (state, action) => {
-                state.api = LOADING
-                state.currentRequestId = action.meta.requestId
-            })
-            .addCase(populateSurveyParticipants.fulfilled, (state, action) => {
-                const { requestId } = action.meta
-                if (state.api === LOADING && state.currentRequestId === requestId) {
-                    state.api = IDLE
-                    state.status = action.payload.status
-                    state.currentRequestId = undefined
-                }
-            })
+            // .addCase(populateSurveyParticipants.pending, (state, action) => {
+            //     state.api = LOADING
+            //     state.currentRequestId = action.meta.requestId
+            // })
+            // .addCase(populateSurveyParticipants.fulfilled, (state, action) => {
+            //     const { requestId } = action.meta
+            //     if (state.api === LOADING && state.currentRequestId === requestId) {
+            //         state.api = IDLE
+            //         state.status = action.payload.status
+            //         state.currentRequestId = undefined
+            //     }
+            // })
 
     },
 });
@@ -446,6 +483,10 @@ export const selectStudy = (state) => {
 
 export const selectStudySetupInfo = (state) => {
     return state.studies.studySetupInfo;
+}
+
+export const selectStudyExport = (state) => {
+    return state.studies.studyExport;
 }
 
 export const selectStudyApiStatus = (state) => {

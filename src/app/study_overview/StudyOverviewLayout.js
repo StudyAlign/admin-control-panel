@@ -25,6 +25,8 @@ import {
     updateStudy,
     selectStudyProcedureOverview,
     getProcedureConfigOverview,
+    exportStudySchema,
+    selectStudyExport
 } from "../../redux/reducers/studySlice";
 
 
@@ -47,20 +49,13 @@ export default function StudyOverviewLayout() {
     const [editState, setEditState] = useState(-1)
 
     const study = useSelector(selectStudy)
-    const studySetupInfo = useSelector(selectStudySetupInfo)
-    const procedureConfigOverview = useSelector(selectStudyProcedureOverview)
+    const studyExport = useSelector(selectStudyExport)
 
     useEffect(() => {
         dispatch(getStudy(study_id))
-        dispatch(getStudySetupInfo(study_id))
-        dispatch(getProcedureConfig(study_id)).then((response) => {
-            if (response.payload.body.id) {
-                dispatch(getProcedureConfigOverview(response.payload.body.id))
-            }
-        })
+        dispatch(exportStudySchema(study_id))
         return () => {
-            dispatch(studySlice.actions.resetStudySetupInfo())
-            dispatch(studySlice.actions.resetProcedureOverview())
+            dispatch(studySlice.actions.resetStudyExport())
         }
     }, [])
 
@@ -87,7 +82,7 @@ export default function StudyOverviewLayout() {
         )
     }
 
-    if (study == null || studySetupInfo == null || procedureConfigOverview == null) {
+    if (study == null || studyExport == null) {
         return (
             <>
                 <Topbar/>
@@ -140,15 +135,6 @@ export default function StudyOverviewLayout() {
 
     const handleExport = (event, type) => {
         event.preventDefault()
-        // gather study
-        const updatedStudy = { 
-            ...study,
-            planned_number_participants: studySetupInfo.planned_number_participants
-        }
-        const studyExport = {
-            study: updatedStudy,
-            procedure_config_steps: procedureConfigOverview.procedure_config_steps
-        }
         
         // Export
         let data
@@ -219,9 +205,9 @@ export default function StudyOverviewLayout() {
                     <Button variant="success" onClick={(event) => handleExport(event, 0)}>
                         JSON
                     </Button>
-                    <Button variant="success" onClick={(event) => handleExport(event, 1)}>
+                    {/* <Button variant="success" onClick={(event) => handleExport(event, 1)}>
                         YAML
-                    </Button>
+                    </Button> */}
                 </Modal.Footer>
             </Modal>
 

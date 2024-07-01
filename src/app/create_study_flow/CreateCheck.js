@@ -15,7 +15,7 @@ import {
     updateStudy,
     generateProceduresWithSteps,
     generateParticipants,
-    populateSurveyParticipants,
+    // populateSurveyParticipants,
     selectStudyProcedureOverview,
     getProcedureConfigOverview,
 } from "../../redux/reducers/studySlice";
@@ -96,7 +96,7 @@ export default function CreateCheck() {
         }))
 
         if (studySetupInfo.planned_procedure.findIndex(step => step.questionnaire_id != null) > -1) {
-            await dispatch(populateSurveyParticipants(study_id))
+            // await dispatch(populateSurveyParticipants(study_id))
         }
 
         await dispatch(updateStudy({
