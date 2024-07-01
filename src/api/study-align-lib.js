@@ -56,6 +56,7 @@ class StudyAlignLib {
                         reject({
                             status: xhr.status,
                             statusText: xhr.statusText,
+                            response: JSON.parse(xhr.response), //
                             requestBody: options.body
                         });
                     }
@@ -221,8 +222,8 @@ class StudyAlignLib {
     exportStudySchema(studyId) {
         return this.basicRead("studies/" + studyId + "/export");
     }
-    importStudySchema(studyId, studySchema) {
-        return this.basicCreate("studies/" + studyId + "/import", studySchema);
+    importStudySchema(studySchema) {
+        return this.basicCreate("studies/import", studySchema);
     }
     duplicateStudy(studyId) {
         return this.basicRead("studies/" + studyId + "/duplicate");

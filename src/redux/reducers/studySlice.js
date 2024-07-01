@@ -199,6 +199,21 @@ export const updateProcedure = createAsyncThunk(
     }
 );
 
+export const importStudySchema = createAsyncThunk(
+    'importStudySchema',
+    async (studySchema, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            return await apiWithAuth(importStudySchemaApi, studySchema, dispatch)
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
 export const exportStudySchema = createAsyncThunk(
     'exportStudySchema',
     async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
@@ -428,6 +443,21 @@ export const studySlice = createSlice({
                 state.status = action.payload.status
                 state.currentRequestId = undefined
                 state.studyExport = action.payload.body
+            })
+            //
+            // Import Study Schema Cases
+            .addCase(importStudySchema.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(importStudySchema.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                    state.study = action.payload.body
+                }
             })
             //
             .addCase(generateProceduresWithSteps.pending, (state, action) => {

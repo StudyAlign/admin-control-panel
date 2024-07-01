@@ -109,8 +109,8 @@ export function exportStudySchemaApi(studyId) {
     return sal.exportStudySchema(studyId);
 }
 
-export function importStudySchemaApi(args) {
-    return sal.importStudySchema(args.studyId, args.studySchema);
+export function importStudySchemaApi(studySchema) {
+    return sal.importStudySchema(studySchema);
 }
 
 export function duplicateStudyApi(studyId) {
