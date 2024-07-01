@@ -32,7 +32,6 @@ export default function StudyCreationLogic(props) {
 
     const next_step = (current_step) => {
         let idx = CreationOrder.indexOf(current_step)
-        if(idx === 0) idx += 1 // TODO: Remove after Backend Change
         return CreationOrder[idx+1]
     }
 

@@ -60,8 +60,7 @@ export default function SidebarLayout(props){
                                 <Nav.Link onClick={(event) => handleNavigation(event,CreationOrder[0],CreationOrder[1])} className={getClassName(CreationSteps.Information)}> (1) Study </Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                {/*TODO:0 -> 1, if backend is ready*/}
-                                <Nav.Link onClick={(event) => handleNavigation(event,CreationOrder[0],CreationOrder[2])} className={getClassName(CreationSteps.Procedure)}> (2) Procedure </Nav.Link>
+                                <Nav.Link onClick={(event) => handleNavigation(event,CreationOrder[1],CreationOrder[2])} className={getClassName(CreationSteps.Procedure)}> (2) Procedure </Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
                                 <Nav.Link onClick={(event) => handleNavigation(event,CreationOrder[2],CreationOrder[3])} className={getClassName(CreationSteps.Integrations)}> (3) Integrations </Nav.Link>

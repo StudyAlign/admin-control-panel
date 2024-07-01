@@ -207,9 +207,30 @@ class StudyAlignLib {
         this.setHeaders(options);
         return this.request(options);
     }
-    populateSurveyParticipants(studyId) {
-        return this.basicRead("studies/" + studyId + "/survey-participants");
+    addParticipants(studyId, amount) {
+        const options = {
+            method: "POST",
+            path: "studies/" + studyId + "/add-participants",
+            headers: {},
+            body: { amount: amount },
+            formData: true,
+        };
+        this.setHeaders(options);
+        return this.request(options);
     }
+    exportStudySchema(studyId) {
+        return this.basicRead("studies/" + studyId + "/export");
+    }
+    importStudySchema(studyId, studySchema) {
+        return this.basicCreate("studies/" + studyId + "/import", studySchema);
+    }
+    duplicateStudy(studyId) {
+        return this.basicRead("studies/" + studyId + "/duplicate");
+    }
+    // DEPRECATED function
+    //populateSurveyParticipants(studyId: number) {
+    //    return this.basicRead("studies/" + studyId + "/survey-participants");
+    //}
     // Procedure Configs
     getProcedureConfig(procedureConfigId) {
         return this.basicRead("procedure-configs/" + procedureConfigId);

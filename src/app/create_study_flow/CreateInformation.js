@@ -62,7 +62,7 @@ export default function CreateInformation() {
             "consent": consent,
             "planned_number_participants": amountParticipants,
             "planned_procedure": null,
-            "current_setup_step": "study"
+            "current_setup_step": "information" // jump to procedure after creating
         }
         await dispatch(createStudy(study))
         setCreated(true)
@@ -78,7 +78,7 @@ export default function CreateInformation() {
     }
 
     return(
-        <StudyCreationLayout step={CreationSteps.Information}>
+        <StudyCreationLayout step={CreationSteps.Information} static={true}>
 
             <Container>
                 <Form onSubmit={handleSubmit}>

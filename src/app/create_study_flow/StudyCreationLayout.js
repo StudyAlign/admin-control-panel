@@ -1,6 +1,7 @@
 import React from "react";
 import Topbar from "../../components/Topbar";
 import SidebarLayout from "./SidebarLayout";
+import SidebarLayoutStatic from "./SidebarLayoutStatic";
 
 export const StudyStatus = {
     Creation: 0,
@@ -24,6 +25,13 @@ export const CreationSteps = {
 }
 
 export default function StudyCreationLayout(props) {
+
+    let showStatic = false
+
+    if( props.static ) {
+        showStatic = props.static
+    }
+
     const getTitle = (step) => {
         switch (step) {
             case CreationSteps.Information:
@@ -39,13 +47,20 @@ export default function StudyCreationLayout(props) {
         }
     }
 
-    return(
+    return (
         <>
-            <Topbar/>
-            <SidebarLayout step={props.step}>
-                <h1 className="page-title"> {getTitle(props.step)} </h1>
-                {props.children}
-            </SidebarLayout>
+            <Topbar />
+                {showStatic ? (
+                    <SidebarLayoutStatic step={props.step}>
+                        <h1 className="page-title"> {getTitle(props.step)} </h1>
+                        {props.children}
+                    </SidebarLayoutStatic>
+                ) : (
+                    <SidebarLayout step={props.step}>
+                        <h1 className="page-title"> {getTitle(props.step)} </h1>
+                        {props.children}
+                    </SidebarLayout>
+                )}
         </>
     )
 }

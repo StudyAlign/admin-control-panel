@@ -94,7 +94,7 @@ export default function EditInformation(props) {
                 "consent": consent,
                 "planned_number_participants": amountParticipants,
                 "planned_procedure": null,
-                "current_setup_step": "study" // TODO change to "information" after backend change
+                "current_setup_step": "information"
             }
         }))
         await dispatch(getStudySetupInfo(study_id))

@@ -46,7 +46,7 @@ export default function App() {
                         <Route path="/study/:study_id/:page"    element={<StudyOverviewLayout/>} />
 
                         <Route path="import"            element={<ImportStudy/>} />
-                        <Route path="create"            element={<EmptyProcedureOrderProvider><CreateInformation/></EmptyProcedureOrderProvider>} />
+                        <Route path="create"            element={<CreateInformation/>} />
                         <Route path="create/:study_id"  element={<EmptyProcedureOrderProvider><StudyCreationLogic/></EmptyProcedureOrderProvider>}>
                             <Route path="information"   element={<EditInformation status={StudyStatus.Creation}/>} />
                             <Route path="procedure"     element={<CreateProcedure status={StudyStatus.Creation}/>} />
@@ -55,7 +55,7 @@ export default function App() {
                             <Route path="*"             element={<h1>ERROR</h1>} />
                         </Route>
 
-                        <Route path="edit/:study_id"  element={<StudyCreationLogic/>}>
+                        <Route path="edit/:study_id"  element={<EmptyProcedureOrderProvider><StudyCreationLogic/></EmptyProcedureOrderProvider>}>
                             <Route path="information"   element={<EditInformation status={StudyStatus.Active}/>} />
                             <Route path="procedure"     element={<CreateProcedure status={StudyStatus.Active}/>} />
                             <Route path="integrations"  element={<CreateIntegrations status={StudyStatus.Active}/>} />
