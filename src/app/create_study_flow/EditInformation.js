@@ -126,7 +126,8 @@ export default function EditInformation(props) {
                         <Col>
                             <Form.Group className="mb-3" controlId="formStartDate">
                                 <Form.Label>Start Date</Form.Label>
-                                <Form.Control disabled={disabled} required type="date" placeholder="Start Date" value={startDate} onChange={handleStartDate}/>
+                                <Form.Control disabled={disabled} required type="date" placeholder="Start Date" value={startDate} onChange={handleStartDate}
+                                    min={disabled ? null : (new Date()).toISOString().split('T')[0]} />
                             </Form.Group>
                         </Col>
                         <Col>
@@ -140,7 +141,7 @@ export default function EditInformation(props) {
 
                     <Row>
                         <Form.Group className="mb-3" controlId="formParticipants">
-                            <Form.Label>Amount Participants {disabled && <span style={{color:"red"}}>(at least {amountParticipantsRef.current})</span>}</Form.Label>
+                            <Form.Label>Amount Participants</Form.Label>
                             <Form.Control min={disabled ? amountParticipantsRef.current : 0} required type="number" placeholder="Amount Participants" value={amountParticipants} onChange={handleParticipants}/>
                         </Form.Group>
                     </Row>

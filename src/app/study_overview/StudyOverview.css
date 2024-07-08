@@ -20,19 +20,25 @@
     position: relative;
 }
 
-.sidebar-item {
+.sidebar-item{
     color: black;
     font-size: 16pt;
     margin-bottom: 5px;
 }
 
-.sidebar-item-selected {
+.sidebar-item:hover {
+    color: #224396;
+    cursor: pointer;
+}
+
+.sidebar-item-selected,
+.sidebar-item-selected:hover {
     color: #224396;
     font-weight: bold;
 }
 
-.sidebar-item:hover {
-    color: #224396;
+.nav-link:focus {
+    color: black;
 }
 
 .study-title {
