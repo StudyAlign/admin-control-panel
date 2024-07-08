@@ -21,6 +21,7 @@ import {
 } from "../../redux/reducers/studySlice";
 import { useDispatch, useSelector } from "react-redux";
 
+import Topbar from "../../components/Topbar";
 import LoadingScreen from "../../components/LoadingScreen";
 import { reformatDate } from "../../components/CommonFunctions";
 import ShowProcedure from "./ShowProcedure";
@@ -48,56 +49,40 @@ export default function CreateCheck() {
                 dispatch(getProcedureConfigOverview(response.payload.body.id))
             }
         })
-        dispatch(getTexts(study_id))
-        dispatch(getConditions(study_id))
-        dispatch(getPauses(study_id))
 
     }, [])
 
-    if (study == null || studySetupInfo == null
-        || texts == null || conditions == null || pauses == null || procedureConfigOverview == null) {
-        return <LoadingScreen/>
-    }
-
-    const getProcedureStep = (orderObject, key) => {
-        let header = ""
-
-        if (orderObject.text_id != null) {
-            header = texts.find(obj => obj.id === orderObject.text_id).title + " - Text"
-        }
-        else if (orderObject.condition_id != null) {
-            header = conditions.find(obj => obj.id === orderObject.condition_id).name + " - Condition"
-        }
-        else if (orderObject.questionnaire_id != null) {
-            header = "Questionnaire"
-        }
-        else if (orderObject.pause_id != null) {
-            header = pauses.find(obj => obj.id === orderObject.pause_id).title + " - Pause"
-        }
-
-        return <Card className="m-1 p-1" style={{ "width": "300px" }} key={key}> {header} </Card>
+    if (study == null || studySetupInfo == null || procedureConfig == null || procedureConfigOverview == null) {
+        return (
+            <>
+                <Topbar />
+                <LoadingScreen />
+            </>
+        )
     }
 
     const handleFinish = async (event) => {
         event.preventDefault()
 
-        let procedureScheme = studySetupInfo.planned_procedure.map(step =>
-            step.condition_id == null ? step : {"dummy": true}
-        )
+        // let procedureScheme = studySetupInfo.planned_procedure.map(step =>
+        //     step.condition_id == null ? step : {"dummy": true}
+        // )
 
-        await dispatch(generateProceduresWithSteps({
-            "studyId": study_id,
-            "procedureScheme": procedureScheme
-        }))
+        // DEPRECATED
+        // await dispatch(generateProceduresWithSteps({
+        //     "studyId": study_id,
+        //     "procedureScheme": null
+        // }))
 
         await dispatch(generateParticipants({
             "studyId": study_id,
             "amount": studySetupInfo.planned_number_participants
         }))
 
-        if (studySetupInfo.planned_procedure.findIndex(step => step.questionnaire_id != null) > -1) {
-            // await dispatch(populateSurveyParticipants(study_id))
-        }
+        // DEPRECATED
+        // if (studySetupInfo.planned_procedure.findIndex(step => step.questionnaire_id != null) > -1) {
+        //     await dispatch(populateSurveyParticipants(study_id))
+        // }
 
         await dispatch(updateStudy({
             "studyId": study_id,

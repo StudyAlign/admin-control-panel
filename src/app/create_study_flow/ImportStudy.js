@@ -4,6 +4,11 @@ import { Upload } from "react-bootstrap-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { Navigate, useLocation } from "react-router-dom";
 
+import CodeMirror from "@uiw/react-codemirror"
+import { vscodeDark } from "@uiw/codemirror-theme-vscode";
+import { json } from "@codemirror/lang-json";
+import { linter, lintGutter } from "@codemirror/lint";
+
 import * as yaml from "js-yaml";
 
 import {
@@ -30,10 +35,13 @@ export default function ImportStudy() {
     }
 
     const dispatch = useDispatch()
-    const auth = useAuth()
     const location = useLocation()
 
     const [text, setText] = useState('')
+    const onChange = React.useCallback((val, viewUpdate) => {
+        setText(val);
+    }, []);
+
     const [parsedData, setParsedData] = useState(null)
     const [showModal, setShowModal] = useState(modalStates.CORRECT)
     const [apiErrorText, setApiErrorText] = useState([])
@@ -255,6 +263,8 @@ export default function ImportStudy() {
         }
     }
 
+    
+
     return (
         <>
             <Topbar />
@@ -265,7 +275,7 @@ export default function ImportStudy() {
                         Drop file here
                     </div>
                 )}
-                <textarea
+                {/* <textarea
                     value={text}
                     onChange={handleTextChange}
                     placeholder={isDragging ? "" : "Write/Drop Json/Yaml here"}
@@ -277,6 +287,25 @@ export default function ImportStudy() {
                         height: '500px',
                         border: isDraggingOverTextArea ? '2px solid #00f' : (isDragging ? '2px dashed #000' : '1px solid #ccc'),
                         borderRadius: '5px',
+                        backgroundColor: isDraggingOverTextArea ? '#e0f7ff' : '#fff',
+                    }}
+                /> */}
+                <CodeMirror
+                    value={text}
+                    onChange={onChange}
+                    placeholder={isDragging ? "" : "Write/Drop Json/Yaml here"}
+                    onDragOver={handleDragOverTextArea}
+                    onDragLeave={handleDragLeaveTextArea}
+                    onDrop={handleDrop}
+                    extensions={[json()]}
+                    theme={vscodeDark}
+                    height="100%"
+                    style={{
+                        width: '100%',
+                        height: '600px',
+                        border: isDraggingOverTextArea ? '2px solid #00f' : (isDragging ? '2px dashed #000' : '1px solid #ccc'),
+                        borderRadius: '5px',
+                        margin: '10px 0 10px 0',
                         backgroundColor: isDraggingOverTextArea ? '#e0f7ff' : '#fff',
                     }}
                 />
