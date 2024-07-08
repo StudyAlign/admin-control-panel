@@ -8,7 +8,7 @@ import ResetPW from './app/login/ResetPW';
 import Dashboard from './app/dashboard/Dashboard';
 import StudyOverviewLayout from "./app/study_overview/StudyOverviewLayout";
 import CreateInformation from "./app/create_study_flow/CreateInformation";
-import CreateProcedure, { EmptyProcedureOrderProvider } from "./app/create_study_flow/CreateProcedure";
+import CreateProcedure, { CreateProcedureContextProvider } from "./app/create_study_flow/CreateProcedure";
 import StudyCreationLogic from "./app/create_study_flow/navigation_logic/StudyCreationLogic";
 import CreateIntegrations from "./app/create_study_flow/CreateIntegrations";
 import CreateCheck from "./app/create_study_flow/CreateCheck";
@@ -47,7 +47,7 @@ export default function App() {
 
                         <Route path="import"            element={<ImportStudy/>} />
                         <Route path="create"            element={<CreateInformation/>} />
-                        <Route path="create/:study_id"  element={<EmptyProcedureOrderProvider><StudyCreationLogic/></EmptyProcedureOrderProvider>}>
+                        <Route path="create/:study_id"  element={<CreateProcedureContextProvider><StudyCreationLogic/></CreateProcedureContextProvider>}>
                             <Route path="information"   element={<EditInformation status={StudyStatus.Creation}/>} />
                             <Route path="procedure"     element={<CreateProcedure status={StudyStatus.Creation}/>} />
                             <Route path="integrations"  element={<CreateIntegrations status={StudyStatus.Creation}/>} />
@@ -55,7 +55,7 @@ export default function App() {
                             <Route path="*"             element={<h1>ERROR</h1>} />
                         </Route>
 
-                        <Route path="edit/:study_id"  element={<EmptyProcedureOrderProvider><StudyCreationLogic/></EmptyProcedureOrderProvider>}>
+                        <Route path="edit/:study_id"  element={<CreateProcedureContextProvider><StudyCreationLogic/></CreateProcedureContextProvider>}>
                             <Route path="information"   element={<EditInformation status={StudyStatus.Active}/>} />
                             <Route path="procedure"     element={<CreateProcedure status={StudyStatus.Active}/>} />
                             <Route path="integrations"  element={<CreateIntegrations status={StudyStatus.Active}/>} />

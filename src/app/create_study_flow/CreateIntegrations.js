@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 
-import { getStudySetupInfo, selectStudySetupInfo, updateStudy } from "../../redux/reducers/studySlice";
+import { getStudySetupInfo, selectStudySetupInfo, updateStudy, getProcedureConfig, selectStudyProcedure, getProcedureConfigOverview, selectStudyProcedureOverview } from "../../redux/reducers/studySlice";
 
 import StudyCreationLayout, { CreationSteps } from "./navigation_logic/StudyCreationLayout";
+import { CreateProcedureContext } from "./CreateProcedure";
+import { ProcedureTypes } from "./ProcedureObject";
+import LoadingScreen from "../../components/LoadingScreen";
+import Topbar from "../../components/Topbar";
 
 const url = process.env.REACT_APP_STUDY_ALIGN_URL || "http://localhost:8000/";
 
@@ -72,12 +76,32 @@ export default function CreateIntegrations(props) {
 
     const { status } = props
 
+    const { currentSystem, NO_QUESTIONNAIRE_SYSTEM } = useContext(CreateProcedureContext)
+
     const { study_id } = useParams()
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const [checked, setChecked] = useState(false)
 
-    const studySetupInfo = useSelector(selectStudySetupInfo)
+    const procedureConfig = useSelector(selectStudyProcedure)
+    const procedureConfigOverview = useSelector(selectStudyProcedureOverview)
+
+    useEffect(() => {
+        dispatch(getProcedureConfig(study_id)).then((response) => {
+            if (response.payload.body.id) {
+                dispatch(getProcedureConfigOverview(response.payload.body.id))
+            }
+        })
+    }, [])
+
+    if (procedureConfig == null || procedureConfigOverview == null) {
+        return (
+            <>
+                <Topbar />
+                <LoadingScreen />
+            </>
+        )
+    }
 
     const copyToClipboard = (event) => {
         event.preventDefault()
@@ -96,33 +120,109 @@ export default function CreateIntegrations(props) {
         navigate("/create/" + study_id + "/check")
     }
 
+    const checkForQuestionnaires = () => {
+        const gatherArray = (steps) => {
+            let procedure = []
+            for (let step of steps) {
+                let newContent = {
+                    id: undefined,
+                    type: undefined,
+                    content: undefined,
+                    children: undefined
+                }
+                if (step["questionnaire_id"]) {
+                    newContent.id = "q" + step["questionnaire_id"].toString()
+                    newContent.type = ProcedureTypes.Questionnaire
+                    let empty_content = JSON.parse(JSON.stringify(ProcedureTypes.Questionnaire.emptyContent))
+                    for (let [key,] of Object.entries(ProcedureTypes.Questionnaire.emptyContent)) {
+                        empty_content[key] = step["questionnaire"][key]
+                    }
+                    newContent.content = JSON.parse(JSON.stringify(empty_content))
+                    // push new content
+                    procedure.push(newContent)
+                } else if (step["block_id"]) {
+                    newContent.id = "b" + step["block_id"].toString()
+                    newContent.type = ProcedureTypes.BlockElement
+                    newContent.children = gatherArray(step["block"]["procedure_config_steps"])
+                    // push new content
+                    procedure.push(newContent)
+                }
+            }
+            return procedure
+        }
+        const questionnaireBlockArray = gatherArray(procedureConfigOverview["procedure_config_steps"])
+        const blockElements = questionnaireBlockArray.filter(element => element.type === ProcedureTypes.BlockElement)
+        // save questionnaireBlockArray without block elements
+        const questionnaireArray = questionnaireBlockArray.filter(element => element.type === ProcedureTypes.Questionnaire)
+        for (let block of blockElements) {
+            for (let q of block.children) {
+                questionnaireArray.push(q)
+            }
+        }
+        return questionnaireArray
+    }
+
+    const showCurrentSystemCallback = () => {
+        let noSystem
+        let system
+
+        const questionnaires = checkForQuestionnaires()
+        if (questionnaires.length === 0) {
+            noSystem = true
+        } else {
+            noSystem = false
+            system = questionnaires[0].content.system
+        }
+
+        if (noSystem) {
+            return (
+                <>
+                    <Row>
+                        <p> You are not using a questionnaire system in your procedure. </p>
+                        <p> Go to the next page and chek out your study! </p>
+                    </Row>
+
+                    <Row className='mt-3' xs="auto">
+                        <Button size="lg" onClick={handleProceed}>Save and Proceed</Button>
+                    </Row>
+                </>
+            )
+        } else {
+            return (
+                <>
+                    <Row>
+                        <p> Your are using <span style={{ color: 'blue' }}>{system}</span> questionnaires in your procedure. </p>
+
+                        <p> Please paste the following Callback code into the “End Message” of each of your questionnaires (see example screenshot).</p>
+                    </Row>
+
+                    <Row className="align-items-baseline">
+                        <Col xs="auto">
+                            <textarea disabled rows={18} cols={80} style={{ "fontSize": "10pt" }} value={code} />
+                        </Col>
+                        <Col xs="auto">
+                            <Button variant="secondary" size="sm" className="align-text-bottom" onClick={copyToClipboard}> Copy to clipboard </Button>
+                        </Col>
+                    </Row>
+
+                    <Row>
+                        <Form.Check checked={checked}
+                            onChange={() => setChecked(!checked)}
+                            label={"I have pasted the callback code into the end messages."} />
+                    </Row>
+
+                    <Row className='mt-3' xs="auto">
+                        <Button size="lg" onClick={handleProceed} disabled={!checked}>Save and Proceed</Button>
+                    </Row>
+                </>
+            )
+        }
+    }
+
     return (
         <StudyCreationLayout step={CreationSteps.Integrations}>
             <Container>
-                <Row>
-                    <p> Your are using LimeSurvey questionnaires in your procedure. </p>
-
-                    <p> Please paste the following Callback code into the “End Message” of each of your questionnaires (see example screenshot).</p>
-                </Row>
-
-                <Row className="align-items-baseline">
-                    <Col xs="auto">
-                        <textarea disabled rows={18} cols={80} style={{"fontSize": "10pt"}} value={code}/>
-                    </Col>
-                    <Col xs="auto">
-                        <Button variant="secondary" size="sm" className="align-text-bottom" onClick={copyToClipboard}> Copy to clipboard </Button>
-                    </Col>
-                </Row>
-
-                <Row>
-                    <Form.Check checked={checked}
-                                onChange={() => setChecked(!checked)}
-                                label={"I have pasted the callback code into the end messages."}/>
-                </Row>
-
-                <Row className='mt-3' xs="auto">
-                    <Button size="lg" onClick={handleProceed} disabled={!checked}>Save and Proceed</Button>
-                </Row>
+                {showCurrentSystemCallback()}
             </Container>
         </StudyCreationLayout>
     )

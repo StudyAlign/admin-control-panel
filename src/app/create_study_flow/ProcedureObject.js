@@ -1,8 +1,10 @@
-import React, { useEffect, useState, useImperativeHandle, forwardRef } from 'react';
+import React, { useEffect, useState, useImperativeHandle, forwardRef, useContext } from 'react';
 import { DragHandleComponent } from 'react-sortful'
 import { Accordion, Form, Button, Tooltip, OverlayTrigger } from "react-bootstrap";
 import { Trash3, Save } from "react-bootstrap-icons";
 import { useDispatch} from "react-redux";
+
+import { CreateProcedureContext } from './CreateProcedure';
 
 import { createSingleProcedureConfigStep } from "../../redux/reducers/studySlice"
 import { createText, updateText } from "../../redux/reducers/textSlice";
@@ -38,7 +40,7 @@ export const ProcedureTypes = {
         key: "questionnaire",
         label: "Questionnaire",
         color: "rgb(144,30,64)",
-        emptyContent: { "url": "", "system": "limesurvey", "ext_id": "-", "api_url": "-", "api_username": "-", "api_password": "-", "study_id": -1}
+        emptyContent: { "url": "", "system": "", "study_id": -1}
     },
     Pause:  {
         id: 3,
@@ -115,10 +117,41 @@ function ConditionForm(props) {
 }
 
 function QuestionnaireForm(props) {
+    // Questionnaire Context
+    const {
+        questionnaireUpdateList,
+        currentSystem,
+        setCurrentSystem,
+        setQuestionnaireModalContent,
+        setShowQuestionnaireModal,
+        NO_QUESTIONNAIRE_SYSTEM
+    } = useContext(CreateProcedureContext)
+
+    const isValidSystem = (value) => {
+        // If no value is set or there is just one questionnaire, return true
+        if ( currentSystem === NO_QUESTIONNAIRE_SYSTEM || currentSystem === value || questionnaireUpdateList.length === 1 ) {
+            setCurrentSystem(value)
+            return true
+        } else {
+            console.log("Show Modal",value,currentSystem,questionnaireUpdateList)
+            setQuestionnaireModalContent([currentSystem, value])
+            setShowQuestionnaireModal(true)
+            return false
+        }
+    }
 
     const onChange = (event) => {
         event.preventDefault()
-        props.editProcedureStep(event.target.id, event.target.value)
+        const { id, value } = event.target
+
+        if (id === "system") {
+            console.log("System",id,value)
+            if (isValidSystem(value)) {
+                props.editProcedureStep(id, value)
+            }
+        } else {
+            props.editProcedureStep(id, value)
+        }
     }
 
     return (
@@ -133,27 +166,12 @@ function QuestionnaireForm(props) {
                 <Form.Select value={props.content.system} onChange={onChange}>
                     <option disabled value={""}> -- Select a System -- </option>
                     <option value={"limesurvey"}> Limesurvey </option>
+                    <option value={"qualtrics"}> Qualtrics </option>
+                    <option value={"surveymonkey"}> Survey Monkey </option>
+                    <option value={"googleforms"}> Google Forms </option>
+                    <option value={"typeform"}> Typeform </option>
+                    <option value={"jotform"}> Jotform </option>
                 </Form.Select>
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="ext_id">
-                <Form.Label> Ext-Id </Form.Label>
-                <Form.Control type="text" value={props.content.ext_id} onChange={onChange} required/>
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="api_url">
-                <Form.Label> API-Url </Form.Label>
-                <Form.Control type="url" value={props.content.api_url} onChange={onChange} required/>
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="api_username">
-                <Form.Label> API-Username </Form.Label>
-                <Form.Control type="text" value={props.content.api_username} onChange={onChange} required/>
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="api_password">
-                <Form.Label> API-Password </Form.Label>
-                <Form.Control type="password" value={props.content.api_password} onChange={onChange} required/>
             </Form.Group>
         </Form>
     )
@@ -219,10 +237,7 @@ const dotsSVG = (
 
 
 const ProcedureObject = forwardRef((props, ref) => {
-
-    
-    
-    
+ 
     // ---------------------------------------------------------------------------------------------------------
     // Sector: React States and References: Start --------------------------------------------------------------
 
@@ -234,8 +249,8 @@ const ProcedureObject = forwardRef((props, ref) => {
     const [stepId, setStepId] = useState(props.stepId) // StepId of ProcedureObject
     const [stored, setStored] = useState(props.stored) // Indicator if ProcedureObject already got stored in backed
     const [updated, setUpdated] = useState(false) // Indicator if the content got updated
-    const [showTooltip, setShowTooltip] = useState(false);
-    const [delayTimeout, setDelayTimeout] = useState(null);
+    const [showTooltip, setShowTooltip] = useState(false)
+    const [delayTimeout, setDelayTimeout] = useState(null)
 
     // onclose logic ref from accordion in createProcedure
     useImperativeHandle(ref, () => ({
@@ -243,6 +258,13 @@ const ProcedureObject = forwardRef((props, ref) => {
             if (updated) {
                 updateContent()
             }
+        },
+        changeQuestionnaireSystem(id, newSystem) {
+            console.log("Test changeQuestionnaireSystem: ",id,newSystem)
+            let newContent = {...content}
+            newContent.system = newSystem
+            setContent(newContent)
+            updateQuestionnaireRef(newContent)
         }
     }))
 
@@ -268,6 +290,26 @@ const ProcedureObject = forwardRef((props, ref) => {
             }
         }
         return true
+    }
+
+    const updateQuestionnaireRef = async (newContent) => {
+        // if not stored or not complete return
+        if (!stored || !contentComplete()) return
+
+        console.log("Update Questionnaire via Ref",newContent)
+
+        // update Questionnaire in Backend
+        const response = await dispatch(updateQuestionnaire({questionnaireId: backendId, questionnaire: {
+            "url": newContent.url,
+            "system": newContent.system
+        }}))
+
+        // if response successful status 204
+        if (response.payload.status === 204) {
+            props.setMessage({type: "success", text: "Questionnaire updated"})
+        } else {
+            props.setMessage({ type: "danger", text: "Error while updating Questionnaire, please reload page!" })
+        }
     }
 
     const storeContent = async () => {
@@ -367,7 +409,7 @@ const ProcedureObject = forwardRef((props, ref) => {
             return
         }
 
-        // create ProcedureObject in Backend
+        // update ProcedureObject in Backend
         let response = { payload: { status: 400 } }
         if (props.type === ProcedureTypes.TextPage) {
             response = await dispatch(updateText({textId: backendId, text: {
@@ -392,11 +434,7 @@ const ProcedureObject = forwardRef((props, ref) => {
         else if (props.type === ProcedureTypes.Questionnaire) {
             response = await dispatch(updateQuestionnaire({questionnaireId: backendId, questionnaire: {
                     "url": content.url,
-                    "system": content.system,
-                    "ext_id": content.ext_id,
-                    "api_url": content.api_url,
-                    "api_username": content.api_username,
-                    "api_password": content.api_password,
+                    "system": content.system
                 }}))
         }
         else if (props.type === ProcedureTypes.Pause) {

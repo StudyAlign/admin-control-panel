@@ -34,20 +34,60 @@ import styles from "./CreateProcedure.module.css";
 // ---------------------------------------------------------------------------------------------------
 // Sector: Empty Procedure Order --------------------------------------------------------------
 
-export const EmptyProcedureOrder = createContext()
+export const CreateProcedureContext = createContext()
 
-export const EmptyProcedureOrderProvider = ({ children }) => {
+export const CreateProcedureContextProvider = ({ children }) => {
+    // EmptyProcedure
     const [emptyOrder, setEmptyOrder] = useState(false)
     const [emptyOrderListener, setEmptyOrderListener] = useState(true)
+    // QuestionnaireSystem
+    const [questionnaireUpdateList, setQuestionnaireUpdateList] = useState([])
+    const [currentSystem, setCurrentSystem] = useState("")
+    const [questionnaireModalContent, setQuestionnaireModalContent] = useState([])
+    const [showQuestionnaireModal, setShowQuestionnaireModal] = useState(false)
+
+    const NO_QUESTIONNAIRE_SYSTEM = ""
+
+    const addToQuestionnaireUpdateList = (questionnaireId) => {
+        // check if questionnaireId is already in list
+        if (questionnaireUpdateList.includes(questionnaireId)) return
+        setQuestionnaireUpdateList([...questionnaireUpdateList, questionnaireId])
+    }
+
+    const removeFromQuestionnaireUpdateList = (questionnaireId) => {
+        const filteredList = questionnaireUpdateList.filter(id => id !== questionnaireId)
+        if (filteredList.length === 0) {
+            setCurrentSystem(NO_QUESTIONNAIRE_SYSTEM)
+        }
+        setQuestionnaireUpdateList(filteredList)
+    }
+
+    const resetQuestionnaireUpdateList = () => {
+        setQuestionnaireUpdateList([])
+        setCurrentSystem(NO_QUESTIONNAIRE_SYSTEM)
+    }
+
     return (
-        <EmptyProcedureOrder.Provider value={{
+        <CreateProcedureContext.Provider value={{
             emptyOrder,
             setEmptyOrder,
             emptyOrderListener,
-            setEmptyOrderListener
+            setEmptyOrderListener,
+            //
+            addToQuestionnaireUpdateList,
+            removeFromQuestionnaireUpdateList,
+            resetQuestionnaireUpdateList,
+            questionnaireUpdateList,
+            currentSystem,
+            setCurrentSystem,
+            questionnaireModalContent,
+            setQuestionnaireModalContent,
+            showQuestionnaireModal,
+            setShowQuestionnaireModal,
+            NO_QUESTIONNAIRE_SYSTEM
         }}>
             {children}
-        </EmptyProcedureOrder.Provider>
+        </CreateProcedureContext.Provider>
     )
 }
 
@@ -81,7 +121,24 @@ export default function CreateProcedure(props) {
     // ---------------------------------------------------------------------------------------------------------
     // Sector: React States and References: Start --------------------------------------------------------------
 
-    const { emptyOrder, setEmptyOrder, emptyOrderListener ,setEmptyOrderListener } = useContext(EmptyProcedureOrder)
+    const {
+        emptyOrder,
+        setEmptyOrder,
+        emptyOrderListener,
+        setEmptyOrderListener,
+        //
+        addToQuestionnaireUpdateList,
+        removeFromQuestionnaireUpdateList,
+        resetQuestionnaireUpdateList,
+        questionnaireUpdateList,
+        currentSystem,
+        setCurrentSystem,
+        questionnaireModalContent,
+        setQuestionnaireModalContent,
+        showQuestionnaireModal,
+        setShowQuestionnaireModal,
+        NO_QUESTIONNAIRE_SYSTEM
+    } = useContext(CreateProcedureContext)
 
     // States
     const [disabled] = useState(status === StudyStatus.Active ? true : false)
@@ -120,6 +177,7 @@ export default function CreateProcedure(props) {
         Promise.all([
             dispatch(getProcedureConfig(study_id)),
         ]).then(() => {
+            resetQuestionnaireUpdateList()
             setIsDispatched(true)
         })
 
@@ -190,6 +248,9 @@ export default function CreateProcedure(props) {
                             empty_content[key] = step["questionnaire"][key]
                         }
                         newContent.content = JSON.parse(JSON.stringify(empty_content))
+                        // add to update list
+                        addToQuestionnaireUpdateList(newContent.id)
+                        setCurrentSystem(empty_content.system)
                         // push new content
                         procedure.push(newContent)
                     } else if (step["pause_id"]) {
@@ -349,6 +410,10 @@ export default function CreateProcedure(props) {
                     newMap.delete(id)
                     // delete ref from procedureObjectRefs
                     procedureObjectRefs.current.delete(id)
+                    // if questionnaire remove from update list
+                    if (procedureObject.type === ProcedureTypes.Questionnaire) {
+                        removeFromQuestionnaireUpdateList(id)
+                    }
 
                     // delete child from superior element
                     for (let [, value] of newMap) {
@@ -449,23 +514,80 @@ export default function CreateProcedure(props) {
         return notStored
     }
 
+    const onQuestionnaireSystemChange = () => {
+        const newMap = new Map(procedureObjectMapState)
+        // for each questionaireUpdateList in procedureObjectRefs.current
+        for (let questionnaireId of questionnaireUpdateList) {
+            const ref = procedureObjectRefs.current.get(questionnaireId)
+            if (ref && ref.current) {
+                ref.current.changeQuestionnaireSystem(questionnaireId, questionnaireModalContent[1])
+            }
+            // update frontend state
+            const procedureObject = newMap.get(questionnaireId)
+            if (procedureObject) {
+                procedureObject.content.system = questionnaireModalContent[1]
+            }
+        }
+        setProcedureObjectMapState(newMap)
+        setCurrentSystem(questionnaireModalContent[1])
+        onQuestionnaireModalClose()
+    }
+
+    const onQuestionnaireModalClose = () => {
+        setQuestionnaireModalContent([])
+        setShowQuestionnaireModal(false)
+    }
+
+    const questionnaireModalBody = () => {
+        if (questionnaireModalContent.length === 0) {
+            return (
+                <>
+                    <Modal.Body>
+                        You have different Systems in your Questionnaires. Please choose one System for all Questionnaires.
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={() => onQuestionnaireModalClose()}>
+                            Cancel
+                        </Button>
+                    </Modal.Footer>
+                </>
+            )
+        } else {
+            return (
+                <>
+                    <Modal.Body>
+                        You have different Systems in your Questionnaires. Do you want to change all Systems from "{questionnaireModalContent[0]}" to "{questionnaireModalContent[1]}"?
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={() => onQuestionnaireModalClose()}>
+                            Cancel
+                        </Button>
+                        <Button variant="warning" onClick={() => onQuestionnaireSystemChange()}>
+                            Change
+                        </Button>
+                    </Modal.Footer>
+                </>
+            )
+        }
+    }
+
     const onCollapseListener = (eventKey) => {
         // if event key = null => Accordion is closed => current state is last closed Accordion
         // if event key is not state and both are not null => current state represents last closed Accordion
         let closedEvent = eventKey === null || (selectedAccordionKey !== eventKey && selectedAccordionKey !== null && eventKey !== null)
 
         if(closedEvent && selectedAccordionKey !== null){
-            const ref = procedureObjectRefs.current.get(selectedAccordionKey);
+            const ref = procedureObjectRefs.current.get(selectedAccordionKey)
             if (ref && ref.current) {
-                ref.current.handleClose();
+                ref.current.handleClose()
             }
         }
 
         // check if the selected Accordion is already open
-        const isAlreadyOpen = selectedAccordionKey === eventKey;
+        const isAlreadyOpen = selectedAccordionKey === eventKey
     
         // update state with selected Accordion key
-        setSelectedAccordionKey(isAlreadyOpen ? null : eventKey);
+        setSelectedAccordionKey(isAlreadyOpen ? null : eventKey)
     }
 
     // Sector: Evaluate ProcedureMap: End --------------------------------------------------------------
@@ -489,6 +611,12 @@ export default function CreateProcedure(props) {
         // Set study id
         let empty_content = JSON.parse(JSON.stringify(procedureType.emptyContent))
         empty_content.study_id = study_id
+        if (procedureType === ProcedureTypes.Questionnaire) {
+            addToQuestionnaireUpdateList(newId)
+            if (currentSystem !== NO_QUESTIONNAIRE_SYSTEM) {
+                empty_content.system = currentSystem
+            }
+        }
 
         // Create new ProcedureObject
         let isBlockElement = procedureType === ProcedureTypes.BlockElement
@@ -738,7 +866,7 @@ export default function CreateProcedure(props) {
                         type: "danger",
                         text: "You can't nest Block Elements within other Block Elements.",
                         duration: 4000})
-                    return;
+                    return
                 }
             }
 
@@ -950,6 +1078,13 @@ export default function CreateProcedure(props) {
                 </Modal.Footer>
             </Modal>
 
+            <Modal show={showQuestionnaireModal}>
+                <Modal.Header>
+                    <Modal.Title> Questionnaire System Mismatch </Modal.Title>
+                </Modal.Header>
+                {questionnaireModalBody()}
+            </Modal>
+
             <Modal show={showModal}>
                 <Modal.Header>
                     <Modal.Title> Still proceed? </Modal.Title>
@@ -970,4 +1105,3 @@ export default function CreateProcedure(props) {
         </>
     )
 }
-

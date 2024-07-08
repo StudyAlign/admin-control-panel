@@ -6,14 +6,14 @@ import { useDispatch } from "react-redux";
 import { CreationSteps } from "./StudyCreationLayout";
 import { studySlice, updateStudy, getStudySetupInfo } from "../../../redux/reducers/studySlice";
 import { CreationOrder } from "./StudyCreationLayout";
-import { EmptyProcedureOrder } from "../CreateProcedure";
+import { CreateProcedureContext } from "../CreateProcedure";
 
 import "../CreateStudyFlow.css";
 
 
 export default function SidebarLayout(props){
 
-    const { setEmptyOrder, emptyOrderListener } = useContext(EmptyProcedureOrder)
+    const { setEmptyOrder, emptyOrderListener } = useContext(CreateProcedureContext)
 
     const { study_id } = useParams()
     const dispatch = useDispatch()
