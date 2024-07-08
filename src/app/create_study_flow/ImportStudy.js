@@ -19,23 +19,6 @@ import Topbar from "../../components/Topbar";
 import { ProcedureTypes } from "./ProcedureObject";
 
 
-const expectedStructure = {
-    study: {
-        name: '',
-        startDate: '',
-        endDate: '',
-        is_active: false,
-        // owner_id: 1,
-        invite_only: false,
-        // id: 0,
-        description: '',
-        consent: '',
-        planned_number_participants: 0
-    },
-    procedure_config_steps: []
-}
-
-
 export default function ImportStudy() {
 
     const modalStates = {

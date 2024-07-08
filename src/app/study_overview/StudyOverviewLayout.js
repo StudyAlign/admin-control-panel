@@ -40,13 +40,19 @@ export default function StudyOverviewLayout() {
         NotOpen: 2,
     }
 
+    const modalStates = {
+        DELETE: 0,
+        EXPORT: 1,
+        CORRECT: 2,
+    }
+
     const { study_id, page } = useParams()
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
-    const [deleteModal, setDeleteModal] = useState(false)
-    const [exportModal, setExportModal] = useState(false)
+    const [showModal, setShowModal] = useState(modalStates.CORRECT)
+    const [copyButtonText, setCopyButtonText] = useState('COPY TO CLIPBOARD');
     const [editState, setEditState] = useState(-1)
 
     const study = useSelector(selectStudy)
@@ -136,6 +142,23 @@ export default function StudyOverviewLayout() {
         })
     }
 
+    const handleCopyToClipboard = (event) => {
+        event.preventDefault()
+        navigator.clipboard.writeText(JSON.stringify(studyExport, null, 2)).then(() => {
+            setCopyButtonText('COPIED!');
+            setTimeout(() => {
+                setCopyButtonText('COPY TO CLIPBOARD');
+            }, 2000);
+        }).catch(err => {
+            console.error('Copy To Clipboard Error', err);
+            setCopyButtonText('ERROR!');
+            setTimeout(() => {
+                setCopyButtonText('COPY TO CLIPBOARD');
+            }, 2000);
+        });
+    }
+
+
     const handleExport = (event, type) => {
         event.preventDefault()
         
@@ -155,7 +178,7 @@ export default function StudyOverviewLayout() {
         }
 
         // close modal
-        setExportModal(false)
+        setShowModal(modalStates.CORRECT)
 
         // Create a blob and trigger download
         const blob = new Blob([data], { type: mimeType })
@@ -166,6 +189,67 @@ export default function StudyOverviewLayout() {
         event.preventDefault()
         await dispatch(deleteStudy(study_id))
         navigate("/")
+    }
+
+    const returnModal = () => {
+        if (showModal !== modalStates.CORRECT) {
+            let title = null
+            let body = null
+            let footer = null
+
+            if (showModal === modalStates.DELETE) {
+                title = "Delete Study"
+                body = (
+                    <Modal.Body>
+                        Are you sure you want to delete study: "{study.name}"!
+                    </Modal.Body>
+                )
+                footer = (
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={() => setShowModal(modalStates.CORRECT)}>
+                            Cancel
+                        </Button>
+                        <Button variant="danger" onClick={handleDelete}>
+                            Delete
+                        </Button>
+                    </Modal.Footer>
+                )
+            } else if (showModal === modalStates.EXPORT) {
+                title = "Export Study"
+                body = (
+                    <Modal.Body>
+                        Export study: "{study.name}"!
+                        <textarea
+                            value={JSON.stringify(studyExport, null, 2)}
+                            readOnly
+                            style={{width: '100%', height: '300px', marginTop: '10px'}}
+                        />
+                    </Modal.Body>
+                )
+                footer = (
+                    <Modal.Footer>
+                        <Button variant="primary" onClick={(event) => handleCopyToClipboard(event)}>
+                            {copyButtonText}
+                        </Button>
+                        <Button variant="success" onClick={(event) => handleExport(event, 0)}>
+                            DOWNLOAD
+                        </Button>
+                    </Modal.Footer>
+                )
+            }
+
+            if (title === null || body === null || footer === null) return
+
+            return (
+                <Modal show={true} onHide={() => setShowModal(modalStates.CORRECT)}>
+                    <Modal.Header>
+                        <Modal.Title> {title} </Modal.Title>
+                    </Modal.Header>
+                    {body}
+                    {footer}
+                </Modal>
+            )
+        }
     }
 
     return (
@@ -187,9 +271,9 @@ export default function StudyOverviewLayout() {
                                     <Dropdown.Item onClick={handleEdit}>Edit</Dropdown.Item>
                                 ) : null}
                                 <Dropdown.Item onClick={handleDuplicate}>Duplicate</Dropdown.Item>
-                                <Dropdown.Item onClick={() => setExportModal(true)}>Export Study</Dropdown.Item>
+                                <Dropdown.Item onClick={() => setShowModal(modalStates.EXPORT)}>Export Study</Dropdown.Item>
                                 <Dropdown.Divider/>
-                                <Dropdown.Item onClick={() => setDeleteModal(true)} style={{color: "red"}}>Delete</Dropdown.Item>
+                                <Dropdown.Item onClick={() => setShowModal(modalStates.DELETE)} style={{color: "red"}}>Delete</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
                     </Col>
@@ -197,39 +281,7 @@ export default function StudyOverviewLayout() {
                 {getContent(page)}
             </SidebarLayout>
 
-            <Modal show={exportModal}>
-                <Modal.Header>
-                    <Modal.Title> Export Study </Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    Decide export format for "{study.name}"!
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="success" onClick={(event) => handleExport(event, 0)}>
-                        JSON
-                    </Button>
-                    {/* <Button variant="success" onClick={(event) => handleExport(event, 1)}>
-                        YAML
-                    </Button> */}
-                </Modal.Footer>
-            </Modal>
-
-            <Modal show={deleteModal}>
-                <Modal.Header>
-                    <Modal.Title> Delete Study </Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    Are you sure you want to delete the study "{study.name}"?
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setDeleteModal(false)}>
-                        Cancel
-                    </Button>
-                    <Button variant="danger" onClick={handleDelete}>
-                        Delete
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+            {returnModal()}
         </>
     )
 }
