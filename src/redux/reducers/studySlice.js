@@ -246,14 +246,13 @@ export const exportStudySchema = createAsyncThunk(
 
 export const generateProceduresWithSteps = createAsyncThunk(
     'generateProceduresWithSteps',
-    async (args, { dispatch, getState, rejectWithValue, requestId}) => {
+    async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
         const { api, currentRequestId } = getState().studies
         if (api !== LOADING || requestId !== currentRequestId) {
             return
         }
         try {
-            const response = await apiWithAuth(generateProceduresWithStepsApi, args, dispatch)
-            return response;
+            return await apiWithAuth(generateProceduresWithStepsApi, studyId, dispatch)
         } catch (err) {
             return rejectWithValue(err)
         }

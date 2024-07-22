@@ -188,7 +188,7 @@ class StudyAlignLib {
     deleteStudy(studyId) {
         return this.basicDelete("studies/" + studyId);
     }
-    generateProceduresWithSteps(studyId, procedureScheme) {
+    generateProceduresWithSteps(studyId) {
         return this.basicCreate("studies/" + studyId + "/procedures");
     }
     getProcedureConfigMain(studyId) {

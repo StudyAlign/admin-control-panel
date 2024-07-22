@@ -68,11 +68,7 @@ export default function CreateCheck() {
         //     step.condition_id == null ? step : {"dummy": true}
         // )
 
-        // DEPRECATED
-        await dispatch(generateProceduresWithSteps({
-            "studyId": study_id,
-            "procedureScheme": studySetupInfo.planned_procedure
-        }))
+        await dispatch(generateProceduresWithSteps(study_id))
 
         await dispatch(generateParticipants({
             "studyId": study_id,
