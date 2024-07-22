@@ -8,7 +8,7 @@ import { studySlice, updateStudy, getStudySetupInfo } from "../../../redux/reduc
 import { CreationOrder } from "./StudyCreationLayout";
 import { CreateProcedureContext } from "../CreateProcedure";
 
-import "../CreateStudyFlow.css";
+import "../../SidebarAndReactStyles.css";
 
 
 export default function SidebarLayout(props){
@@ -66,7 +66,7 @@ export default function SidebarLayout(props){
                                 <Nav.Link onClick={(event) => handleNavigation(event,CreationOrder[1],CreationOrder[2])} className={getClassName(CreationSteps.Procedure)}> (2) Procedure </Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link onClick={(event) => handleNavigation(event,CreationOrder[2],CreationOrder[3])} className={getClassName(CreationSteps.Integrations)}> (3) Integrations </Nav.Link>
+                                <Nav.Link onClick={(event) => handleNavigation(event,CreationOrder[2],CreationOrder[3])} className={getClassName(CreationSteps.Integrations) + ' integrations'}> (3) Integrations </Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
                                 <Nav.Link disabled style={{ cursor: "not-allowed" }} className={getClassName(CreationSteps.Check)} > (4) Check </Nav.Link>

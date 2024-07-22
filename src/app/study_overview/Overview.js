@@ -7,6 +7,7 @@ import { getStudy, updateStudy } from "../../redux/reducers/studySlice";
 import { reformatDate } from "../../components/CommonFunctions";
 
 import "./StudyOverview.css";
+import "../SidebarAndReactStyles.css";
 
 export default function Overview(props) {
     const dispatch = useDispatch()

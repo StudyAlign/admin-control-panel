@@ -3,7 +3,7 @@ import { Container, Row, Col, Nav } from "react-bootstrap";
 
 import { CreationSteps } from "./StudyCreationLayout";
 
-import "../CreateStudyFlow.css"
+import "../../SidebarAndReactStyles.css";
 
 export default function SidebarLayoutStatic(props){
 
@@ -28,7 +28,7 @@ export default function SidebarLayoutStatic(props){
                                 <Nav.Link disabled className={getClassName(CreationSteps.Procedure)}> (2) Procedure </Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link disabled className={getClassName(CreationSteps.Integrations)}> (3) Integrations </Nav.Link>
+                                <Nav.Link disabled className={getClassName(CreationSteps.Integrations) + ' integrations'}> (3) Integrations </Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
                                 <Nav.Link disabled className={getClassName(CreationSteps.Check)}> (4) Check </Nav.Link>

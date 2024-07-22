@@ -4,6 +4,7 @@ import { useParams } from "react-router";
 import { useTable } from "react-table";
 
 import "./StudyOverview.css"
+import "../SidebarAndReactStyles.css";
 
 export default function InteractionData() {
     const { study_id } = useParams()
