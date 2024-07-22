@@ -7,6 +7,10 @@
     margin-left: 10px;
 }
 
+.invalidLabel {
+    color: #dc3545;
+}
+
 .saveButton {
     margin-left: 10px;
     background: none;

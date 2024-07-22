@@ -104,8 +104,18 @@ function ConditionForm(props) {
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="config">
-                <Form.Label> Config </Form.Label>
-                <Form.Control as="textarea" rows={3} value={props.content.config} onChange={onChange} required/>
+                <Form.Label className={props.error ? styles.invalidLabel : ''}>
+                    {props.error ? 'Config*' : 'Config'}
+                </Form.Label>
+                <Form.Control
+                    as="textarea"
+                    rows={3}
+                    value={props.content.config}
+                    onChange={onChange}
+                    required
+                    className={props.error ? 'is-invalid' : ''}
+                />
+                {props.error && <div className="invalid-feedback">Not a valid JSON.</div>}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="url">
@@ -133,7 +143,6 @@ function QuestionnaireForm(props) {
             setCurrentSystem(value)
             return true
         } else {
-            console.log("Show Modal",value,currentSystem,questionnaireUpdateList)
             setQuestionnaireModalContent([currentSystem, value])
             setShowQuestionnaireModal(true)
             return false
@@ -145,7 +154,6 @@ function QuestionnaireForm(props) {
         const { id, value } = event.target
 
         if (id === "system") {
-            console.log("System",id,value)
             if (isValidSystem(value)) {
                 props.editProcedureStep(id, value)
             }
@@ -249,6 +257,7 @@ const ProcedureObject = forwardRef((props, ref) => {
     const [stepId, setStepId] = useState(props.stepId) // StepId of ProcedureObject
     const [stored, setStored] = useState(props.stored) // Indicator if ProcedureObject already got stored in backed
     const [updated, setUpdated] = useState(false) // Indicator if the content got updated
+    const [updateError, setUpdateError] = useState(false) // Indicator if there was an error while updating
     const [showTooltip, setShowTooltip] = useState(false)
     const [delayTimeout, setDelayTimeout] = useState(null)
 
@@ -260,7 +269,6 @@ const ProcedureObject = forwardRef((props, ref) => {
             }
         },
         changeQuestionnaireSystem(id, newSystem) {
-            console.log("Test changeQuestionnaireSystem: ",id,newSystem)
             let newContent = {...content}
             newContent.system = newSystem
             setContent(newContent)
@@ -352,7 +360,7 @@ const ProcedureObject = forwardRef((props, ref) => {
                 }))
             } catch (error) {
                 props.setMessage({type: "danger", text: "Error while parsing config to JSON"})
-                return
+                setUpdateError(true)
             }
         }
         else if(props.type === ProcedureTypes.Questionnaire) {
@@ -395,6 +403,7 @@ const ProcedureObject = forwardRef((props, ref) => {
 
     const updateContent = async () => {
         setUpdated(false)
+        setUpdateError(false)
 
         if (!stored) {
             storeContent().then(r => { })
@@ -420,7 +429,6 @@ const ProcedureObject = forwardRef((props, ref) => {
         else if (props.type === ProcedureTypes.Condition) {
             try {
                 const conditionConfig = JSON.parse(content.config)
-                console.log(conditionConfig)
                 response = await dispatch(updateCondition({conditionId: backendId, condition: {
                     "name": content.name,
                     "config": conditionConfig,
@@ -428,7 +436,7 @@ const ProcedureObject = forwardRef((props, ref) => {
                 }}))
             } catch (error) {
                 props.setMessage({type: "danger", text: "Error while parsing config to JSON"})
-                return
+                setUpdateError(true)
             } 
         }
         else if (props.type === ProcedureTypes.Questionnaire) {
@@ -464,12 +472,32 @@ const ProcedureObject = forwardRef((props, ref) => {
     // -------------------------------------------------------------------------------------------------------------------
     // Sector: ProcedureObject FrontEnd interactions: Start --------------------------------------------------------------
 
-    const handleSave = (event) => {
+    const handleSave = async (event) => {
         event.preventDefault()
-        if (updated) {
-            updateContent()
+        // disable button while updating
+        const eventTarget = event.target
+        let button
+    
+        if (eventTarget.nodeName === "BUTTON") {
+            button = eventTarget;
+        } else {
+            button = eventTarget.closest('button');
+        }
+    
+        if (button) {
+            button.disabled = true;
+            button.blur()
+    
+            try {
+                if (updated) {
+                    await updateContent()
+                }
+            } finally {
+                button.disabled = false
+            }
         }
     }
+    
 
     const editContent = (content_id, value) => {
         let new_content = {...content}
@@ -483,7 +511,7 @@ const ProcedureObject = forwardRef((props, ref) => {
             case ProcedureTypes.TextPage:
                 return <TextPageForm content={content} editProcedureStep={editProcedureStep}/>
             case ProcedureTypes.Condition:
-                return <ConditionForm content={content} editProcedureStep={editProcedureStep}/>
+                return <ConditionForm error={updateError} content={content} editProcedureStep={editProcedureStep}/>
             case ProcedureTypes.Questionnaire:
                 return <QuestionnaireForm content={content} editProcedureStep={editProcedureStep}/>
             case ProcedureTypes.Pause:
@@ -507,6 +535,8 @@ const ProcedureObject = forwardRef((props, ref) => {
         }
         if(!stored) {
             header += ' [Not Stored]'
+        }else if(stored && updateError) {
+            header += ' [Update Error]'
         }
         return header
     }
@@ -551,6 +581,7 @@ const ProcedureObject = forwardRef((props, ref) => {
                 overlay={<Tooltip id="tooltip-top">Manual save</Tooltip>}
             >
                 <Button
+                    type='submit'
                     size="sm"
                     onClick={handleSave}
                     disabled={!updated}
