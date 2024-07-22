@@ -474,26 +474,21 @@ const ProcedureObject = forwardRef((props, ref) => {
 
     const handleSave = async (event) => {
         event.preventDefault()
-        // disable button while updating
+    
         const eventTarget = event.target
         let button
-    
+        
         if (eventTarget.nodeName === "BUTTON") {
             button = eventTarget;
         } else {
             button = eventTarget.closest('button');
         }
-    
+        
         if (button) {
-            button.disabled = true;
             button.blur()
-    
-            try {
-                if (updated) {
-                    await updateContent()
-                }
-            } finally {
-                button.disabled = false
+        
+            if (updated) {
+                await updateContent()
             }
         }
     }
@@ -581,7 +576,6 @@ const ProcedureObject = forwardRef((props, ref) => {
                 overlay={<Tooltip id="tooltip-top">Manual save</Tooltip>}
             >
                 <Button
-                    type='submit'
                     size="sm"
                     onClick={handleSave}
                     disabled={!updated}
