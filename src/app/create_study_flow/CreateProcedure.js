@@ -180,8 +180,6 @@ export default function CreateProcedure(props) {
             resetQuestionnaireUpdateList()
             setIsDispatched(true)
         })
-
-        
     }, [])
 
     useEffect(() => {

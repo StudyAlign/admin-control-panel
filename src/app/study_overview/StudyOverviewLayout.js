@@ -63,6 +63,8 @@ export default function StudyOverviewLayout() {
         dispatch(exportStudySchema(study_id))
         return () => {
             dispatch(studySlice.actions.resetStudyExport())
+            dispatch(studySlice.actions.resetStudySetupInfo())
+            dispatch(studySlice.actions.resetProcedureOverview())
         }
     }, [])
 

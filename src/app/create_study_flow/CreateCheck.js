@@ -69,10 +69,10 @@ export default function CreateCheck() {
         // )
 
         // DEPRECATED
-        // await dispatch(generateProceduresWithSteps({
-        //     "studyId": study_id,
-        //     "procedureScheme": null
-        // }))
+        await dispatch(generateProceduresWithSteps({
+            "studyId": study_id,
+            "procedureScheme": studySetupInfo.planned_procedure
+        }))
 
         await dispatch(generateParticipants({
             "studyId": study_id,

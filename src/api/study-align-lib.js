@@ -102,7 +102,7 @@ class StudyAlignLib {
             headers: {}
         };
         this.setHeaders(options);
-        options.body = data;
+        if(data) options.body = data;
         return this.request(options);
     }
     basicRead(path) {
@@ -189,7 +189,7 @@ class StudyAlignLib {
         return this.basicDelete("studies/" + studyId);
     }
     generateProceduresWithSteps(studyId, procedureScheme) {
-        return this.basicCreate("studies/" + studyId + "/procedures", procedureScheme);
+        return this.basicCreate("studies/" + studyId + "/procedures");
     }
     getProcedureConfigMain(studyId) {
         return this.basicRead("studies/" + studyId + "/procedure-config");
