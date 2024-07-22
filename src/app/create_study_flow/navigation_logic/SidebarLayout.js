@@ -27,6 +27,14 @@ export default function SidebarLayout(props){
         return className
     }
 
+    const getClassNameCheck = (step) => {
+        let className = 'sidebar-item-check'
+        if (step === props.step) {
+            className += ' sidebar-item-selected-check'
+        }
+        return className
+    }
+
     const handleNavigation = async (event, step, navTo) => {
         // return if the step is already selected
         if (props.step + 1 === CreationOrder.indexOf(navTo)) {
@@ -69,7 +77,7 @@ export default function SidebarLayout(props){
                                 <Nav.Link onClick={(event) => handleNavigation(event,CreationOrder[2],CreationOrder[3])} className={getClassName(CreationSteps.Integrations) + ' integrations'}> (3) Integrations </Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link disabled style={{ cursor: "not-allowed" }} className={getClassName(CreationSteps.Check)} > (4) Check </Nav.Link>
+                                <Nav.Link className={getClassNameCheck(CreationSteps.Check)} > (4) Check </Nav.Link>
                             </Nav.Item>
                         </Nav>
                     </Col>

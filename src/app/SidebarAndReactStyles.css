@@ -67,6 +67,28 @@
     font-weight: bold;
 }
 
+.sidebar-item-check{
+    color: #686868;
+    font-size: 16pt;
+    margin-bottom: 5px;
+}
+
+.sidebar-item-check:hover {
+    color: #686868;
+    cursor: not-allowed;
+}
+
+.sidebar-item-check:focus {
+    color: #686868;
+}
+
+.sidebar-item-selected-check,
+.sidebar-item-selected-check:hover {
+    pointer-events: none;
+    color: #224396;
+    font-weight: bold;
+}
+
 .integrations:focus {
     color: black;
 }
