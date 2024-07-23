@@ -96,8 +96,8 @@ export function deleteStudyApi(studyId) {
     return sal.deleteStudy(studyId);
 }
 
-export function generateProceduresWithStepsApi(studyId) {
-    return sal.generateProceduresWithSteps(studyId);
+export function generateProceduresApi(studyId) {
+    return sal.generateProcedures(studyId);
 }
 
 export function addParticipantsApi(args) {

@@ -14,7 +14,7 @@ import {
     exportStudySchemaApi,
     importStudySchemaApi,
     duplicateStudyApi,
-    generateProceduresWithStepsApi,
+    generateProcedures,
     generateParticipantsApi,
     // populateSurveyParticipantsApi, // DEPRECATED
     addParticipantsApi,
@@ -189,6 +189,7 @@ export const getProcedureConfigOverview = createAsyncThunk(
             return
         }
         try {
+            console.log(procedureConfigId)
             const response = await apiWithAuth(getProcedureConfigOverviewApi, procedureConfigId, dispatch)
             return response
         } catch (err) {
@@ -244,15 +245,15 @@ export const exportStudySchema = createAsyncThunk(
     }
 );
 
-export const generateProceduresWithSteps = createAsyncThunk(
-    'generateProceduresWithSteps',
+export const generateProcedures = createAsyncThunk(
+    'generateProcedures',
     async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
         const { api, currentRequestId } = getState().studies
         if (api !== LOADING || requestId !== currentRequestId) {
             return
         }
         try {
-            return await apiWithAuth(generateProceduresWithStepsApi, studyId, dispatch)
+            return await apiWithAuth(generateProceduresApi, studyId, dispatch)
         } catch (err) {
             return rejectWithValue(err)
         }
@@ -511,11 +512,11 @@ export const studySlice = createSlice({
                 state.status = action.payload.status
                 state.currentRequestId = undefined
             })
-            .addCase(generateProceduresWithSteps.pending, (state, action) => {
+            .addCase(generateProcedures.pending, (state, action) => {
                 state.api = LOADING
                 state.currentRequestId = action.meta.requestId
             })
-            .addCase(generateProceduresWithSteps.fulfilled, (state, action) => {
+            .addCase(generateProcedures.fulfilled, (state, action) => {
                 const { requestId } = action.meta
                 if (state.api === LOADING && state.currentRequestId === requestId) {
                     state.api = IDLE

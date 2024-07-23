@@ -13,7 +13,7 @@ import {
     selectStudySetupInfo,
     selectStudyProcedure,
     updateStudy,
-    generateProceduresWithSteps,
+    generateProcedures,
     generateParticipants,
     // populateSurveyParticipants,
     selectStudyProcedureOverview,
@@ -68,7 +68,7 @@ export default function CreateCheck() {
         //     step.condition_id == null ? step : {"dummy": true}
         // )
 
-        await dispatch(generateProceduresWithSteps(study_id))
+        await dispatch(generateProcedures(study_id))
 
         await dispatch(generateParticipants({
             "studyId": study_id,

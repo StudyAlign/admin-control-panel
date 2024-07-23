@@ -40,6 +40,14 @@ class StudyAlignLib {
         return new Promise((resolve, reject) => {
             let url = this.apiUrl + "/" + options.path;
             let xhr = new XMLHttpRequest();
+            if (options.asQuery) {
+                let params = options.params;
+                let encodedParams = "";
+                if (params && typeof params === 'object') {
+                    encodedParams = encodeParams(params);
+                }
+                url = url + "?" + encodedParams;
+            }
             xhr.open(options.method, url);
             if (options.onload) {
                 xhr.onload = options.onload;
@@ -56,7 +64,6 @@ class StudyAlignLib {
                         reject({
                             status: xhr.status,
                             statusText: xhr.statusText,
-                            response: JSON.parse(xhr.response), //
                             requestBody: options.body
                         });
                     }
@@ -91,7 +98,12 @@ class StudyAlignLib {
                 xhr.send(encodedParams);
             }
             if (options.method === "POST" || options.method === "PATCH") {
-                xhr.send(options.formData ? encodeParams(options.body) : JSON.stringify(options.body));
+                if (options.asQuery) {
+                    xhr.send();
+                }
+                else {
+                    xhr.send(options.formData ? encodeParams(options.body) : JSON.stringify(options.body));
+                }
             }
         });
     }
@@ -102,7 +114,9 @@ class StudyAlignLib {
             headers: {}
         };
         this.setHeaders(options);
-        if(data) options.body = data;
+        if (data) {
+            options.body = data;
+        }
         return this.request(options);
     }
     basicRead(path) {
@@ -188,8 +202,16 @@ class StudyAlignLib {
     deleteStudy(studyId) {
         return this.basicDelete("studies/" + studyId);
     }
-    generateProceduresWithSteps(studyId) {
-        return this.basicCreate("studies/" + studyId + "/procedures");
+    generateProcedures(studyId) {
+        const options = {
+            method: "POST",
+            path: "studies/" + studyId + "/procedures",
+            headers: {},
+            body: {},
+            formData: true,
+        };
+        this.setHeaders(options);
+        return this.request(options);
     }
     getProcedureConfigMain(studyId) {
         return this.basicRead("studies/" + studyId + "/procedure-config");
@@ -202,8 +224,8 @@ class StudyAlignLib {
             method: "POST",
             path: "studies/" + studyId + "/participants",
             headers: {},
-            body: { amount: amount },
-            formData: true,
+            params: { amount: amount },
+            asQuery: true
         };
         this.setHeaders(options);
         return this.request(options);
@@ -213,8 +235,8 @@ class StudyAlignLib {
             method: "POST",
             path: "studies/" + studyId + "/add-participants",
             headers: {},
-            body: { amount: amount },
-            formData: true,
+            params: { amount: amount },
+            asQuery: true
         };
         this.setHeaders(options);
         return this.request(options);
@@ -222,8 +244,8 @@ class StudyAlignLib {
     exportStudySchema(studyId) {
         return this.basicRead("studies/" + studyId + "/export");
     }
-    importStudySchema(studySchema) {
-        return this.basicCreate("studies/import", studySchema);
+    importStudySchema(studyId, studySchema) {
+        return this.basicCreate("studies/" + studyId + "/import", studySchema);
     }
     duplicateStudy(studyId) {
         return this.basicRead("studies/" + studyId + "/duplicate");
