@@ -5,6 +5,8 @@ import { Navigate, useLocation } from "react-router-dom";
 
 import { createStudy, selectStudy } from "../../redux/reducers/studySlice";
 
+import { STATES } from "../study_overview/StudyOverviewLayout";
+
 import { useAuth } from "../../components/Auth";
 import LoadingScreen from "../../components/LoadingScreen";
 import StudyCreationLayout, { CreationSteps } from "./navigation_logic/StudyCreationLayout";
@@ -55,13 +57,12 @@ export default function CreateInformation() {
             "name": title,
             "startDate": startDate + "T15:08:50.161Z",
             "endDate": endDate  + "T15:08:50.161Z",
-            "is_active": false, // TODO how to initialize study? As active or not active
+            "state": STATES.SETUP, // "setup", "running", "finished"
             "owner_id": auth.user.id,
             "invite_only": false, // TODO how to indicate if invite_only or not? Checkbox?
             "description": description,
             "consent": consent,
             "planned_number_participants": amountParticipants,
-            "planned_procedure": null,
             "current_setup_step": "information" // jump to procedure after creating
         }
         await dispatch(createStudy(study))

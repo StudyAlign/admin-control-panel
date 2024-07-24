@@ -30,6 +30,11 @@ import {
     duplicateStudy
 } from "../../redux/reducers/studySlice";
 
+export const STATES = {
+    SETUP: "setup",
+    RUNNING: "running",
+    FINISHED: "finished"
+}
 
 // TODO Maybe refactor layout so that the use is similar to the CreateStudyLayout
 export default function StudyOverviewLayout() {
@@ -70,7 +75,7 @@ export default function StudyOverviewLayout() {
 
     useEffect(() => {
         if (study) {
-            if (study.is_active) {
+            if (study.state === STATES.RUNNING) {
                 setEditState(editEnum.Running)
             } else {
                 setEditState(editEnum.Closed)

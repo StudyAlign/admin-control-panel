@@ -97,12 +97,9 @@ export default function EditInformation(props) {
                 "name": title,
                 "startDate": startDate + "T15:08:50.161Z",
                 "endDate": endDate + "T15:08:50.161Z",
-                "is_active": false, // TODO how to initialize study? As active or not active
-                "invite_only": false, // TODO how to indicate if invite_only or not? Checkbox?
                 "description": description,
                 "consent": consent,
                 "planned_number_participants": amountParticipants,
-                "planned_procedure": null,
                 "current_setup_step": "information"
             }
         }))

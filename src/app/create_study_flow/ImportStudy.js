@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Button, Modal } from "react-bootstrap";
+import { Button, Modal, Row } from "react-bootstrap";
 import { Upload } from "react-bootstrap-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { Navigate, useLocation } from "react-router-dom";
@@ -321,8 +321,11 @@ export default function ImportStudy() {
                     style={{ display: 'none' }}
                     id="fileUpload"
                 />
-                <Button onClick={() => document.getElementById('fileUpload').click()}>Upload</Button>
-                <Button onClick={handleCreate} disabled={!text}>Create</Button>
+                <Row style={{display: "flex", flexDirection: "row", gap: "10px", marginLeft: "0px"}}>
+                    <Button style={{width: "auto"}} onClick={() => document.getElementById('fileUpload').click()}>Upload</Button>
+                    <Button style={{width: "auto"}} onClick={handleCreate} disabled={!text}>Create</Button>
+                </Row>
+                
             </div>
 
             {returnModal()}

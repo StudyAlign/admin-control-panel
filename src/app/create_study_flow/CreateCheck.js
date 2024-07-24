@@ -26,6 +26,7 @@ import LoadingScreen from "../../components/LoadingScreen";
 import { reformatDate } from "../../components/CommonFunctions";
 import ShowProcedure from "./ShowProcedure";
 import StudyCreationLayout, { CreationSteps } from "./navigation_logic/StudyCreationLayout";
+import { STATES } from "../study_overview/StudyOverviewLayout";
 
 
 export default function CreateCheck() {
@@ -68,21 +69,28 @@ export default function CreateCheck() {
         //     step.condition_id == null ? step : {"dummy": true}
         // )
 
-        await dispatch(generateProcedures(study_id))
+        if (study.state === STATES.SETUP) {
+            await dispatch(generateProcedures(study_id))
 
-        await dispatch(generateParticipants({
-            "studyId": study_id,
-            "amount": studySetupInfo.planned_number_participants
-        }))
+            await dispatch(generateParticipants({
+                "studyId": study_id,
+                "amount": studySetupInfo.planned_number_participants
+            }))
+        }
 
         // DEPRECATED
         // if (studySetupInfo.planned_procedure.findIndex(step => step.questionnaire_id != null) > -1) {
         //     await dispatch(populateSurveyParticipants(study_id))
         // }
 
+        // check if start date is today
+        let updateState = STATES.FINISHED
+        if (new Date(study.startDate.split('T')[0]) <= new Date()) updateState = STATES.RUNNING
+
         await dispatch(updateStudy({
             "studyId": study_id,
             "study": {
+                "state": updateState, // "setup", "running", "finished"
                 "current_setup_step": "check"
             }
         }))

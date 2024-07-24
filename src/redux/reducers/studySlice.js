@@ -14,7 +14,7 @@ import {
     exportStudySchemaApi,
     importStudySchemaApi,
     duplicateStudyApi,
-    generateProcedures,
+    generateProceduresApi,
     generateParticipantsApi,
     // populateSurveyParticipantsApi, // DEPRECATED
     addParticipantsApi,
@@ -82,6 +82,16 @@ export const getStudySetupInfo = createAsyncThunk(
         }
     }
 );
+
+// info no thunk
+export const getStudySetupInfoParticipantsNoThunk = async (studyId, dispatch) => {
+    try {
+        const response = await apiWithAuth(getStudySetupInfoApi, studyId, dispatch)
+        return response.body.planned_number_participants
+    } catch (err) {
+        return "error"
+    }
+}
 
 export const duplicateStudy = createAsyncThunk(
     'duplicateStudy',

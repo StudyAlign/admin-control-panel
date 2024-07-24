@@ -2,13 +2,15 @@ import React, {useEffect} from "react";
 import {Container, Row, Col, Button, NavLink} from "react-bootstrap";
 import {useNavigate} from "react-router";
 
+import { STATES } from "../study_overview/StudyOverviewLayout";
+
 import StudyBox from "./StudyBox";
 
 import "./Dashboard.css";
 
 export default function FilledDashboard(props) {
-    const navigate = useNavigate();
-    const max_amount_boxes = 3;
+    const navigate = useNavigate()
+    const max_amount_boxes = 3
 
     const handleClickStudyLink = (event, study_id) => {
         event.preventDefault()
@@ -20,6 +22,11 @@ export default function FilledDashboard(props) {
         navigate("/create")
     }
 
+    const handleClickSetupStudy = (event, study_id) => {
+        event.preventDefault()
+        navigate("/create/" + study_id)
+    }
+
     const handleClickImportStudy = (event) => {
         event.preventDefault()
         navigate("/import")
@@ -28,22 +35,27 @@ export default function FilledDashboard(props) {
     let running_studies = []
     let finished_studies = []
     let recent_studies = []
+    let setup_unfinished_studies = []
     for(let s of props.studies) {
         // TODO how to declare which (and how many) studies are shown as boxes
-        if(recent_studies.length < max_amount_boxes) {
+        if(recent_studies.length < max_amount_boxes && s.state !== STATES.SETUP) {
             recent_studies.push(
                 <Col key={s.id} xs="auto"> <StudyBox study={s}/> </Col>
             )
         }
         else {
-            if(s.is_active) {
+            if(s.state === STATES.RUNNING) {
                 running_studies.push(
                     <Row key={s.id}> <NavLink onClick={(event) => handleClickStudyLink(event, s.id)}> {s.name} </NavLink> </Row>
                 )
             }
-            else {
+            else if(s.state === STATES.FINISHED) {
                 finished_studies.push(
                     <Row key={s.id}> <NavLink onClick={(event) => handleClickStudyLink(event, s.id)}> {s.name} </NavLink> </Row>
+                )
+            } else {
+                setup_unfinished_studies.push(
+                    <Row key={s.id}> <NavLink onClick={(event) => handleClickSetupStudy(event, s.id)}> {s.name} </NavLink> </Row>
                 )
             }
         }
@@ -67,6 +79,10 @@ export default function FilledDashboard(props) {
                         <Col>
                             <Row> <label className="headline"> Closed Studies </label> </Row>
                             {finished_studies}
+                        </Col>
+                        <Col>
+                            <Row> <label className="headline"> Setup not finished </label> </Row>
+                            {setup_unfinished_studies}
                         </Col>
                     </Row>
                     <Row className="button-center">
