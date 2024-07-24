@@ -33,7 +33,8 @@ export default function FilledDashboard(props) {
     }
 
     let running_studies = []
-    let finished_studies = []
+    let finished_done_studies = []
+    let finished_future_studies = []
     let recent_studies = []
     let setup_unfinished_studies = []
     for(let s of props.studies) {
@@ -50,9 +51,16 @@ export default function FilledDashboard(props) {
                 )
             }
             else if(s.state === STATES.FINISHED) {
-                finished_studies.push(
-                    <Row key={s.id}> <NavLink onClick={(event) => handleClickStudyLink(event, s.id)}> {s.name} </NavLink> </Row>
-                )
+                if (new Date(s.startDate.split('T')[0]) > new Date()) {
+                    finished_future_studies.push(
+                        <Row key={s.id}> <NavLink onClick={(event) => handleClickStudyLink(event, s.id)}> {s.name} </NavLink> </Row>
+                    )
+                } else {
+                    finished_done_studies.push(
+                        <Row key={s.id}> <NavLink onClick={(event) => handleClickStudyLink(event, s.id)}> {s.name} </NavLink> </Row>
+                    )
+                }
+                
             } else {
                 setup_unfinished_studies.push(
                     <Row key={s.id}> <NavLink onClick={(event) => handleClickSetupStudy(event, s.id)}> {s.name} </NavLink> </Row>
@@ -77,8 +85,12 @@ export default function FilledDashboard(props) {
                             {running_studies}
                         </Col>
                         <Col>
-                            <Row> <label className="headline"> Closed Studies </label> </Row>
-                            {finished_studies}
+                            <Row> <label className="headline"> Closed Studies [Done] </label> </Row>
+                            {finished_done_studies}
+                        </Col>
+                        <Col>
+                            <Row> <label className="headline"> Closed Studies [Future] </label> </Row>
+                            {finished_future_studies}
                         </Col>
                         <Col>
                             <Row> <label className="headline"> Setup not finished </label> </Row>

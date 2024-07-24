@@ -89,7 +89,7 @@ export const getStudySetupInfoParticipantsNoThunk = async (studyId, dispatch) =>
         const response = await apiWithAuth(getStudySetupInfoApi, studyId, dispatch)
         return response.body.planned_number_participants
     } catch (err) {
-        return "error"
+        return "N.A."
     }
 }
 
