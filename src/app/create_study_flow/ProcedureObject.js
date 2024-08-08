@@ -175,10 +175,10 @@ function QuestionnaireForm(props) {
                     <option disabled value={""}> -- Select a System -- </option>
                     <option value={"limesurvey"}> Limesurvey </option>
                     <option value={"qualtrics"}> Qualtrics </option>
-                    <option value={"surveymonkey"}> Survey Monkey </option>
+                    {/* <option value={"surveymonkey"}> Survey Monkey </option>
                     <option value={"googleforms"}> Google Forms </option>
                     <option value={"typeform"}> Typeform </option>
-                    <option value={"jotform"}> Jotform </option>
+                    <option value={"jotform"}> Jotform </option> */}
                 </Form.Select>
             </Form.Group>
         </Form>
