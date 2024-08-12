@@ -1,9 +1,11 @@
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
+import { getStudies, selectStudies } from "../../redux/reducers/studySlice";
+
 import Topbar from "../../components/Topbar";
 import EmptyDashboard from "./EmptyDashboard";
 import FilledDashboard from "./FilledDashboard";
-import {useDispatch, useSelector} from "react-redux";
-import {getStudies, selectStudies} from "../../redux/reducers/studySlice";
 
 
 export default function Dashboard() {

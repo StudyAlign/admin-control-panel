@@ -1,9 +1,11 @@
 import React from "react";
-import {Container, Row, Col, Nav } from "react-bootstrap";
-import "./CreateStudyFlow.css"
-import {CreationSteps} from "./StudyCreationLayout";
+import { Container, Row, Col, Nav } from "react-bootstrap";
 
-export default function SidebarLayout(props){
+import { CreationSteps } from "./StudyCreationLayout";
+
+import "../../SidebarAndReactStyles.css";
+
+export default function SidebarLayoutStatic(props){
 
     const getClassName = (step) => {
         let className = 'sidebar-item'
@@ -23,13 +25,13 @@ export default function SidebarLayout(props){
                                 <Nav.Link className={getClassName(CreationSteps.Information)}> (1) Study </Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link className={getClassName(CreationSteps.Procedure)}> (2) Procedure </Nav.Link>
+                                <Nav.Link disabled className={getClassName(CreationSteps.Procedure)}> (2) Procedure </Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link className={getClassName(CreationSteps.Integrations)}> (3) Integrations </Nav.Link>
+                                <Nav.Link disabled className={getClassName(CreationSteps.Integrations)}> (3) Integrations </Nav.Link>
                             </Nav.Item>
                             <Nav.Item>
-                                <Nav.Link className={getClassName(CreationSteps.Check)}> (4) Check </Nav.Link>
+                                <Nav.Link disabled className={getClassName(CreationSteps.Check)}> (4) Check </Nav.Link>
                             </Nav.Item>
                         </Nav>
                     </Col>

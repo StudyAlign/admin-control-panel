@@ -1,25 +1,31 @@
 import React from "react";
-import {Button} from "react-bootstrap";
-import "./StudyOverview.css"
-import {useDispatch} from "react-redux";
-import {getStudy, updateStudy} from "../../redux/reducers/studySlice";
-import {reformatDate} from "../../components/CommonFunctions";
+import { Button } from "react-bootstrap";
+import { useDispatch} from "react-redux";
+
+import { STATES } from "./StudyOverviewLayout";
+
+import { getStudy, updateStudy } from "../../redux/reducers/studySlice";
+
+import { reformatDate } from "../../components/CommonFunctions";
+
+import "./StudyOverview.css";
+import "../SidebarAndReactStyles.css";
 
 export default function Overview(props) {
     const dispatch = useDispatch()
 
-    const handleStudyActive = async (event, active) => {
+    const handleStudyActive = async (event, state) => {
         event.preventDefault()
-        await dispatch(updateStudy({studyId: props.study.id, study: {"is_active": active}}));
+        await dispatch(updateStudy({studyId: props.study.id, study: {"state": state}}));
         await dispatch(getStudy(props.study.id));
     }
 
-    const getButton = (is_active) => {
-        if (is_active) {
-            return <Button type="button" className="big-button" onClick={(event) => handleStudyActive(event, false)}> Close Study </Button>
+    const getButton = (state) => {
+        if (state === STATES.RUNNING) {
+            return <Button type="button" className="big-button" onClick={(event) => handleStudyActive(event, "finished")}> Close Study </Button>
         }
-        else {
-            return <Button type="button" className="big-button" onClick={(event) => handleStudyActive(event, true)}> Open Study </Button>
+        else if (state === STATES.FINISHED) {
+            return <Button type="button" className="big-button" onClick={(event) => handleStudyActive(event, "running")}> Open Study </Button>
         }
     }
 
@@ -35,7 +41,7 @@ export default function Overview(props) {
                 </tr>
                 <tr>
                     <td className="content-name"> Status: </td>
-                    <td> {(props.study.is_active) ? 'Running' : 'Closed'} </td>
+                    <td> {(props.study.state === STATES.RUNNING) ? 'Running' : 'Closed'} </td>
                 </tr>
                 <tr>
                     <td className="content-name"> Start Date: </td>
@@ -61,7 +67,7 @@ export default function Overview(props) {
                 <li> N.A. </li>
             </ul>
             <Button type="button" className="small-button"> + Add </Button>
-            {getButton(props.study.is_active)}
+            {getButton(props.study.state)}
         </>
     )
 }

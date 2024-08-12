@@ -1,28 +1,27 @@
 import React, {createContext, useEffect, useState} from 'react';
-import './App.css';
-import 'bootstrap/dist/css/bootstrap.css';
-
-import {
-    BrowserRouter,
-    Routes,
-    Route
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {useDispatch, useSelector, useStore} from "react-redux";
 
 import Login from './app/login/Login';
 import ForgotPW from './app/login/ForgotPW';
 import ResetPW from './app/login/ResetPW';
 import Dashboard from './app/dashboard/Dashboard';
 import StudyOverviewLayout from "./app/study_overview/StudyOverviewLayout";
-import RequireAuth, {AuthRoute, AuthProvider, useAuth} from "./components/Auth";
-import {useDispatch, useSelector, useStore} from "react-redux";
-import {
-    authSlice,
-} from "./redux/reducers/authSlice";
 import CreateInformation from "./app/create_study_flow/CreateInformation";
-import CreateProcedure from "./app/create_study_flow/CreateProcedure";
-import StudyCreationLogic from "./app/create_study_flow/StudyCreationLogic"
+import CreateProcedure, { CreateProcedureContextProvider } from "./app/create_study_flow/CreateProcedure";
+import StudyCreationLogic from "./app/create_study_flow/navigation_logic/StudyCreationLogic";
 import CreateIntegrations from "./app/create_study_flow/CreateIntegrations";
 import CreateCheck from "./app/create_study_flow/CreateCheck";
+import EditInformation from './app/create_study_flow/EditInformation';
+import ImportStudy from './app/create_study_flow/ImportStudy';
+import { StudyStatus } from './app/create_study_flow/navigation_logic/StudyCreationLayout';
+
+import RequireAuth, {AuthRoute, AuthProvider, useAuth} from "./components/Auth";
+
+import { authSlice } from "./redux/reducers/authSlice";
+
+import './App.css';
+import 'bootstrap/dist/css/bootstrap.css';
 
 
 export default function App() {
@@ -46,10 +45,20 @@ export default function App() {
                         <Route path="/"                         element={<Dashboard/>} />
                         <Route path="/study/:study_id/:page"    element={<StudyOverviewLayout/>} />
 
+                        <Route path="import"            element={<ImportStudy/>} />
                         <Route path="create"            element={<CreateInformation/>} />
-                        <Route path="create/:study_id"  element={<StudyCreationLogic/>}>
-                            <Route path="procedure"     element={<CreateProcedure/>} />
-                            <Route path="integrations"  element={<CreateIntegrations/>} />
+                        <Route path="create/:study_id"  element={<CreateProcedureContextProvider><StudyCreationLogic/></CreateProcedureContextProvider>}>
+                            <Route path="information"   element={<EditInformation status={StudyStatus.Creation}/>} />
+                            <Route path="procedure"     element={<CreateProcedure status={StudyStatus.Creation}/>} />
+                            <Route path="integrations"  element={<CreateIntegrations status={StudyStatus.Creation}/>} />
+                            <Route path="check"         element={<CreateCheck/>} />
+                            <Route path="*"             element={<h1>ERROR</h1>} />
+                        </Route>
+
+                        <Route path="edit/:study_id"  element={<CreateProcedureContextProvider><StudyCreationLogic/></CreateProcedureContextProvider>}>
+                            <Route path="information"   element={<EditInformation status={StudyStatus.Active}/>} />
+                            <Route path="procedure"     element={<CreateProcedure status={StudyStatus.Active}/>} />
+                            <Route path="integrations"  element={<CreateIntegrations status={StudyStatus.Active}/>} />
                             <Route path="check"         element={<CreateCheck/>} />
                             <Route path="*"             element={<h1>ERROR</h1>} />
                         </Route>

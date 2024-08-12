@@ -40,6 +40,14 @@ class StudyAlignLib {
         return new Promise((resolve, reject) => {
             let url = this.apiUrl + "/" + options.path;
             let xhr = new XMLHttpRequest();
+            if (options.asQuery) {
+                let params = options.params;
+                let encodedParams = "";
+                if (params && typeof params === 'object') {
+                    encodedParams = encodeParams(params);
+                }
+                url = url + "?" + encodedParams;
+            }
             xhr.open(options.method, url);
             if (options.onload) {
                 xhr.onload = options.onload;
@@ -90,7 +98,12 @@ class StudyAlignLib {
                 xhr.send(encodedParams);
             }
             if (options.method === "POST" || options.method === "PATCH") {
-                xhr.send(options.formData ? encodeParams(options.body) : JSON.stringify(options.body));
+                if (options.asQuery) {
+                    xhr.send();
+                }
+                else {
+                    xhr.send(options.formData ? encodeParams(options.body) : JSON.stringify(options.body));
+                }
             }
         });
     }
@@ -101,7 +114,9 @@ class StudyAlignLib {
             headers: {}
         };
         this.setHeaders(options);
-        options.body = data;
+        if (data) {
+            options.body = data;
+        }
         return this.request(options);
     }
     basicRead(path) {
@@ -187,8 +202,16 @@ class StudyAlignLib {
     deleteStudy(studyId) {
         return this.basicDelete("studies/" + studyId);
     }
-    generateProcedureWithSteps(studyId, procedureScheme) {
-        return this.basicCreate("studies/" + studyId + "/procedures", procedureScheme);
+    generateProcedures(studyId) {
+        const options = {
+            method: "POST",
+            path: "studies/" + studyId + "/procedures",
+            headers: {},
+            body: {},
+            formData: true,
+        };
+        this.setHeaders(options);
+        return this.request(options);
     }
     getProcedureConfigMain(studyId) {
         return this.basicRead("studies/" + studyId + "/procedure-config");
@@ -201,18 +224,42 @@ class StudyAlignLib {
             method: "POST",
             path: "studies/" + studyId + "/participants",
             headers: {},
-            body: { amount: amount },
-            formData: true,
+            params: { amount: amount },
+            asQuery: true
         };
         this.setHeaders(options);
         return this.request(options);
     }
-    populateSurveyParticipants(studyId) {
-        return this.basicRead("studies/" + studyId + "/survey-participants");
+    addParticipants(studyId, amount) {
+        const options = {
+            method: "POST",
+            path: "studies/" + studyId + "/add-participants",
+            headers: {},
+            params: { amount: amount },
+            asQuery: true
+        };
+        this.setHeaders(options);
+        return this.request(options);
     }
+    exportStudySchema(studyId) {
+        return this.basicRead("studies/" + studyId + "/export");
+    }
+    importStudySchema(studyId, studySchema) {
+        return this.basicCreate("studies/" + studyId + "/import", studySchema);
+    }
+    duplicateStudy(studyId) {
+        return this.basicRead("studies/" + studyId + "/duplicate");
+    }
+    // DEPRECATED function
+    //populateSurveyParticipants(studyId: number) {
+    //    return this.basicRead("studies/" + studyId + "/survey-participants");
+    //}
     // Procedure Configs
     getProcedureConfig(procedureConfigId) {
         return this.basicRead("procedure-configs/" + procedureConfigId);
+    }
+    getProcedureConfigOverview(procedureConfigId) {
+        return this.basicRead("procedure-configs/" + procedureConfigId + "/overview");
     }
     createProcedureConfigBlock(block) {
         return this.basicCreate("procedure-configs/block", block);
@@ -225,8 +272,7 @@ class StudyAlignLib {
             method: "POST",
             path: "procedure-configs/" + procedureConfigId + "/step",
             headers: {},
-            body: procedureConfigStep,
-            formData: true,
+            body: procedureConfigStep
         };
         this.setHeaders(options);
         return this.request(options);
@@ -236,8 +282,7 @@ class StudyAlignLib {
             method: "POST",
             path: "procedure-configs/" + procedureConfigId + "/create-steps",
             headers: {},
-            body: procedureConfigSteps,
-            formData: true,
+            body: procedureConfigSteps
         };
         this.setHeaders(options);
         return this.request(options);

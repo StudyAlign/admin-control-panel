@@ -1,0 +1,108 @@
+/* Over write react styles */
+.accordion-button:not(.collapsed) {
+    color: inherit; 
+    background-color: inherit; 
+    box-shadow: none; 
+}
+
+.accordion-button:focus {
+    z-index: inherit; 
+    border-color: inherit; 
+    outline: inherit; 
+    box-shadow: none; 
+}
+
+.form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.form-check-input:focus {
+    border-color: inherit;
+    outline: inherit;
+    box-shadow: none;
+}
+
+.form-check-input:hover {
+    border-color: #0d6efd;
+    outline: inherit;
+    box-shadow: none;
+}
+
+.sidebar {
+    left: 0;
+    min-height: 100%;
+    padding: 10px 10px 0 10px;
+    background-color: #ececec;
+}
+
+#sidebar-wrapper{
+    height: 93vh;
+    margin-left: -1rem;
+    -webkit-transition: margin .25s ease-out;
+    -moz-transition: margin .25s ease-out;
+    -o-transition: margin .25s ease-out;
+    transition: margin .25s ease-out;
+    width: 250px;
+}
+
+#page-content-wrapper {
+    position: relative;
+}
+
+.sidebar-item{
+    color: black;
+    font-size: 16pt;
+    margin-bottom: 5px;
+}
+
+.sidebar-item:hover {
+    color: #224396;
+    cursor: pointer;
+}
+
+.sidebar-item-selected,
+.sidebar-item-selected:hover {
+    color: #224396;
+    font-weight: bold;
+}
+
+.sidebar-item-check{
+    color: #686868;
+    font-size: 16pt;
+    margin-bottom: 5px;
+}
+
+.sidebar-item-check:hover {
+    color: #686868;
+    cursor: not-allowed;
+}
+
+.sidebar-item-check:focus {
+    color: #686868;
+}
+
+.sidebar-item-selected-check,
+.sidebar-item-selected-check:hover {
+    pointer-events: none;
+    color: #224396;
+    font-weight: bold;
+}
+
+.integrations:focus {
+    color: black;
+}
+
+.study-title {
+    color: #494949;
+    font-size: 32pt;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.page-title {
+    color: #494949;
+    font-size: 32pt;
+    font-weight: bold;
+    margin-top: 10px;
+}

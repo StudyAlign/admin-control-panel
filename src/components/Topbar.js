@@ -1,9 +1,11 @@
 import {Container, Nav, NavDropdown, Navbar} from "react-bootstrap";
+import React from "react";
+import {useNavigate} from "react-router";
+
+import {useAuth} from "./Auth";
+
 import "bootstrap/dist/css/bootstrap.css";
 import "./Components.css"
-import React from "react";
-import {useAuth} from "./Auth";
-import {useNavigate} from "react-router";
 
 export default function Topbar() {
     const auth = useAuth() // the useAuth hook returns the currently logged in user

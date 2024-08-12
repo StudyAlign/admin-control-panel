@@ -7,9 +7,17 @@ import {
     getStudySetupInfoApi,
     updateStudyApi,
     deleteStudyApi,
-    generateProceduresWithStepsApi,
+    getProcedureConfigMainApi, // Get Procedure Config
+    getProcedureConfigOverviewApi, // Get Procedure Config Overview
+    createSingleProcedureConfigStepApi, // Create Procedure Config Step
+    updateProcedureConfigApi, // Update Procedure Config
+    exportStudySchemaApi,
+    importStudySchemaApi,
+    duplicateStudyApi,
+    generateProceduresApi,
     generateParticipantsApi,
-    populateSurveyParticipantsApi,
+    // populateSurveyParticipantsApi, // DEPRECATED
+    addParticipantsApi,
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
 
@@ -17,6 +25,9 @@ const initialState = {
     studies: null,
     study: null,
     studySetupInfo: null,
+    studyProcedure: null, // Procedure Config State
+    procedureOverview: null, // Procedure Config Overview State
+    studyExport: null,
     api: IDLE,
     error: null,
     status: null,
@@ -72,6 +83,31 @@ export const getStudySetupInfo = createAsyncThunk(
     }
 );
 
+// info no thunk
+export const getStudySetupInfoParticipantsNoThunk = async (studyId, dispatch) => {
+    try {
+        const response = await apiWithAuth(getStudySetupInfoApi, studyId, dispatch)
+        return response.body.planned_number_participants
+    } catch (err) {
+        return "N.A."
+    }
+}
+
+export const duplicateStudy = createAsyncThunk(
+    'duplicateStudy',
+    async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            return await apiWithAuth(duplicateStudyApi, studyId, dispatch)
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
 export const createStudy = createAsyncThunk(
     'createStudy',
     async (arg, { dispatch, getState, rejectWithValue, requestId}) => {
@@ -120,16 +156,114 @@ export const deleteStudy = createAsyncThunk(
     }
 );
 
-export const generateProceduresWithSteps = createAsyncThunk(
-    'generateProceduresWithSteps',
+// create procedure config step
+export const createSingleProcedureConfigStep = createAsyncThunk(
+    'createSingleProcedureConfigStep',
     async (args, { dispatch, getState, rejectWithValue, requestId}) => {
         const { api, currentRequestId } = getState().studies
         if (api !== LOADING || requestId !== currentRequestId) {
             return
         }
         try {
-            const response = await apiWithAuth(generateProceduresWithStepsApi, args, dispatch)
+            const response = await apiWithAuth(createSingleProcedureConfigStepApi, args, dispatch)
             return response;
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
+// get procedure config
+export const getProcedureConfig = createAsyncThunk(
+    'getProcedureConfig',
+    async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(getProcedureConfigMainApi, studyId, dispatch)
+            return response
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
+// get procedure config
+export const getProcedureConfigOverview = createAsyncThunk(
+    'getProcedureConfigOverview',
+    async (procedureConfigId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            console.log(procedureConfigId)
+            const response = await apiWithAuth(getProcedureConfigOverviewApi, procedureConfigId, dispatch)
+            return response
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
+// update procedure config
+export const updateProcedure = createAsyncThunk(
+    'updateProcedure',
+    async (args, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(updateProcedureConfigApi, args, dispatch)
+            return response;
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
+export const importStudySchema = createAsyncThunk(
+    'importStudySchema',
+    async (studySchema, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            return await apiWithAuth(importStudySchemaApi, studySchema, dispatch)
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
+export const exportStudySchema = createAsyncThunk(
+    'exportStudySchema',
+    async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            return await apiWithAuth(exportStudySchemaApi, studyId, dispatch)
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
+export const generateProcedures = createAsyncThunk(
+    'generateProcedures',
+    async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            return await apiWithAuth(generateProceduresApi, studyId, dispatch)
         } catch (err) {
             return rejectWithValue(err)
         }
@@ -152,21 +286,37 @@ export const generateParticipants = createAsyncThunk(
     }
 );
 
-export const populateSurveyParticipants = createAsyncThunk(
-    'populateSurveyParticipants',
-    async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
+export const addParticipants = createAsyncThunk(
+    'addParticipants',
+    async (args, { dispatch, getState, rejectWithValue, requestId}) => {
         const { api, currentRequestId } = getState().studies
         if (api !== LOADING || requestId !== currentRequestId) {
             return
         }
         try {
-            const response = await apiWithAuth(populateSurveyParticipantsApi, studyId, dispatch)
-            return response;
+            return await apiWithAuth(addParticipantsApi, args, dispatch)
         } catch (err) {
             return rejectWithValue(err)
         }
     }
 );
+
+// DEPRECATED
+// export const populateSurveyParticipants = createAsyncThunk(
+//     'populateSurveyParticipants',
+//     async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
+//         const { api, currentRequestId } = getState().studies
+//         if (api !== LOADING || requestId !== currentRequestId) {
+//             return
+//         }
+//         try {
+//             const response = await apiWithAuth(populateSurveyParticipantsApi, studyId, dispatch)
+//             return response;
+//         } catch (err) {
+//             return rejectWithValue(err)
+//         }
+//     }
+// );
 
 // reducers
 export const studySlice = createSlice({
@@ -174,6 +324,15 @@ export const studySlice = createSlice({
     initialState,
     reducers: {
         // REDUCERS THAT DO NOT DEPEND ON API CALLS GO HERE
+        resetStudySetupInfo: (state, _action) => {
+            state.studySetupInfo = null
+        },
+        resetProcedureOverview: (state, _action) => {
+            state.procedureOverview = null
+        },
+        resetStudyExport: (state, _action) => {
+            state.studyExport = null
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -196,12 +355,21 @@ export const studySlice = createSlice({
             })
             .addCase(getStudy.fulfilled, (state, action) => {
                 const { requestId } = action.meta
-                if (state.api === LOADING && state.currentRequestId === requestId) {
-                    state.api = IDLE
-                    state.status = action.payload.status
-                    state.currentRequestId = undefined
-                    state.study = action.payload.body
-                }
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
+                state.study = action.payload.body
+            })
+            // duplicate study
+            .addCase(duplicateStudy.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(duplicateStudy.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
             })
             .addCase(getStudySetupInfo.pending, (state, action) => {
                 state.api = LOADING
@@ -209,12 +377,10 @@ export const studySlice = createSlice({
             })
             .addCase(getStudySetupInfo.fulfilled, (state, action) => {
                 const { requestId } = action.meta
-                if (state.api === LOADING && state.currentRequestId === requestId) {
-                    state.api = IDLE
-                    state.status = action.payload.status
-                    state.currentRequestId = undefined
-                    state.studySetupInfo = action.payload.body
-                }
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
+                state.studySetupInfo = action.payload.body
             })
             .addCase(getStudySetupInfo.rejected, (state, action) => {
                 const { requestId } = action.meta
@@ -262,11 +428,105 @@ export const studySlice = createSlice({
                     state.currentRequestId = undefined
                 }
             })
-            .addCase(generateProceduresWithSteps.pending, (state, action) => {
+            // Procedure Config Overview
+            .addCase(getProcedureConfigOverview.pending, (state, action) => {
                 state.api = LOADING
                 state.currentRequestId = action.meta.requestId
             })
-            .addCase(generateProceduresWithSteps.fulfilled, (state, action) => {
+            .addCase(getProcedureConfigOverview.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
+                state.procedureOverview = action.payload.body
+            })
+            //
+            // Procedure Config Cases
+            .addCase(getProcedureConfig.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(getProcedureConfig.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
+                state.studyProcedure = action.payload.body
+            })
+            //
+            // Add Procedure Config step Cases
+            .addCase(createSingleProcedureConfigStep.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(createSingleProcedureConfigStep.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                    //state.studyProcedure = action.payload.body
+                }
+            })
+            //
+            // Update Procedure Config Cases
+            .addCase(updateProcedure.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(updateProcedure.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                }
+            })
+            //
+            // Export Study Schema Cases
+            .addCase(exportStudySchema.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(exportStudySchema.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
+                state.studyExport = action.payload.body
+            })
+            //
+            // Import Study Schema Cases
+            .addCase(importStudySchema.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(importStudySchema.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                if (state.api === LOADING && state.currentRequestId === requestId) {
+                    state.api = IDLE
+                    state.status = action.payload.status
+                    state.currentRequestId = undefined
+                    state.study = action.payload.body
+                }
+            })
+            //
+            // Add Participants Cases
+            .addCase(addParticipants.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(addParticipants.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
+            })
+            .addCase(generateProcedures.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(generateProcedures.fulfilled, (state, action) => {
                 const { requestId } = action.meta
                 if (state.api === LOADING && state.currentRequestId === requestId) {
                     state.api = IDLE
@@ -286,18 +546,18 @@ export const studySlice = createSlice({
                     state.currentRequestId = undefined
                 }
             })
-            .addCase(populateSurveyParticipants.pending, (state, action) => {
-                state.api = LOADING
-                state.currentRequestId = action.meta.requestId
-            })
-            .addCase(populateSurveyParticipants.fulfilled, (state, action) => {
-                const { requestId } = action.meta
-                if (state.api === LOADING && state.currentRequestId === requestId) {
-                    state.api = IDLE
-                    state.status = action.payload.status
-                    state.currentRequestId = undefined
-                }
-            })
+            // .addCase(populateSurveyParticipants.pending, (state, action) => {
+            //     state.api = LOADING
+            //     state.currentRequestId = action.meta.requestId
+            // })
+            // .addCase(populateSurveyParticipants.fulfilled, (state, action) => {
+            //     const { requestId } = action.meta
+            //     if (state.api === LOADING && state.currentRequestId === requestId) {
+            //         state.api = IDLE
+            //         state.status = action.payload.status
+            //         state.currentRequestId = undefined
+            //     }
+            // })
 
     },
 });
@@ -317,8 +577,20 @@ export const selectStudySetupInfo = (state) => {
     return state.studies.studySetupInfo;
 }
 
+export const selectStudyExport = (state) => {
+    return state.studies.studyExport;
+}
+
 export const selectStudyApiStatus = (state) => {
     return state.studies.status
+}
+
+export const selectStudyProcedure = (state) => {
+    return state.studies.studyProcedure
+}
+
+export const selectStudyProcedureOverview = (state) => {
+    return state.studies.procedureOverview
 }
 
 export default studySlice.reducer;

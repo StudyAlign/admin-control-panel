@@ -1,12 +1,15 @@
-import React, {useState} from "react";
-import StudyCreationLayout, {CreationSteps} from "./StudyCreationLayout";
-import {Button, Col, Row, Container, Form} from "react-bootstrap";
-import {useDispatch, useSelector} from "react-redux";
-import {useAuth} from "../../components/Auth";
-import {createStudy, selectStudy} from "../../redux/reducers/studySlice";
-import {useNavigate} from "react-router";
+import React, { useState } from "react";
+import { Button, Col, Row, Container, Form } from "react-bootstrap";
+import { useDispatch, useSelector } from "react-redux";
+import { Navigate, useLocation } from "react-router-dom";
+
+import { createStudy, selectStudy } from "../../redux/reducers/studySlice";
+
+import { STATES } from "../study_overview/StudyOverviewLayout";
+
+import { useAuth } from "../../components/Auth";
 import LoadingScreen from "../../components/LoadingScreen";
-import {Navigate, useLocation} from "react-router-dom";
+import StudyCreationLayout, { CreationSteps } from "./navigation_logic/StudyCreationLayout";
 
 export default function CreateInformation() {
     const dispatch = useDispatch()
@@ -54,14 +57,13 @@ export default function CreateInformation() {
             "name": title,
             "startDate": startDate + "T15:08:50.161Z",
             "endDate": endDate  + "T15:08:50.161Z",
-            "is_active": false, // TODO how to initialize study? As active or not active
+            "state": STATES.SETUP, // "setup", "running", "finished"
             "owner_id": auth.user.id,
             "invite_only": false, // TODO how to indicate if invite_only or not? Checkbox?
             "description": description,
             "consent": consent,
             "planned_number_participants": amountParticipants,
-            "planned_procedure": null,
-            "current_setup_step": "study"
+            "current_setup_step": "information" // jump to procedure after creating
         }
         await dispatch(createStudy(study))
         setCreated(true)
@@ -77,7 +79,7 @@ export default function CreateInformation() {
     }
 
     return(
-        <StudyCreationLayout step={CreationSteps.Information}>
+        <StudyCreationLayout step={CreationSteps.Information} static={true}>
 
             <Container>
                 <Form onSubmit={handleSubmit}>
@@ -92,13 +94,14 @@ export default function CreateInformation() {
                         <Col>
                             <Form.Group className="mb-3" controlId="formStartDate">
                                 <Form.Label>Start Date</Form.Label>
-                                <Form.Control required type="date" placeholder="Start Date" value={startDate} onChange={handleStartDate}/>
+                                <Form.Control required type="date" placeholder="Start Date" value={startDate} onChange={handleStartDate}
+                                    min={(new Date()).toISOString().split('T')[0]}/>
                             </Form.Group>
                         </Col>
                         <Col>
                             <Form.Group className="mb-3" controlId="formEndDate">
                                 <Form.Label>End Date</Form.Label>
-                                <Form.Control required type="date" placeholder="End Date" value={endDate} onChange={handleEndDate}/>
+                                <Form.Control required type="date" placeholder="End Date" min={startDate} value={endDate} onChange={handleEndDate}/>
                             </Form.Group>
                         </Col>
                     </Row>

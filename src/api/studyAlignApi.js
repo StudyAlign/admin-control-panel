@@ -96,13 +96,30 @@ export function deleteStudyApi(studyId) {
     return sal.deleteStudy(studyId);
 }
 
-export function generateProceduresWithStepsApi(args) {
-    return sal.generateProceduresWithSteps(args.studyId, args.procedureScheme);
+export function generateProceduresApi(studyId) {
+    return sal.generateProcedures(studyId);
 }
 
-export function populateSurveyParticipantsApi(studyId) {
-    return sal.populateSurveyParticipants(studyId);
+export function addParticipantsApi(args) {
+    return sal.addParticipants(args.studyId, args.amount);
 }
+
+export function exportStudySchemaApi(studyId) {
+    return sal.exportStudySchema(studyId);
+}
+
+export function importStudySchemaApi(studySchema) {
+    return sal.importStudySchema(studySchema);
+}
+
+export function duplicateStudyApi(studyId) {
+    return sal.duplicateStudy(studyId);
+}
+
+// DEPRECATED
+// export function populateSurveyParticipantsApi(studyId) {
+//     return sal.populateSurveyParticipants(studyId);
+// }
 
 export function generateParticipantsApi(args) {
     return sal.generateParticipants(args.studyId, args.amount);
@@ -116,6 +133,10 @@ export function getProcedureConfigMainApi(studyId) {
 
 export function getProcedureConfigApi(procedureConfigId) {
     return sal.getProcedureConfig(procedureConfigId);
+}
+
+export function getProcedureConfigOverviewApi(procedureConfigId) {
+    return sal.getProcedureConfigOverview(procedureConfigId);
 }
 
 export function createProcedureConfigBlockApi(procedureConfigBlock) {

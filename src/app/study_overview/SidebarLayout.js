@@ -1,7 +1,9 @@
 import React from "react";
-import {Container, Row, Col, Nav } from "react-bootstrap";
-import {useNavigate, useParams} from "react-router";
-import "./StudyOverview.css"
+import { Container, Row, Col, Nav } from "react-bootstrap";
+import { useNavigate, useParams } from "react-router";
+
+import "./StudyOverview.css";
+import "../SidebarAndReactStyles.css";
 
 export default function SidebarLayout(props){
     const navigate = useNavigate();

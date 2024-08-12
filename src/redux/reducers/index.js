@@ -5,6 +5,7 @@ import texts from "./textSlice"
 import conditions from "./conditionSlice"
 import questionnaires from "./questionnaireSlice"
 import pauses from "./pauseSlice"
+import blocks from "./blockSlice"
 
 
 export default combineReducers({
@@ -13,5 +14,6 @@ export default combineReducers({
     texts,
     conditions,
     questionnaires,
-    pauses
+    pauses,
+    blocks
 });

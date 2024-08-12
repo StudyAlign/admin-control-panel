@@ -1,21 +1,32 @@
-import {useNavigate, useParams} from "react-router";
-import StudyCreationLayout, {CreationSteps} from "./StudyCreationLayout";
-import React, {useEffect} from "react";
-import {Container, Row, Col, ListGroup, Card, Button} from "react-bootstrap";
-import {getTexts, selectTexts} from "../../redux/reducers/textSlice";
-import {getConditions, selectConditions} from "../../redux/reducers/conditionSlice";
-import {getPauses, selectPauses} from "../../redux/reducers/pauseSlice";
+import { useNavigate, useParams } from "react-router";
+import { Container, Row, Col, Card, Button } from "react-bootstrap";
+import React, { useEffect } from "react";
+
+import { getTexts, selectTexts } from "../../redux/reducers/textSlice";
+import { getConditions, selectConditions } from "../../redux/reducers/conditionSlice";
+import { getPauses, selectPauses } from "../../redux/reducers/pauseSlice";
 import {
+    getProcedureConfig,
     getStudy,
     getStudySetupInfo,
     selectStudy,
     selectStudySetupInfo,
+    selectStudyProcedure,
     updateStudy,
-    generateProceduresWithSteps, generateParticipants, populateSurveyParticipants,
+    generateProcedures,
+    generateParticipants,
+    // populateSurveyParticipants,
+    selectStudyProcedureOverview,
+    getProcedureConfigOverview,
 } from "../../redux/reducers/studySlice";
-import {useDispatch, useSelector} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+
+import Topbar from "../../components/Topbar";
 import LoadingScreen from "../../components/LoadingScreen";
-import {reformatDate} from "../../components/CommonFunctions";
+import { reformatDate } from "../../components/CommonFunctions";
+import ShowProcedure from "./ShowProcedure";
+import StudyCreationLayout, { CreationSteps } from "./navigation_logic/StudyCreationLayout";
+import { STATES } from "../study_overview/StudyOverviewLayout";
 
 
 export default function CreateCheck() {
@@ -28,64 +39,58 @@ export default function CreateCheck() {
     const texts = useSelector(selectTexts)
     const conditions = useSelector(selectConditions)
     const pauses = useSelector(selectPauses)
+    const procedureConfig = useSelector(selectStudyProcedure)
+    const procedureConfigOverview = useSelector(selectStudyProcedureOverview)
 
     useEffect(  () => {
-        dispatch(getStudy(study_id)).then(() => {
-            dispatch(getStudySetupInfo(study_id))
+        dispatch(getStudy(study_id))
+        dispatch(getStudySetupInfo(study_id))
+        dispatch(getProcedureConfig(study_id)).then((response) => {
+            if (response.payload.body.id) {
+                dispatch(getProcedureConfigOverview(response.payload.body.id))
+            }
         })
-        dispatch(getTexts(study_id))
-        dispatch(getConditions(study_id))
-        dispatch(getPauses(study_id))
+
     }, [])
 
-    if (study == null || studySetupInfo == null
-        || texts == null || conditions == null || pauses == null) {
-        return <LoadingScreen/>
-    }
-
-    const getProcedureStep = (orderObject, key) => {
-        let header = ""
-
-        if (orderObject.text_id != null) {
-            header = texts.find(obj => obj.id === orderObject.text_id).title + " - Text"
-        }
-        else if (orderObject.condition_id != null) {
-            header = conditions.find(obj => obj.id === orderObject.condition_id).name + " - Condition"
-        }
-        else if (orderObject.questionnaire_id != null) {
-            header = "Questionnaire"
-        }
-        else if (orderObject.pause_id != null) {
-            header = pauses.find(obj => obj.id === orderObject.pause_id).title + " - Pause"
-        }
-
-        return <Card className="m-1 p-1" style={{ "width": "300px" }} key={key}> {header} </Card>
+    if (study == null || studySetupInfo == null || procedureConfig == null || procedureConfigOverview == null) {
+        return (
+            <>
+                <Topbar />
+                <LoadingScreen />
+            </>
+        )
     }
 
     const handleFinish = async (event) => {
         event.preventDefault()
 
-        let procedureScheme = studySetupInfo.planned_procedure.map(step =>
-            step.condition_id == null ? step : {"dummy": true}
-        )
+        // let procedureScheme = studySetupInfo.planned_procedure.map(step =>
+        //     step.condition_id == null ? step : {"dummy": true}
+        // )
 
-        await dispatch(generateProceduresWithSteps({
-            "studyId": study_id,
-            "procedureScheme": procedureScheme
-        }))
+        if (study.state === STATES.SETUP) {
+            await dispatch(generateProcedures(study_id))
 
-        await dispatch(generateParticipants({
-            "studyId": study_id,
-            "amount": studySetupInfo.planned_number_participants
-        }))
-
-        if (studySetupInfo.planned_procedure.findIndex(step => step.questionnaire_id != null) > -1) {
-            await dispatch(populateSurveyParticipants(study_id))
+            await dispatch(generateParticipants({
+                "studyId": study_id,
+                "amount": studySetupInfo.planned_number_participants
+            }))
         }
+
+        // DEPRECATED
+        // if (studySetupInfo.planned_procedure.findIndex(step => step.questionnaire_id != null) > -1) {
+        //     await dispatch(populateSurveyParticipants(study_id))
+        // }
+
+        // check if start date is today
+        let updateState = STATES.FINISHED
+        if (new Date(study.startDate.split('T')[0]) <= new Date()) updateState = STATES.RUNNING
 
         await dispatch(updateStudy({
             "studyId": study_id,
             "study": {
+                "state": updateState, // "setup", "running", "finished"
                 "current_setup_step": "check"
             }
         }))
@@ -124,13 +129,7 @@ export default function CreateCheck() {
             <Row className="mt-3"> <hr/> </Row>
             <Row> <h3> Procedure </h3></Row>
             <Row>
-                <ListGroup>
-                    {
-                        studySetupInfo.planned_procedure.map((orderObject, index) => {
-                         return getProcedureStep(orderObject, index)
-                        })
-                    }
-                </ListGroup>
+                <ShowProcedure procedureId={procedureConfig && procedureConfig.id} />
             </Row>
             <Row className="mt-3"> <hr/> </Row>
             <Row className='mt-0' xs="auto">

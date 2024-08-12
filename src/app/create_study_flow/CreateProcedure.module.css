@@ -1,0 +1,207 @@
+.checkBoxOverlay {
+    display: flex;
+    align-items: center;
+}
+
+.checkBox {
+    margin-left: 10px;
+}
+
+.invalidLabel {
+    color: #dc3545;
+}
+
+.saveButton {
+    margin-left: 10px;
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgb(0, 115, 160);
+    &:disabled {
+        color: #6c757d;
+        background: none;
+    };
+}
+
+.deleteButton {
+    margin-left: 10px;
+    color: rgb(85, 0, 0);
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ProcedureOrder {
+    word-break: normal;
+    tab-size: 4;
+    color: #6c757d;
+    font-family: sans-serif;
+    font-size: 14px;
+    background-repeat: no-repeat;
+    box-sizing: inherit;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dropLine {
+    /* Drag & Drop rendered Line */
+    height: 2px;
+    background-color: #007bff;
+}
+.dropLine::before,
+.dropLine::after {
+    --size: 6px;
+
+    position: absolute;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    background-color: inherit;
+    content: '';
+}
+.dropLine::before {
+    top: calc(var(--size) / 2 * -1 + 1px);
+    left: calc(var(--size) / 2 * -1);
+}
+.dropLine::after {
+    top: calc(var(--size) / 2 * -1 + 1px);
+    right: calc(var(--size) / 2 * -1);
+}
+
+
+.dragHandleBlock {
+    /* Block cursor */
+    cursor: grab;
+}
+.dragHandleBlockNotAllowed {
+    /* Block cursor */
+    cursor: not-allowed;
+}
+.dragHandleBlock:active {
+    cursor: grabbing;
+}
+
+.dragHandle svg {
+    /* Drag Handle Design */
+    margin: 4px;
+    height: 16px;
+    fill: black;
+    cursor: grab;
+}
+.dragHandleNotAllowed svg {
+    /* Drag Handle Design */
+    margin: 4px;
+    height: 16px;
+    fill: black;
+    cursor: not-allowed;
+}
+.dragHandle svg:active {
+    cursor: grabbing;
+}
+
+.accordionItem {
+    cursor: auto;
+    margin-left: 12px;
+    width: 100%;
+}
+
+.wrapper {
+    /* Ensure ProcedureObject width */
+    --padding: 8px;
+
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 800px;
+}
+.wrapper>* {
+    width: 100%;
+}
+
+.block {
+    /* block design */
+    flex-grow: 1;
+    padding: 0 var(--padding) calc(var(--padding) / 2);
+    border: 1px solid #adbde7;
+    border-radius: 4px;
+    background-color: rgba(173 , 189, 231, 0.1);
+}
+.blockHeader {
+    /* design to show trash button */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.block.stacked {
+    /* drag in block design */
+    --color: #adbde7;
+
+    box-shadow: 0 0 0 1px var(--color);
+    border-color: var(--color);
+}
+.block.ghost {
+    /* drag block */
+    border-color: #adbde7;
+    background-color: #adbde762;
+    z-index: 1000; /* Ensure it stays on top */
+}
+.heading {
+    /* Block Heading */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    padding: 8px 4px 0;
+    color: #809de7;
+    font-size: 15px;
+    font-weight: bold;
+    line-height: 1.4;
+}
+
+.procedureElement {
+    /* ProcedureObject Design */
+    display: flex;
+    flex-grow: 1;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    min-height: 48px;
+    border: 1px solid #cfd4db;
+    border-radius: 4px;
+    background-color: white;
+}
+.procedureElement.ghost {
+    /* Drag procedureElement */
+    background-color: #f6f9fc;
+    z-index: 1000; /* Ensure it stays on top */
+}
+
+.ghost {
+    /* Preview animation */
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    height: 100%;
+    opacity: 0.8;
+    animation-name: ghostItemVisible;
+    animation-duration: 200ms;
+    animation-fill-mode: forwards;
+    z-index: 1000; /* Ensure it stays on top */
+}
+@keyframes ghostItemVisible {
+    0% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(0.8);
+    }
+}

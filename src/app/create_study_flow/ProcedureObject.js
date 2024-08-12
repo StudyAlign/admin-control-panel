@@ -1,39 +1,71 @@
-import React, {useState} from 'react';
-import {Draggable} from 'react-beautiful-dnd';
-import {Card, Accordion, useAccordionButton, Form, Row, Button, Col} from "react-bootstrap";
-import {useDispatch} from "react-redux";
-import {createText, deleteText, getTexts, updateText} from "../../redux/reducers/textSlice";
-import {createCondition, deleteCondition, getConditions, updateCondition} from "../../redux/reducers/conditionSlice";
-import {createQuestionnaire, deleteQuestionnaire, getQuestionnaires, updateQuestionnaire} from "../../redux/reducers/questionnaireSlice";
-import {createPause, deletePause, getPauses, updatePause} from "../../redux/reducers/pauseSlice";
-import {DeviceSsd, Trash3} from "react-bootstrap-icons";
+import React, { useEffect, useState, useImperativeHandle, forwardRef, useContext } from 'react';
+import { DragHandleComponent } from 'react-sortful'
+import { Accordion, Form, Button, Tooltip, OverlayTrigger } from "react-bootstrap";
+import { Trash3, Save } from "react-bootstrap-icons";
+import { useDispatch} from "react-redux";
+
+import { CreateProcedureContext } from './CreateProcedure';
+
+import { createSingleProcedureConfigStep } from "../../redux/reducers/studySlice"
+import { createText, updateText } from "../../redux/reducers/textSlice";
+import { createCondition, updateCondition } from "../../redux/reducers/conditionSlice";
+import { createQuestionnaire, updateQuestionnaire } from "../../redux/reducers/questionnaireSlice";
+import { createPause, updatePause } from "../../redux/reducers/pauseSlice";
+
+import styles from './CreateProcedure.module.css'
+
+
+
+
+// -------------------------------------------------------------------------------------------------------
+// Sector: ProcedureObject Structure: Start --------------------------------------------------------------
 
 export const ProcedureTypes = {
     TextPage: {
         id: 0,
         key: "text",
         label: "Text Page",
+        color: "rgb(13,4,73)",
         emptyContent: { "title": "", "body": "", "study_id": -1 }
     },
     Condition: {
         id: 1,
         key: "condition",
         label: "Condition",
+        color: "rgb(191,96,16)",
         emptyContent: { "name": "", "config": "", "url": "", "study_id": -1 }
     },
     Questionnaire: {
         id: 2,
         key: "questionnaire",
         label: "Questionnaire",
-        emptyContent: { "url": "", "system": "limesurvey", "ext_id": "-", "api_url": "-", "api_username": "-", "api_password": "-", "study_id": -1}
+        color: "rgb(144,30,64)",
+        emptyContent: { "url": "", "system": "", "study_id": -1}
     },
     Pause:  {
         id: 3,
         key: "pause",
         label: "Pause",
+        color: "rgb(81,99,39)",
         emptyContent: { "title": "", "body": "", "proceed_body": "", "type": "time_based", "config": "", "study_id": -1 }
     },
+    BlockElement: {
+        id: 4,
+        key: "block",
+        label: "Block Element",
+        color: "rgb(173,189,231)",
+        emptyContent: { "study_id": -1 }
+    },
 }
+
+// Sector: ProcedureObject Structure: End --------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------------
+
+
+
+
+// -----------------------------------------------------------------------------------------------------------
+// Sector: ProcedureObject content forms: Start --------------------------------------------------------------
 
 function TextPageForm(props) {
 
@@ -72,8 +104,18 @@ function ConditionForm(props) {
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="config">
-                <Form.Label> Config </Form.Label>
-                <Form.Control as="textarea" rows={3} value={props.content.config} onChange={onChange} required/>
+                <Form.Label className={props.error ? styles.invalidLabel : ''}>
+                    {props.error ? 'Config*' : 'Config'}
+                </Form.Label>
+                <Form.Control
+                    as="textarea"
+                    rows={3}
+                    value={props.content.config}
+                    onChange={onChange}
+                    required
+                    className={props.error ? 'is-invalid' : ''}
+                />
+                {props.error && <div className="invalid-feedback">Not a valid JSON.</div>}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="url">
@@ -85,10 +127,39 @@ function ConditionForm(props) {
 }
 
 function QuestionnaireForm(props) {
+    // Questionnaire Context
+    const {
+        questionnaireUpdateList,
+        currentSystem,
+        setCurrentSystem,
+        setQuestionnaireModalContent,
+        setShowQuestionnaireModal,
+        NO_QUESTIONNAIRE_SYSTEM
+    } = useContext(CreateProcedureContext)
+
+    const isValidSystem = (value) => {
+        // If no value is set or there is just one questionnaire, return true
+        if ( currentSystem === NO_QUESTIONNAIRE_SYSTEM || currentSystem === value || questionnaireUpdateList.length === 1 ) {
+            setCurrentSystem(value)
+            return true
+        } else {
+            setQuestionnaireModalContent([currentSystem, value])
+            setShowQuestionnaireModal(true)
+            return false
+        }
+    }
 
     const onChange = (event) => {
         event.preventDefault()
-        props.editProcedureStep(event.target.id, event.target.value)
+        const { id, value } = event.target
+
+        if (id === "system") {
+            if (isValidSystem(value)) {
+                props.editProcedureStep(id, value)
+            }
+        } else {
+            props.editProcedureStep(id, value)
+        }
     }
 
     return (
@@ -103,27 +174,12 @@ function QuestionnaireForm(props) {
                 <Form.Select value={props.content.system} onChange={onChange}>
                     <option disabled value={""}> -- Select a System -- </option>
                     <option value={"limesurvey"}> Limesurvey </option>
+                    <option value={"qualtrics"}> Qualtrics </option>
+                    {/* <option value={"surveymonkey"}> Survey Monkey </option>
+                    <option value={"googleforms"}> Google Forms </option>
+                    <option value={"typeform"}> Typeform </option>
+                    <option value={"jotform"}> Jotform </option> */}
                 </Form.Select>
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="ext_id">
-                <Form.Label> Ext-Id </Form.Label>
-                <Form.Control type="text" value={props.content.ext_id} onChange={onChange} required/>
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="api_url">
-                <Form.Label> API-Url </Form.Label>
-                <Form.Control type="url" value={props.content.api_url} onChange={onChange} required/>
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="api_username">
-                <Form.Label> API-Username </Form.Label>
-                <Form.Control type="text" value={props.content.api_username} onChange={onChange} required/>
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="api_password">
-                <Form.Label> API-Password </Form.Label>
-                <Form.Control type="password" value={props.content.api_password} onChange={onChange} required/>
             </Form.Group>
         </Form>
     )
@@ -170,12 +226,69 @@ function PauseForm(props) {
     )
 }
 
-export default function ProcedureObject(props) {
+// Drag Element for Procedure Object
+const dotsSVG = (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+        <circle cx="18" cy="12" r="3" />
+        <circle cx="18" cy="24" r="3" />
+        <circle cx="18" cy="36" r="3" />
+        <circle cx="30" cy="12" r="3" />
+        <circle cx="30" cy="24" r="3" />
+        <circle cx="30" cy="36" r="3" />
+    </svg>
+)
+
+// Sector: ProcedureObject content forms: End --------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------
+
+
+
+
+const ProcedureObject = forwardRef((props, ref) => {
+ 
+    // ---------------------------------------------------------------------------------------------------------
+    // Sector: React States and References: Start --------------------------------------------------------------
+
     const dispatch = useDispatch()
 
+    const [disabled] = useState(props.disabled)
     const [content, setContent] = useState(props.content)
+    const [backendId, setBackendId] = useState(props.backendId) // BackendId of ProcedureObject
+    const [stepId, setStepId] = useState(props.stepId) // StepId of ProcedureObject
     const [stored, setStored] = useState(props.stored) // Indicator if ProcedureObject already got stored in backed
     const [updated, setUpdated] = useState(false) // Indicator if the content got updated
+    const [updateError, setUpdateError] = useState(false) // Indicator if there was an error while updating
+    const [showTooltip, setShowTooltip] = useState(false)
+    const [delayTimeout, setDelayTimeout] = useState(null)
+
+    // onclose logic ref from accordion in createProcedure
+    useImperativeHandle(ref, () => ({
+        handleClose() {
+            if (updated) {
+                updateContent()
+            }
+        },
+        changeQuestionnaireSystem(id, newSystem) {
+            let newContent = {...content}
+            newContent.system = newSystem
+            setContent(newContent)
+            updateQuestionnaireRef(newContent)
+        }
+    }))
+
+    // Update Frontend if stored, backendId or updated is changed
+    useEffect(() => {
+        props.updateProcedureMap(props.id, backendId, stepId, content, stored)
+    }, [backendId, stepId, stored, updated])
+
+    // Sector: React States and References: End --------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------------------
+
+    
+    
+    
+    // -----------------------------------------------------------------------------------------------------------------
+    // Sector: update ProcedureObject backend: Start --------------------------------------------------------------
 
     const contentComplete = () => {
         let required = Object.keys(props.type.emptyContent).filter(k => k !== "study_id")
@@ -187,20 +300,23 @@ export default function ProcedureObject(props) {
         return true
     }
 
-    const updateProcedureOfType = async (type) => {
-        const study_id = props.content.study_id
+    const updateQuestionnaireRef = async (newContent) => {
+        // if not stored or not complete return
+        if (!stored || !contentComplete()) return
 
-        if (type === ProcedureTypes.TextPage) {
-            await dispatch(getTexts(study_id))
-        }
-        else if (type === ProcedureTypes.Condition) {
-            await dispatch(getConditions(study_id))
-        }
-        else if (type === ProcedureTypes.Questionnaire) {
-            await dispatch(getQuestionnaires(study_id))
-        }
-        else if (type === ProcedureTypes.Pause) {
-            await dispatch(getPauses(study_id))
+        console.log("Update Questionnaire via Ref",newContent)
+
+        // update Questionnaire in Backend
+        const response = await dispatch(updateQuestionnaire({questionnaireId: backendId, questionnaire: {
+            "url": newContent.url,
+            "system": newContent.system
+        }}))
+
+        // if response successful status 204
+        if (response.payload.status === 204) {
+            props.setMessage({type: "success", text: "Questionnaire updated"})
+        } else {
+            props.setMessage({ type: "danger", text: "Error while updating Questionnaire, please reload page!" })
         }
     }
 
@@ -212,54 +328,125 @@ export default function ProcedureObject(props) {
                 duration: 4000})
             return
         }
+
+        // create ProcedureObject + step in Backend
+        let response_create = { payload: { status: 400 } }
+        let response_step = { payload: { status: 400 } }
         if(props.type === ProcedureTypes.TextPage) {
-            await dispatch(createText(content))
+            // create object
+            response_create = await dispatch(createText(content))
+            // create step
+            response_step = await dispatch(createSingleProcedureConfigStep({
+                "procedureConfigId": props.rootBackendId,
+                "procedureConfigStep" : {
+                    "counterbalance" : props.counterbalance,
+                    "text_id" : response_create.payload.body.id
+                }
+            }))
         }
         else if(props.type === ProcedureTypes.Condition) {
-            await dispatch(createCondition(content))
+            // try to parse config into object
+            try {
+                const conditionContent = {...content}
+                conditionContent.config = JSON.parse(content.config)
+                console.log(conditionContent)
+                response_create = await dispatch(createCondition(conditionContent))
+                response_step = await dispatch(createSingleProcedureConfigStep({
+                    "procedureConfigId": props.rootBackendId,
+                    "procedureConfigStep" : {
+                        "counterbalance" : props.counterbalance,
+                        "condition_id" : response_create.payload.body.id
+                    }
+                }))
+            } catch (error) {
+                props.setMessage({type: "danger", text: "Error while parsing config to JSON"})
+                setUpdateError(true)
+            }
         }
         else if(props.type === ProcedureTypes.Questionnaire) {
-            await dispatch(createQuestionnaire(content))
+            response_create = await dispatch(createQuestionnaire(content))
+            response_step = await dispatch(createSingleProcedureConfigStep({
+                "procedureConfigId": props.rootBackendId,
+                "procedureConfigStep" : {
+                    "counterbalance" : props.counterbalance,
+                    "questionnaire_id" : response_create.payload.body.id
+                }
+            }))
         }
         else if(props.type === ProcedureTypes.Pause) {
-            await dispatch(createPause(content))
+            response_create = await dispatch(createPause(content))
+            response_step = await dispatch(createSingleProcedureConfigStep({
+                "procedureConfigId": props.rootBackendId,
+                "procedureConfigStep" : {
+                    "counterbalance" : props.counterbalance,
+                    "pause_id" : response_create.payload.body.id
+                }
+            }))
         }
-        setStored(true)
-        props.setMessage({type: "success", text: "Procedure-Object created"})
-        props.removeFromNotStored(props.id)
-        await updateProcedureOfType(props.type)
+
+        // if response successful status 200
+        if (response_create.payload.status === 200 && response_step.payload.status === 200) {
+            // set backendId
+            setBackendId(response_create.payload.body.id)
+            // set stepId
+            setStepId(response_step.payload.body.id)
+            // set stored to update frontend
+            setStored(true)
+            props.setMessage({ type: "success", text: "Procedure-Object created" })
+            // update backend
+            props.updateOnCreate()
+        } else {
+            props.setMessage({ type: "danger", text: "Error while creating Procedure-Object" })
+            setUpdated(true)
+        }
     }
 
     const updateContent = async () => {
+        setUpdated(false)
+        setUpdateError(false)
+
         if (!stored) {
             storeContent().then(r => { })
             return
         }
+
+        if (!contentComplete()) {
+            props.setMessage({
+                type: "danger",
+                text: "There are still some fields missing that need to be filled in!",
+                duration: 4000})
+            return
+        }
+
+        // update ProcedureObject in Backend
+        let response = { payload: { status: 400 } }
         if (props.type === ProcedureTypes.TextPage) {
-            await dispatch(updateText({textId: content.id, text: {
+            response = await dispatch(updateText({textId: backendId, text: {
                     "title": content.title,
                     "body": content.body
                 }}))
         }
         else if (props.type === ProcedureTypes.Condition) {
-            await dispatch(updateCondition({conditionId: content.id, condition: {
+            try {
+                const conditionConfig = JSON.parse(content.config)
+                response = await dispatch(updateCondition({conditionId: backendId, condition: {
                     "name": content.name,
-                    "config": content.config,
+                    "config": conditionConfig,
                     "url": content.url
                 }}))
+            } catch (error) {
+                props.setMessage({type: "danger", text: "Error while parsing config to JSON"})
+                setUpdateError(true)
+            } 
         }
         else if (props.type === ProcedureTypes.Questionnaire) {
-            await dispatch(updateQuestionnaire({questionnaireId: content.id, questionnaire: {
+            response = await dispatch(updateQuestionnaire({questionnaireId: backendId, questionnaire: {
                     "url": content.url,
-                    "system": content.system,
-                    "ext_id": content.ext_id,
-                    "api_url": content.api_url,
-                    "api_username": content.api_username,
-                    "api_password": content.api_password,
+                    "system": content.system
                 }}))
         }
         else if (props.type === ProcedureTypes.Pause) {
-            await dispatch(updatePause({pauseId: content.id, pause: {
+            response = await dispatch(updatePause({pauseId: backendId, pause: {
                     "title": content.title,
                     "body": content.body,
                     "proceed_body": content.proceed_body,
@@ -267,45 +454,45 @@ export default function ProcedureObject(props) {
                     "config": content.config
                 }}))
         }
-        setUpdated(false)
-        props.setMessage({type: "success", text: "Procedure-Object updated"})
-    }
-
-    const decoratedOnClick = useAccordionButton(props.id, (event) => {
-        event.preventDefault()
-        if(updated) {
-            updateContent()
-        }
-    });
-
-    const handleDelete = async (event) => {
-        event.preventDefault()
-        if (!stored) {
-            props.removeFromNotStored(props.id)
-            return
-        }
-        if(props.type === ProcedureTypes.TextPage) {
-            await dispatch(deleteText(content.id))
-        }
-        else if (props.type === ProcedureTypes.Condition) {
-            await dispatch(deleteCondition(content.id))
-        }
-        else if (props.type === ProcedureTypes.Questionnaire) {
-            await dispatch(deleteQuestionnaire(content.id))
-        }
-        else if (props.type === ProcedureTypes.Pause) {
-            await dispatch(deletePause(content.id))
-        }
-        props.setMessage({type: "success", text: "Procedure-Object deleted"})
-        await updateProcedureOfType(props.type)
-    }
-
-    const handleSave = (event) => {
-        event.preventDefault()
-        if(updated) {
-            updateContent()
+        // if response successful status 204
+        if (response.payload.status === 204) {
+            props.setMessage({type: "success", text: "Procedure-Object updated"})
+        } else {
+            props.setMessage({ type: "danger", text: "Error while updating Procedure-Object" })
+            setUpdated(true)
         }
     }
+
+    // Sector: update ProcedureObject backend: End --------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------------------------
+
+    
+    
+    
+    // -------------------------------------------------------------------------------------------------------------------
+    // Sector: ProcedureObject FrontEnd interactions: Start --------------------------------------------------------------
+
+    const handleSave = async (event) => {
+        event.preventDefault()
+    
+        const eventTarget = event.target
+        let button
+        
+        if (eventTarget.nodeName === "BUTTON") {
+            button = eventTarget;
+        } else {
+            button = eventTarget.closest('button');
+        }
+        
+        if (button) {
+            button.blur()
+        
+            if (updated) {
+                await updateContent()
+            }
+        }
+    }
+    
 
     const editContent = (content_id, value) => {
         let new_content = {...content}
@@ -319,7 +506,7 @@ export default function ProcedureObject(props) {
             case ProcedureTypes.TextPage:
                 return <TextPageForm content={content} editProcedureStep={editProcedureStep}/>
             case ProcedureTypes.Condition:
-                return <ConditionForm content={content} editProcedureStep={editProcedureStep}/>
+                return <ConditionForm error={updateError} content={content} editProcedureStep={editProcedureStep}/>
             case ProcedureTypes.Questionnaire:
                 return <QuestionnaireForm content={content} editProcedureStep={editProcedureStep}/>
             case ProcedureTypes.Pause:
@@ -332,10 +519,10 @@ export default function ProcedureObject(props) {
         switch (procedureType) {
             case ProcedureTypes.TextPage:
             case ProcedureTypes.Pause:
-                header = content.title + " - " + procedureType.label
+                header = !content.title ? procedureType.label : content.title + " - " + procedureType.label
                 break
             case ProcedureTypes.Condition:
-                header = content.name + " - " + procedureType.label
+                header = !content.name ? procedureType.label : content.name + " - " + procedureType.label
                 break
             case ProcedureTypes.Questionnaire:
                 header = procedureType.label
@@ -343,38 +530,70 @@ export default function ProcedureObject(props) {
         }
         if(!stored) {
             header += ' [Not Stored]'
+        }else if(stored && updateError) {
+            header += ' [Update Error]'
         }
         return header
     }
 
+    const getColor = (procedureType) => {
+        return procedureType.color
+    }
+
+    const handleMouseEnter = () => {
+        const timeout = setTimeout(() => { setShowTooltip(true) }, 500)
+        setDelayTimeout(timeout)
+    }
+
+    const handleMouseLeave = () => {
+        clearTimeout(delayTimeout)
+        setShowTooltip(false)
+    }
+
+    // Sector: ProcedureObject FrontEnd interactions: End --------------------------------------------------------------
+    // -----------------------------------------------------------------------------------------------------------------
+
+    
+    
+    
     return (
-        <Draggable draggableId={props.id} index={props.index} isDragDisabled={!props.stored}>
-            {provided => (
-                <div {...provided.draggableProps} {...provided.dragHandleProps}  ref={provided.innerRef}>
+        <div className={styles.procedureElement}>
+            <DragHandleComponent className={disabled ? styles.dragHandleNotAllowed : styles.dragHandle}>
+                {dotsSVG}
+            </DragHandleComponent>
 
-                    <Card className="m-1">
-                        <Card.Header onClick={decoratedOnClick}>
-                            { getHeader(props.type, content) }
-                        </Card.Header>
 
-                        <Accordion.Collapse eventKey={props.id}>
-                            <Card.Body className="pt-1">
-                                <Row className="me-0">
-                                    <Col> </Col>
-                                    <Col xs="auto" className="p-1">
-                                        <Button className="p-1 pt-0 m-0" onClick={handleSave} disabled={!updated}> <DeviceSsd/> </Button>
-                                    </Col>
-                                    <Col xs="auto" className="p-1">
-                                        <Button className="p-1 pt-0 m-0" onClick={handleDelete} variant="danger"> <Trash3/> </Button>
-                                    </Col>
-                                </Row>
-                                { getForm(props.type, content, editContent) }
-                            </Card.Body>
-                        </Accordion.Collapse>
-                    </Card>
+            <Accordion.Item eventKey={props.id} className={styles.accordionItem}>
+                <Accordion.Header style={{borderBottom: `1px solid ${getColor(props.type)}`}}>{getHeader(props.type, content)}</Accordion.Header>
+                <Accordion.Body>
+                    {getForm(props.type, content, editContent)}
+                </Accordion.Body>
+            </Accordion.Item>
 
-                </div>
-            )}
-        </Draggable>
-    );
-}
+            <OverlayTrigger
+                placement="top"
+                show={showTooltip}
+                overlay={<Tooltip id="tooltip-top">Manual save</Tooltip>}
+            >
+                <Button
+                    size="sm"
+                    onClick={handleSave}
+                    disabled={!updated}
+                    className={styles.saveButton}
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
+                >
+                    <Save />
+                </Button>
+            </OverlayTrigger>
+
+            {!disabled &&
+                <Button variant="danger" size="sm" onClick={() => props.deleteProcedureObject(props.id)} className={styles.deleteButton}>
+                    <Trash3 />
+                </Button>
+            }
+
+        </div>
+    )
+})
+export default ProcedureObject

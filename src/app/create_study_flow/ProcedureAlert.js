@@ -1,5 +1,5 @@
 import Alert from 'react-bootstrap/Alert';
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 
 export default function ProcedureAlert(props) {
     const [visible, setVisible] = useState(true)
