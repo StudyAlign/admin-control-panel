@@ -1,7 +1,13 @@
-import React from "react";
-import { Button } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Button, Tabs, Tab, Pagination, Dropdown } from "react-bootstrap";
 import { useParams } from "react-router";
-import { useTable } from "react-table";
+
+import { useDispatch, useSelector } from "react-redux";
+
+import {
+    getFirst100Interactions,
+    selectInteractionData,
+} from "../../redux/reducers/studySlice";
 
 import "./StudyOverview.css"
 import "../SidebarAndReactStyles.css";
@@ -9,94 +15,204 @@ import "../SidebarAndReactStyles.css";
 export default function InteractionData() {
     const { study_id } = useParams()
 
-    const data = React.useMemo(
-        () => [
-            {
-                col1: '...',
-                col2: '...',
-                col3: '...',
-            },
-            {
-                col1: '...',
-                col2: '...',
-                col3: '...',
-            },
-            {
-                col1: '...',
-                col2: '...',
-                col3: '...',
-            },
-            {
-                col1: '...',
-                col2: '...',
-                col3: '...',
-            },
-        ],
-        []
-    )
+    const dispatch = useDispatch()
+    const interactionData = useSelector(selectInteractionData)
 
-    const columns = React.useMemo(
-        () => [
-            {
-                Header: 'Column 1',
-                accessor: 'col1', // accessor is the "key" in the data
-            },
-            {
-                Header: 'Column 2',
-                accessor: 'col2',
-            },
-            {
-                Header: 'Column 3',
-                accessor: 'col3',
-            },
-        ],
-        []
-    )
-    // TODO get information from backend
+    useEffect(() => {
+        dispatch(getFirst100Interactions(study_id))
+    }, [])
 
-    const {
-        getTableProps,
-        getTableBodyProps,
-        headerGroups,
-        rows,
-        prepareRow,
-    } = useTable({ columns, data })
+    const [activePage, setActivePage] = useState(1)
+    const [itemsPerPage, setItemsPerPage] = useState(10)
 
+    if (interactionData == null) {
+        return <h1>No data available</h1>
+    } else {
 
-    return (
-        <>
-            <table {...getTableProps()} className="data-table">
-                <thead>
-                    {headerGroups.map(headerGroup => (
-                        <tr {...headerGroup.getHeaderGroupProps()}>
-                            {headerGroup.headers.map(column => (
-                                <th {...column.getHeaderProps()} className="data-table-header">
-                                    {column.render('Header')}
-                                </th>
-                            ))}
-                        </tr>
-                    ))}
-                </thead>
+        // copy interactionData to new const
+        const interactionDataCopy = [...interactionData]
+        // some test data
+        const data = [
+            { id: 1, name: 'alice', age: 23 },
+            { id: 2, name: 'bob', age: 25 },
+            { id: 3, name: 'charlie', age: 27 },
+            { id: 4, name: 'david', age: 29 },
+            { id: 5, name: 'eve', age: 31 },
+            { id: 6, name: 'frank', age: 33},
+            { id: 7, name: 'george', age: 35 },
+            { id: 8, name: 'harry', age: 37 },
+            { id: 9, name: 'ian', age: 39 },
+            { id: 10, name: 'jane', age: 41 },
+            { id: 11, name: 'kate', age: 43 },
+            { uuid: '1', interactions: 100, correct: 90, incorrect: 10 },
+            { uuid: '2', interactions: 200, correct: 180, incorrect: 20 },
+            { uuid: '3', interactions: 300, correct: 270, incorrect: 30 },
+            { uuid: '4', interactions: 400, correct: 360, incorrect: 40 },
+            { uuid: '5', interactions: 500, correct: 450, incorrect: 50 },
+            { uuid: '6', interactions: 600, correct: 540, incorrect: 60 },
+            { uuid: '7', interactions: 700, correct: 630, incorrect: 70 },
+            { uuid: '8', interactions: 800, correct: 720, incorrect: 80 },
+            { uuid: '9', interactions: 900, correct: 810, incorrect: 90 },
+            { uuid: '10', interactions: 1000, correct: 900, incorrect: 100 },
+            { uuid: '11', interactions: 1100, correct: 990, incorrect: 110 },
+            { id: 31, event: 'click', target: 'button', time: '2021-01-01T00:00:00Z' },
+            { id: 2, event: 'hover', target: 'div', time: '2021-01-01T00:01:00Z' },
+            { id: 3, event: 'scroll', target: 'window', time: '2021-01-01T00:02:00Z'},
+            { id: 4, event: 'click', target: 'button', time: '2021-01-01T00:03:00Z' },
+            { id: 52, event: 'hover', target: 'div', time: '2021-01-01T00:04:00Z' },
+            { id: 6, event: 'scroll', target: 'window', time: '2021-01-01T00:05:00Z'},
+            { id: 7, event: 'click', target: 'button', time: '2021-01-01T00:06:00Z' },
+            { id: 18, event: 'hover', target: 'div', time: '2021-01-01T00:07:00Z' },
+            { id: 9, event: 'scroll', target: 'window', time: '2021-01-01T00:08:00Z'},
+            { id: 104, event: 'click', target: 'button', time: '2021-01-01T00:09:00Z' },
+            { id: 11, event: 'hover', target: 'div', time: '2021-01-01T00:10:00Z'}
+        ]
+        // append every object to interactionDataCopy
+        data.forEach((obj) => {
+            interactionDataCopy.push(obj)
+        })
 
-                <tbody {...getTableBodyProps()}>
-                    {rows.map(row => {
-                        prepareRow(row)
+        const interactionDataList = [];
+
+        // Helper function to get sorted key signatures
+        const getKeySignature = (obj) => Object.keys(obj).sort().join(",");
+
+        // Grouping objects by key signature
+        const groups = {}
+
+        interactionDataCopy.forEach((obj) => {
+            const keySignature = getKeySignature(obj)
+
+            if (groups[keySignature]) {
+                groups[keySignature].push(obj)
+            } else {
+                groups[keySignature] = [obj]
+            }
+        })
+
+        for (const key in groups) {
+            // Sort each group by "id" if it exists
+            interactionDataList.push(groups[key].sort((a, b) => (a.id || 0) - (b.id || 0)))
+        }
+
+        // Paginate data
+        const paginateData = (data, page, perPage) => {
+            const startIndex = (page - 1) * perPage
+            const endIndex = startIndex + perPage
+            return data.slice(startIndex, endIndex)
+        }
+
+        const handleExportData = () => {
+            // TODO: Implement data export
+            alert('Exporting data...')
+        }
+
+        return (
+            <div>
+                <div className="mb-3">
+                    <Button variant="primary" onClick={handleExportData}>
+                        Export Data
+                    </Button>
+                </div>
+
+                <Tabs defaultActiveKey={0} id="data-tabs">
+                    {interactionDataList.map((group, index) => {
+                        const columns = Object.keys(group[0]);
+                        const paginatedGroup = paginateData(group, activePage, itemsPerPage);
+
                         return (
-                            <tr {...row.getRowProps()}>
-                                {row.cells.map(cell => {
-                                    return (
-                                        <td {...cell.getCellProps()} className="data-table-content">
-                                            {cell.render('Cell')}
-                                        </td>
-                                    )
-                                })}
-                            </tr>
+                            <Tab eventKey={index} title={`Page ${index + 1}`} key={index}>
+
+                                <div className="mb-3 dropdown">
+                                    <Dropdown>
+                                        <Dropdown.Toggle variant="secondary">
+                                            Items per page: {itemsPerPage}
+                                        </Dropdown.Toggle>
+
+                                        <Dropdown.Menu>
+                                            {[10, 25, 50, 100].map((size) => (
+                                                <Dropdown.Item
+                                                    key={size}
+                                                    onClick={() => {
+                                                        setItemsPerPage(size)
+                                                        setActivePage(1) // Reset to first page when items per page changes
+                                                    }}
+                                                >
+                                                    {size}
+                                                </Dropdown.Item>
+                                            ))}
+                                        </Dropdown.Menu>
+                                    </Dropdown>
+                                </div>
+
+                                <table className="table table-striped table-bordered table-sm outer-table">
+                                    <thead>
+                                        <tr>
+                                            {columns.map((col, colIndex) => (
+                                                <th key={`col-${colIndex}`}>{col.charAt(0).toUpperCase() + col.slice(1)}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {paginatedGroup.map((row, rowIndex) => (
+                                            <tr key={`row-${rowIndex}`}>
+                                                {columns.map((col, colIndex) => (
+                                                    <td key={`row-${rowIndex}-col-${colIndex}`}>
+                                                        {typeof row[col] === 'object' && row[col] !== null
+                                                            ? (
+                                                                <table className="table table-sm table-bordered inner-table">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th className="font-weight-bold">Key</th>
+                                                                            <th className="font-weight-bold">Value</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        {Object.entries(row[col]).map(([key, value], entryIndex) => (
+                                                                            <tr key={`object-${rowIndex}-${entryIndex}`}>
+                                                                                <td className="font-weight-bold">{key}</td>
+                                                                                <td>{value !== undefined ? value : ''}</td>
+                                                                            </tr>
+                                                                        ))}
+                                                                    </tbody>
+                                                                </table>
+                                                            )
+                                                            : row[col] !== undefined
+                                                                ? row[col]
+                                                                : ''}
+                                                    </td>
+                                                ))}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+
+                                <div className="d-flex justify-content-center mt-3">
+                                    <Pagination>
+                                        <Pagination.Prev
+                                            onClick={() => setActivePage(prevPage => Math.max(prevPage - 1, 1))}
+                                            disabled={activePage === 1}
+                                        />
+                                        {[...Array(Math.ceil(group.length / itemsPerPage))].map((_, pageIndex) => (
+                                            <Pagination.Item
+                                                key={pageIndex}
+                                                active={pageIndex + 1 === activePage}
+                                                onClick={() => setActivePage(pageIndex + 1)}
+                                            >
+                                                {pageIndex + 1}
+                                            </Pagination.Item>
+                                        ))}
+                                        <Pagination.Next
+                                            onClick={() => setActivePage(prevPage => Math.min(prevPage + 1, Math.ceil(group.length / itemsPerPage)))}
+                                            disabled={activePage === Math.ceil(group.length / itemsPerPage)}
+                                        />
+                                    </Pagination>
+                                </div>
+                            </Tab>
                         )
                     })}
-                </tbody>
-            </table>
-
-            <Button type="button" className="big-button"> Export Data </Button>
-        </>
-    )
+                </Tabs>
+            </div>
+        )
+    }
 }

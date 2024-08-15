@@ -27,7 +27,8 @@ import {
     getProcedureConfigOverview,
     exportStudySchema,
     selectStudyExport,
-    duplicateStudy
+    duplicateStudy,
+    getFirst100Interactions,
 } from "../../redux/reducers/studySlice";
 
 export const STATES = {
@@ -66,10 +67,12 @@ export default function StudyOverviewLayout() {
     useEffect(() => {
         dispatch(getStudy(study_id))
         dispatch(exportStudySchema(study_id))
+        dispatch(getFirst100Interactions(study_id))
         return () => {
             dispatch(studySlice.actions.resetStudyExport())
             dispatch(studySlice.actions.resetStudySetupInfo())
             dispatch(studySlice.actions.resetProcedureOverview())
+            dispatch(studySlice.actions.resetInteractionData())
         }
     }, [])
 

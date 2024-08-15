@@ -411,6 +411,18 @@ class StudyAlignLib {
     deletePause(pauseId) {
         return this.basicDelete("pauses/" + pauseId);
     }
+    //Interactions
+    getFirst100Interactions(studyId) {
+        const options = {
+            method: "GET",
+            path: "interactions",
+            headers: {},
+            params: { study_id: studyId },
+            asQuery: true
+        };
+        this.setHeaders(options);
+        return this.request(options);
+    }
     // ---- MAINLY FOR USE IN STUDY FRONTEND ---- //
     //TODO: read condition config
     //Study Frontend related functions

@@ -18,11 +18,13 @@ import {
     generateParticipantsApi,
     // populateSurveyParticipantsApi, // DEPRECATED
     addParticipantsApi,
+    getFirst100InteractionsApi, // Get First 100 Interactions
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
 
 const initialState = {
     studies: null,
+    interactionData: null,
     study: null,
     studySetupInfo: null,
     studyProcedure: null, // Procedure Config State
@@ -301,6 +303,23 @@ export const addParticipants = createAsyncThunk(
     }
 );
 
+// Interaction Data
+export const getFirst100Interactions = createAsyncThunk(
+    'getFirst100Interactions',
+    async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(getFirst100InteractionsApi, studyId, dispatch)
+            return response
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
 // DEPRECATED
 // export const populateSurveyParticipants = createAsyncThunk(
 //     'populateSurveyParticipants',
@@ -332,6 +351,9 @@ export const studySlice = createSlice({
         },
         resetStudyExport: (state, _action) => {
             state.studyExport = null
+        },
+        resetInteractionData: (state, _action) => {
+            state.interactionData = null
         },
     },
     extraReducers: (builder) => {
@@ -546,6 +568,18 @@ export const studySlice = createSlice({
                     state.currentRequestId = undefined
                 }
             })
+            // Interactions
+            .addCase(getFirst100Interactions.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(getFirst100Interactions.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
+                state.interactionData = action.payload.body
+            })
             // .addCase(populateSurveyParticipants.pending, (state, action) => {
             //     state.api = LOADING
             //     state.currentRequestId = action.meta.requestId
@@ -591,6 +625,10 @@ export const selectStudyProcedure = (state) => {
 
 export const selectStudyProcedureOverview = (state) => {
     return state.studies.procedureOverview
+}
+
+export const selectInteractionData = (state) => {
+    return state.studies.interactionData
 }
 
 export default studySlice.reducer;
