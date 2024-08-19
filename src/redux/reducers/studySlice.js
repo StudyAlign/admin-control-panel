@@ -18,7 +18,6 @@ import {
     generateParticipantsApi,
     // populateSurveyParticipantsApi, // DEPRECATED
     addParticipantsApi,
-    getFirst100InteractionsApi, // Get First 100 Interactions
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
 

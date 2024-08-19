@@ -16,7 +16,7 @@ import LoadingScreen from "../../components/LoadingScreen";
 
 import {
     interactionSlice,
-    getFirst100GenericInteractions,
+    // getFirst100GenericInteractions,
 } from "../../redux/reducers/interactionSlice";
 
 import {
@@ -33,7 +33,6 @@ import {
     exportStudySchema,
     selectStudyExport,
     duplicateStudy,
-    getFirst100Interactions,
 } from "../../redux/reducers/studySlice";
 
 export const STATES = {
@@ -73,7 +72,7 @@ export default function StudyOverviewLayout() {
         dispatch(getStudy(study_id))
         dispatch(exportStudySchema(study_id))
         // Interaction Data
-        dispatch(getFirst100GenericInteractions(study_id))
+        // dispatch(getFirst100GenericInteractions(study_id))
         return () => {
             dispatch(studySlice.actions.resetStudyExport())
             dispatch(studySlice.actions.resetStudySetupInfo())
