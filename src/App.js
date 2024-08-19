@@ -64,6 +64,10 @@ export default function App() {
                         </Route>
                     </Route>
 
+                    <Route element={<RequireAuth role={1}/>}>
+                        <Route path='/users' element={<h1>Users</h1>} />
+                    </Route>
+
                     <Route path="/login"            element={<Login/>} />
                     <Route path="/logout"           element={<Login logout/>} />
                     <Route path="/login/forgot"     element={<ForgotPW/>} />

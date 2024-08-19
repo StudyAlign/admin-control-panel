@@ -27,12 +27,17 @@ export default function Topbar() {
         navigate("/profile")
     }
 
+    const handleClickUsers = (event) => {
+        event.preventDefault()
+        navigate("/users")
+    }
+
     return(
         <Navbar className="top-bar">
             <Container fluid>
                 <Navbar.Brand onClick={handleClickStudyAlign} className="top-bar-logo">StudyAlign</Navbar.Brand>
                 <Nav className="ml-auto">
-                    {auth.user.role_id === 1 && <Nav.Link href="#users" className="top-bar-item">Users</Nav.Link>}
+                    {auth.user.role_id === 1 && <Nav.Link onClick={handleClickUsers} className="top-bar-item">Users</Nav.Link>}
                     <NavDropdown title={auth.user.name} id="top-bar-dropdown" >
                         <NavDropdown.Item onClick={handleClickProfile}>Profile</NavDropdown.Item>
                         <NavDropdown.Item onClick={handleClickLogout}>Logout</NavDropdown.Item>
