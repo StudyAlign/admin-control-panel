@@ -113,7 +113,7 @@ export default function InteractionData() {
 
                     return (
                         <Tab eventKey={key} title={key.charAt(0).toUpperCase() + key.slice(1)} key={index}>
-                            <div className="mb-3 dropdown">
+                            <div className="mb-3 dropdown-table">
                                 <Dropdown>
                                     <Dropdown.Toggle variant="secondary">
                                         Items per page: {itemsPerPage}
