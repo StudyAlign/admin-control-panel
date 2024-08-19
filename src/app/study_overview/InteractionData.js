@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Button, Tabs, Tab, Pagination, Dropdown } from "react-bootstrap";
 import { useParams } from "react-router";
-
 import { useDispatch, useSelector } from "react-redux";
+import { ArrowUp, ArrowDown } from "react-bootstrap-icons";
 
 import {
     getFirst100Interactions,
@@ -24,6 +24,8 @@ export default function InteractionData() {
 
     const [activePage, setActivePage] = useState(1)
     const [itemsPerPage, setItemsPerPage] = useState(10)
+    const [sortColumn, setSortColumn] = useState('id')
+    const [sortDirection, setSortDirection] = useState('asc')
 
     if (interactionData == null) {
         return <h1>No data available</h1>
@@ -72,12 +74,9 @@ export default function InteractionData() {
             interactionDataCopy.push(obj)
         })
 
-        const interactionDataList = [];
+        const interactionDataList = []
 
-        // Helper function to get sorted key signatures
-        const getKeySignature = (obj) => Object.keys(obj).sort().join(",");
-
-        // Grouping objects by key signature
+        const getKeySignature = (obj) => Object.keys(obj).sort().join(",")
         const groups = {}
 
         interactionDataCopy.forEach((obj) => {
@@ -91,11 +90,20 @@ export default function InteractionData() {
         })
 
         for (const key in groups) {
-            // Sort each group by "id" if it exists
-            interactionDataList.push(groups[key].sort((a, b) => (a.id || 0) - (b.id || 0)))
+            interactionDataList.push(
+                groups[key].sort((a, b) => {
+                    const aValue = a[sortColumn] || ''
+                    const bValue = b[sortColumn] || ''
+
+                    if (sortDirection === 'asc') {
+                        return aValue > bValue ? 1 : aValue < bValue ? -1 : 0
+                    } else {
+                        return aValue < bValue ? 1 : aValue > bValue ? -1 : 0
+                    }
+                })
+            )
         }
 
-        // Paginate data
         const paginateData = (data, page, perPage) => {
             const startIndex = (page - 1) * perPage
             const endIndex = startIndex + perPage
@@ -103,8 +111,16 @@ export default function InteractionData() {
         }
 
         const handleExportData = () => {
-            // TODO: Implement data export
             alert('Exporting data...')
+        }
+
+        const handleSort = (col) => {
+            if (sortColumn === col) {
+                setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+            } else {
+                setSortColumn(col)
+                setSortDirection('asc')
+            }
         }
 
         return (
@@ -117,12 +133,11 @@ export default function InteractionData() {
 
                 <Tabs defaultActiveKey={0} id="data-tabs">
                     {interactionDataList.map((group, index) => {
-                        const columns = Object.keys(group[0]);
-                        const paginatedGroup = paginateData(group, activePage, itemsPerPage);
+                        const columns = Object.keys(group[0])
+                        const paginatedGroup = paginateData(group, activePage, itemsPerPage)
 
                         return (
                             <Tab eventKey={index} title={`Page ${index + 1}`} key={index}>
-
                                 <div className="mb-3 dropdown">
                                     <Dropdown>
                                         <Dropdown.Toggle variant="secondary">
@@ -135,7 +150,7 @@ export default function InteractionData() {
                                                     key={size}
                                                     onClick={() => {
                                                         setItemsPerPage(size)
-                                                        setActivePage(1) // Reset to first page when items per page changes
+                                                        setActivePage(1)
                                                     }}
                                                 >
                                                     {size}
@@ -149,7 +164,19 @@ export default function InteractionData() {
                                     <thead>
                                         <tr>
                                             {columns.map((col, colIndex) => (
-                                                <th key={`col-${colIndex}`}>{col.charAt(0).toUpperCase() + col.slice(1)}</th>
+                                                <th 
+                                                    key={`col-${colIndex}`} 
+                                                    onClick={() => handleSort(col)}
+                                                    style={{ cursor: 'pointer' }}
+                                                >
+                                                    {col.charAt(0).toUpperCase() + col.slice(1)}
+                                                    {' '}
+                                                    {sortColumn === col ? (
+                                                        sortDirection === 'asc' ? <ArrowUp color="blue" /> : <ArrowDown color="blue" />
+                                                    ) : (
+                                                        <ArrowUp color="grey" />
+                                                    )}
+                                                </th>
                                             ))}
                                         </tr>
                                     </thead>
