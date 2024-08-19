@@ -5,9 +5,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { ArrowUp, ArrowDown } from "react-bootstrap-icons";
 
 import {
-    getFirst100Interactions,
-    selectInteractionData,
-} from "../../redux/reducers/studySlice";
+    getFirst100GenericInteractions,
+    selectGenericInteraction
+} from "../../redux/reducers/interactionSlice";
 
 import "./StudyOverview.css"
 import "../SidebarAndReactStyles.css";
@@ -16,10 +16,10 @@ export default function InteractionData() {
     const { study_id } = useParams()
 
     const dispatch = useDispatch()
-    const interactionData = useSelector(selectInteractionData)
+    const interactionData = useSelector(selectGenericInteraction)
 
     useEffect(() => {
-        dispatch(getFirst100Interactions(study_id))
+        dispatch(getFirst100GenericInteractions(study_id))
     }, [])
 
     const [activePage, setActivePage] = useState(1)

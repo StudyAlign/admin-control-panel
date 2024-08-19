@@ -15,6 +15,11 @@ import InteractionData from "./InteractionData";
 import LoadingScreen from "../../components/LoadingScreen";
 
 import {
+    interactionSlice,
+    getFirst100GenericInteractions,
+} from "../../redux/reducers/interactionSlice";
+
+import {
     studySlice,
     deleteStudy,
     getProcedureConfig,
@@ -67,12 +72,14 @@ export default function StudyOverviewLayout() {
     useEffect(() => {
         dispatch(getStudy(study_id))
         dispatch(exportStudySchema(study_id))
-        dispatch(getFirst100Interactions(study_id))
+        // Interaction Data
+        dispatch(getFirst100GenericInteractions(study_id))
         return () => {
             dispatch(studySlice.actions.resetStudyExport())
             dispatch(studySlice.actions.resetStudySetupInfo())
             dispatch(studySlice.actions.resetProcedureOverview())
-            dispatch(studySlice.actions.resetInteractionData())
+            // Interaction Data
+            dispatch(interactionSlice.actions.resetGenericInteraction())
         }
     }, [])
 
