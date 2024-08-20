@@ -173,7 +173,7 @@ export default function InteractionData() {
                                                                     {Object.entries(row[col]).map(([key, value], entryIndex) => (
                                                                         <tr key={`object-${rowIndex}-${entryIndex}`}>
                                                                             <td className="font-weight-bold">{key}</td>
-                                                                            <td>{value !== undefined ? value : ''}</td>
+                                                                            <td>{value !== undefined ? JSON.stringify(value) : ''}</td>
                                                                         </tr>
                                                                     ))}
                                                                 </tbody>
