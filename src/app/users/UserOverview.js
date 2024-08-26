@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Table, Pagination, Button, Dropdown, ButtonGroup } from "react-bootstrap";
-import { ArrowUp, ArrowDown, Trash, PencilSquare } from "react-bootstrap-icons";
+import { ArrowUp, ArrowDown, Trash, PencilSquare, ToggleOn, ToggleOff } from "react-bootstrap-icons";
 
 import {
     userSlice,
@@ -29,7 +29,7 @@ export default function UserOverview() {
         return () => {
             dispatch(userSlice.actions.resetAllUsers())
         }
-    }, [dispatch])
+    }, [])
 
     if (users === null) {
         return (
@@ -77,6 +77,11 @@ export default function UserOverview() {
 
     const handleNewUser = () => {
         console.log('Create new user action')
+    }
+
+    const handleToggleActive = (id, isActive) => {
+        const action = isActive ? "Deactivate" : "Activate"
+        console.log(`${action} action for user with ID: ${id}`)
     }
 
     const sortedData = sortData(users)
@@ -158,8 +163,16 @@ export default function UserOverview() {
                                         variant="warning"
                                         size="sm"
                                         onClick={() => handleEdit(user.id)}
+                                        className="mr-2"
                                     >
                                         <PencilSquare /> Edit
+                                    </Button>
+                                    <Button
+                                        variant={user.is_active ? "secondary" : "success"}
+                                        size="sm"
+                                        onClick={() => handleToggleActive(user.id, user.is_active)}
+                                    >
+                                        {user.is_active ? <ToggleOff /> : <ToggleOn />} {user.is_active ? "Deactivate" : "Activate"}
                                     </Button>
                                 </td>
                             </tr>
