@@ -15,6 +15,7 @@ import CreateCheck from "./app/create_study_flow/CreateCheck";
 import EditInformation from './app/create_study_flow/EditInformation';
 import ImportStudy from './app/create_study_flow/ImportStudy';
 import { StudyStatus } from './app/create_study_flow/navigation_logic/StudyCreationLayout';
+import UserOverview from './app/users/UserOverview';
 
 import RequireAuth, {AuthRoute, AuthProvider, useAuth} from "./components/Auth";
 
@@ -62,10 +63,20 @@ export default function App() {
                             <Route path="check"         element={<CreateCheck/>} />
                             <Route path="*"             element={<h1>ERROR</h1>} />
                         </Route>
+
+                        <Route path="profile/:user_id" element={<h1>Profile</h1>} >
+                            <Route pathe="edit"        element={<h1>Edit Profile</h1>} />
+                        </Route>
                     </Route>
 
                     <Route element={<RequireAuth role={1}/>}>
-                        <Route path='/users' element={<h1>Users</h1>} />
+                        <Route path='users' element={<UserOverview/>} />
+                        <Route path='users/create' element={<h1>User create</h1>} />
+                        <Route path="users/:user_id" element={<h1>User</h1>} >
+                            <Route path="information" element={<h1>Information</h1>} />
+                            <Route path="edit" element={<h1>Edit</h1>} />
+                            <Route path="*" element={<h1>ERROR</h1>} />
+                        </Route>
                     </Route>
 
                     <Route path="/login"            element={<Login/>} />

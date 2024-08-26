@@ -24,7 +24,7 @@ export default function Topbar() {
     const handleClickProfile = (event) => {
         event.preventDefault()
         console.log(auth.user)
-        navigate("/profile")
+        navigate("/profile/" + auth.user.id)
     }
 
     const handleClickUsers = (event) => {
