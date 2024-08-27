@@ -12,6 +12,7 @@ import { LOADING, IDLE } from "../apiStates";
 const initialState = {
     users: null,
     user: null,
+    userState: null,
     api: IDLE,
     error: null,
     status: null,
@@ -111,6 +112,9 @@ export const userSlice = createSlice({
         resetUser: (state, _action) => {
             state.user = null
         },
+        setUserProcess: (state, action) => {
+            state.userState = action.payload
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -179,6 +183,10 @@ export const selectUsers = (state) => {
 
 export const selectUser = (state) => {
     return state.users.user;
+}
+
+export const selectUserState = (state) => {
+    return state.users.userState;
 }
 
 export default userSlice.reducer;

@@ -62,8 +62,8 @@ export function createUserApi(user) {
     return sal.createUser(user);
 }
 
-export function updateUserApi(userId, user) {
-    return sal.updateUser(userId, user);
+export function updateUserApi(args) {
+    return sal.updateUser(args.userId, args.user);
 }
 
 export function deleteUserApi(userId) {

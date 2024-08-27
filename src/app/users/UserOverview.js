@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { Table, Pagination, Button, Dropdown, ButtonGroup } from "react-bootstrap";
-import { ArrowUp, ArrowDown, Trash, PencilSquare, ToggleOn, ToggleOff } from "react-bootstrap-icons";
+import { Table, Pagination, Button, Dropdown, ButtonGroup, Modal } from "react-bootstrap";
+import { ArrowUp, ArrowDown, Trash, PencilSquare, ToggleOn, ToggleOff, Display } from "react-bootstrap-icons";
 
 import {
     userSlice,
     getUsers,
     selectUsers,
+    updateUser,
+    deleteUser
 } from "../../redux/reducers/userSlice";
 
 import LoadingScreen from "../../components/LoadingScreen";
@@ -16,13 +19,25 @@ import "../SidebarAndReactStyles.css";
 import "./UserOverview.css";
 
 export default function UserOverview() {
+
     const dispatch = useDispatch()
     const users = useSelector(selectUsers)
+
+    const navigate = useNavigate()
 
     const [activePage, setActivePage] = useState(1)
     const [itemsPerPage, setItemsPerPage] = useState(10)
     const [sortColumn, setSortColumn] = useState('id')
     const [sortDirection, setSortDirection] = useState('asc')
+    // modalstates
+    const modalStates = {
+        DELETE: 0,
+        ACTIVATED: 1,
+        DEACTIVATED: 2,
+        CORRECT: 3
+    }
+    const [showModal, setShowModal] = useState(modalStates.CORRECT)
+    const [selectedUser, setSelectedUser] = useState(null)
 
     useEffect(() => {
         dispatch(getUsers())
@@ -68,20 +83,81 @@ export default function UserOverview() {
     }
 
     const handleDelete = (id) => {
-        console.log(`Delete action for user with ID: ${id}`)
+        setSelectedUser(id)
+        setShowModal(modalStates.DELETE)
     }
 
     const handleEdit = (id) => {
-        console.log(`Edit action for user with ID: ${id}`)
+        dispatch(userSlice.actions.setUserProcess("edit/information"))
+        navigate('/users/' + id + '/edit') 
+    }
+
+    const handleShow = (id) => {
+        dispatch(userSlice.actions.setUserProcess("create"))
+        navigate('/users/' + id + '/information') 
     }
 
     const handleNewUser = () => {
-        console.log('Create new user action')
+        navigate('/users/create')
     }
 
     const handleToggleActive = (id, isActive) => {
-        const action = isActive ? "Deactivate" : "Activate"
-        console.log(`${action} action for user with ID: ${id}`)
+        setSelectedUser(id)
+        const action = isActive ? setShowModal(modalStates.ACTIVATED) : setShowModal(modalStates.DEACTIVATED)
+    }
+
+    const returnModal = () => {
+        if (showModal !== modalStates.CORRECT) {
+            let title = ''
+            let body = ''
+            let buttonText = ''
+            let buttonType = ''
+            let active = true
+            if (showModal === modalStates.DELETE) {
+                title = 'Delete user ' + selectedUser + '?'
+                body = 'Are you sure you want to delete user ' + selectedUser + '?'
+                buttonText = 'Delete'
+                buttonType = 'danger'
+            } else if (showModal === modalStates.ACTIVATED) {
+                title = 'Deactivate user ' + selectedUser + '?'
+                body = 'Are you sure you want to deactivate user ' + selectedUser + '?'
+                buttonText = 'Deactivate'
+                buttonType = 'warning'
+                active = false
+            } else if (showModal === modalStates.DEACTIVATED) {
+                title = 'Activate user ' + selectedUser + '?'
+                body = 'Are you sure you want to activate user ' + selectedUser + '?'
+                buttonText = 'Activate'
+                buttonType = 'success'
+            }
+
+            return (
+                <Modal show={true} onHide={() => setShowModal(modalStates.CORRECT)}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>{title}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>{body}</Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={() => {
+                            setShowModal(modalStates.CORRECT)
+                        }}>Close</Button>
+                        <Button variant={buttonType} onClick={() => {
+                            setShowModal(modalStates.CORRECT)
+                            if (showModal === modalStates.DELETE) {
+                                dispatch(deleteUser(selectedUser)).then(() => {
+                                    dispatch(getUsers())
+                                })
+                            } else {
+                                const user = { "user": { is_active: active }, "userId": selectedUser }
+                                dispatch(updateUser(user)).then(() => {
+                                    dispatch(getUsers())
+                                })
+                            }
+                        }}>{buttonText}</Button>
+                    </Modal.Footer>
+                </Modal>
+            )
+        }
     }
 
     const sortedData = sortData(users)
@@ -174,6 +250,14 @@ export default function UserOverview() {
                                     >
                                         {user.is_active ? <ToggleOff /> : <ToggleOn />} {user.is_active ? "Deactivate" : "Activate"}
                                     </Button>
+                                    <Button
+                                        variant="success"
+                                        size="sm"
+                                        onClick={() => handleShow(user.id)}
+                                        className="mr-2"
+                                    >
+                                        <Display /> Show
+                                    </Button>
                                 </td>
                             </tr>
                         ))}
@@ -202,6 +286,8 @@ export default function UserOverview() {
                     </Pagination>
                 </div>
             </div>
+
+            {returnModal()}
         </>
     )
 }
