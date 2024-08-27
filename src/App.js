@@ -19,6 +19,7 @@ import UserOverview from './app/users/UserOverview';
 import CreateUserForm from './app/users/CreateUserForm';
 import UserCreationLogic from './app/users/UserCreationLogic';
 import UserInformation from './app/users/UserInformation';
+import Profile from './app/users/Profile';
 
 import RequireAuth, {AuthRoute, AuthProvider, useAuth} from "./components/Auth";
 
@@ -67,9 +68,8 @@ export default function App() {
                             <Route path="*"             element={<h1>ERROR</h1>} />
                         </Route>
 
-                        <Route path="profile/:user_id" element={<h1>Profile</h1>} >
-                            <Route pathe="information" element={<h1>Edit Profile</h1>} />
-                        </Route>
+                        <Route path="profile/:user_id/information" element={<Profile editable={false}/>}  />
+
                     </Route>
 
                     <Route element={<RequireAuth role={1}/>}>
