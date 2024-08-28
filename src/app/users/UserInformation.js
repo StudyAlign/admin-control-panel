@@ -6,6 +6,8 @@ import { userSlice, getUser, selectUser, updateUser } from "../../redux/reducers
 import { useNavigate, useParams } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 
+import LoadingScreen from "../../components/LoadingScreen";
+
 export default function UserInformation(props) {
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -38,6 +40,12 @@ export default function UserInformation(props) {
     }
     const [showModal, setShowModal] = useState(modalStates.CORRECT)
 
+    if (user === null) {
+        return <LoadingScreen />
+    } else {
+        dispatch(getUser(user_id))
+    }
+
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target
         setFormData({
@@ -50,6 +58,9 @@ export default function UserInformation(props) {
         if (editable) {
             e.preventDefault()
             if (formData.password !== formData.confirmPassword) {
+                setShowModal(modalStates.NOTMATCHING)
+                return
+            } else {
                 const new_Data = {
                     name: formData.name,
                     firstname: formData.firstname,
@@ -62,7 +73,6 @@ export default function UserInformation(props) {
                 dispatch(updateUser({ "userId": user_id, "user": new_Data })).then(() => {
                     dispatch(getUser(user_id))
                 })
-                return
             }
             setEditable(false)
         }
