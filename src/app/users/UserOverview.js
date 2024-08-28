@@ -46,6 +46,12 @@ export default function UserOverview() {
         }
     }, [])
 
+    const roleNames = {
+        1: 'Admin',
+        2: 'Researcher',
+        3: 'Student'
+    }
+
     if (users === null) {
         return (
             <>
@@ -201,7 +207,7 @@ export default function UserOverview() {
                 <Table striped bordered hover>
                     <thead>
                         <tr>
-                            {['id', 'firstname', 'lastname', 'role_id'].map((col, colIndex) => (
+                            {['id', 'name', 'role'].map((col, colIndex) => (
                                 <th
                                     key={`col-${colIndex}`}
                                     onClick={() => handleSort(col)}
@@ -223,9 +229,8 @@ export default function UserOverview() {
                         {paginatedData.map((user) => (
                             <tr key={user.id}>
                                 <td>{user.id}</td>
-                                <td>{user.firstname}</td>
-                                <td>{user.lastname}</td>
-                                <td>{user.role_id}</td>
+                                <td>{user.name}</td>
+                                <td>{roleNames[user.role_id]}</td>
                                 <td className="action-gap">
                                     <Button
                                         variant="danger"
@@ -244,19 +249,19 @@ export default function UserOverview() {
                                         <PencilSquare /> Edit
                                     </Button>
                                     <Button
-                                        variant={user.is_active ? "secondary" : "success"}
-                                        size="sm"
-                                        onClick={() => handleToggleActive(user.id, user.is_active)}
-                                    >
-                                        {user.is_active ? <ToggleOff /> : <ToggleOn />} {user.is_active ? "Deactivate" : "Activate"}
-                                    </Button>
-                                    <Button
                                         variant="success"
                                         size="sm"
                                         onClick={() => handleShow(user.id)}
                                         className="mr-2"
                                     >
                                         <Display /> Show
+                                    </Button>
+                                    <Button
+                                        variant={user.is_active ? "secondary" : "success"}
+                                        size="sm"
+                                        onClick={() => handleToggleActive(user.id, user.is_active)}
+                                    >
+                                        {user.is_active ? <ToggleOff /> : <ToggleOn />} {user.is_active ? "Deactivate" : "Activate"}
                                     </Button>
                                 </td>
                             </tr>

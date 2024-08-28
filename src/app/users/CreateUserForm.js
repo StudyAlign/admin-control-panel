@@ -195,8 +195,8 @@ export default function CreateUserForm() {
                                 required
                             >
                                 <option value={1}>Admin</option>
-                                <option value={2}>Owner</option>
-                                <option value={3}>Collaborator</option>
+                                <option value={2}>Researcher</option>
+                                {/* <option value={3}>Student</option> */}
                             </Form.Select>
                         </Form.Group>
                     </Row>
