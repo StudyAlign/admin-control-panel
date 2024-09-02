@@ -18,6 +18,19 @@ export default function UserInformation(props) {
         dispatch(getUser(user_id))
     }, [])
 
+    useEffect(() => {
+        setFormData({
+            name: user?.name || "",
+            firstname: user?.firstname || "",
+            lastname: user?.lastname || "",
+            email: user?.email || "",
+            role_id: user?.role_id || 1,
+            is_active: user?.is_active || true,
+            password: "",
+            confirmPassword: "",
+        })
+    }, [user])
+
     const [editable, setEditable] = useState(props.editable)
     const [formData, setFormData] = useState({
         name: user.name || "",
@@ -42,8 +55,6 @@ export default function UserInformation(props) {
 
     if (user === null) {
         return <LoadingScreen />
-    } else {
-        dispatch(getUser(user_id))
     }
 
     const handleInputChange = (e) => {
