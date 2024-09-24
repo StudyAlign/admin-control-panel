@@ -4,7 +4,7 @@ import { Container, Row, Col, Button } from "react-bootstrap";
 import { PeopleFill } from "react-bootstrap-icons";
 
 import { useDispatch } from "react-redux";
-import { getStudySetupInfoParticipantsNoThunk } from "../../redux/reducers/studySlice";
+import { studySlice, getStudySetupInfo } from "../../redux/reducers/studySlice";
 
 import { STATES } from "../study_overview/StudyOverviewLayout";
 
@@ -16,13 +16,18 @@ import LoadingScreen from "../../components/LoadingScreen";
 export default function StudyBox(props) {
 
     const [participants, setParticipants] = useState("loading...")
+    const [doneParticipants, setDoneParticipants] = useState("loading...")
 
-    const navigate = useNavigate();
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
     const study = props.study
 
     useEffect(async () => {
-        await getStudySetupInfoParticipantsNoThunk(study.id).then((response) => {
-            setParticipants(response)
+        await dispatch(getStudySetupInfo(study.id)).then((response) => {
+            const tempParticipants = response.payload.body.planned_number_participants
+            setParticipants(tempParticipants)
+            setDoneParticipants(tempParticipants - response.payload.body.remaining_participants)
+            dispatch(studySlice.actions.resetStudySetupInfo())
         })
     }, [])
 
@@ -53,13 +58,12 @@ export default function StudyBox(props) {
         return button
     }
 
-    // TODO Amount participants and max participants has to be read from backend in order to display
     return(
         <div className="study-box">
             <Container>
                 <Row>
                     <Col> { getStatusLabel(study.state) } </Col>
-                    <Col> <label className="participants-label"> <PeopleFill/> {"N.A. / " + participants} </label> </Col>
+                    <Col> <label className="participants-label"> <PeopleFill/> {doneParticipants + " / " + participants} </label> </Col>
                 </Row>
                 <Row>
                     <Col> <label className="study-name-label"> {study.name} </label> </Col>
