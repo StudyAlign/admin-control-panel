@@ -304,8 +304,8 @@ export function deletePauseApi(pauseId) {
 
 // Other calls
 
-export function getFirst100InteractionsApi(studyId) {
-    return sal.getFirst100Interactions(studyId);
+export function getInteractions(args) {
+    return sal.getInteractions(args.studyId, args.type, args.offset, args.limit);
 }
 
 export function storeTokensApi(tokens) {

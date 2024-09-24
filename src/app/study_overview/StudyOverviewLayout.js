@@ -78,7 +78,7 @@ export default function StudyOverviewLayout() {
             dispatch(studySlice.actions.resetStudySetupInfo())
             dispatch(studySlice.actions.resetProcedureOverview())
             // Interaction Data
-            dispatch(interactionSlice.actions.resetGenericInteraction())
+            dispatch(interactionSlice.actions.resetAllInteractions())
         }
     }, [])
 

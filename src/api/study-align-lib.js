@@ -188,6 +188,9 @@ class StudyAlignLib {
     deleteUser(userId) {
         return this.basicDelete("users/" + userId);
     }
+    getRoles() {
+        return this.basicRead("users/roles");
+    }
     // ---- MAINLY FOR USE IN ADMIN FRONTEND ---- //
     // Studies
     getStudies() {
@@ -412,12 +415,12 @@ class StudyAlignLib {
         return this.basicDelete("pauses/" + pauseId);
     }
     //Interactions
-    getFirst100Interactions(studyId) {
+    getInteractions(studyId, type, offset = 0, limit = 100) {
         const options = {
             method: "GET",
             path: "interactions",
             headers: {},
-            params: { study_id: studyId },
+            params: { study_id: studyId, type: type, offset: offset, limit: limit },
             asQuery: true
         };
         this.setHeaders(options);

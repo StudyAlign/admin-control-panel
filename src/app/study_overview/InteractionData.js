@@ -5,7 +5,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { ArrowUp, ArrowDown } from "react-bootstrap-icons";
 
 import {
-    getFirst100GenericInteractions,
+    getGenericInteractions,
+    getDragInteractions,
+    getKeyboardInteractions,
+    getMouseInteractions,
+    getTouchInteractions,
     selectGenericInteraction,
     selectDragInteraction,
     selectKeyboardInteraction,
@@ -27,7 +31,31 @@ export default function InteractionData() {
     const touchInteractionData = useSelector(selectTouchInteraction)
 
     useEffect(() => {
-        dispatch(getFirst100GenericInteractions(study_id))
+        dispatch(getGenericInteractions({
+            studyId: study_id,
+            offset: 0,
+            limit: 100
+        }))
+        dispatch(getDragInteractions({
+            studyId: study_id,
+            offset: 0,
+            limit: 100
+        }))
+        dispatch(getKeyboardInteractions({
+            studyId: study_id,
+            offset: 0,
+            limit: 100
+        }))
+        dispatch(getMouseInteractions({
+            studyId: study_id,
+            offset: 0,
+            limit: 100
+        }))
+        dispatch(getTouchInteractions({
+            studyId: study_id,
+            offset: 0,
+            limit: 100
+        }))
     }, [])
 
     const [activePage, setActivePage] = useState(1)
