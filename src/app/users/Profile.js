@@ -3,6 +3,7 @@ import { Form, Button, Col, Row, Container, Modal } from "react-bootstrap";
 import { Eye, EyeSlash, PencilSquare } from "react-bootstrap-icons";
 import UserCreationLayout, { UserSteps } from "./UserCreationLayout";
 import { userSlice, getUser, selectUser, updateUser } from "../../redux/reducers/userSlice";
+import { me } from "../../redux/reducers/authSlice";
 import { useNavigate, useParams } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import Topbar from "../../components/Topbar";
@@ -27,7 +28,6 @@ export default function Profile(props) {
             firstname: user?.firstname || "",
             lastname: user?.lastname || "",
             email: user?.email || "",
-            role_id: user?.role_id || 1,
             is_active: user?.is_active || true,
             password: "",
             confirmPassword: "",
@@ -40,7 +40,6 @@ export default function Profile(props) {
         firstname: user?.firstname || "",
         lastname: user?.lastname || "",
         email: user?.email || "",
-        role_id: user?.role_id || 1,
         is_active: user?.is_active || true,
         password: "",
         confirmPassword: "",
@@ -77,21 +76,25 @@ export default function Profile(props) {
         if (editable) {
             e.preventDefault()
             if (formData.password !== formData.confirmPassword) {
+                setShowModal(modalStates.NOTMATCHING)
+                return
+            } else {
                 const new_Data = {
                     name: formData.name,
                     firstname: formData.firstname,
                     lastname: formData.lastname,
                     email: formData.email,
-                    role_id: formData.role_id,
                     is_active: formData.is_active,
                     password: formData.password
                 }
                 dispatch(updateUser({ "userId": user_id, "user": new_Data })).then(() => {
                     dispatch(getUser(user_id))
+                    dispatch(me())
                 })
+                
+                setEditable(false)
                 return
             }
-            setEditable(false)
         }
     }
 
@@ -213,23 +216,6 @@ export default function Profile(props) {
                                     required
                                     disabled={!editable}
                                 />
-                            </Form.Group>
-                        </Row>
-
-                        <Row>
-                            <Form.Group className="mb-3" controlId="formRole">
-                                <Form.Label>Role</Form.Label>
-                                <Form.Select
-                                    name="role_id"
-                                    value={formData.role_id}
-                                    onChange={handleInputChange}
-                                    required
-                                    disabled={!editable}
-                                >
-                                    <option value={1}>Admin</option>
-                                    <option value={2}>Owner</option>
-                                    <option value={3}>Collaborator</option>
-                                </Form.Select>
                             </Form.Group>
                         </Row>
 

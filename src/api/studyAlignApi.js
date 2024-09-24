@@ -70,6 +70,10 @@ export function deleteUserApi(userId) {
     return sal.deleteUser(userId);
 }
 
+export function getRolesApi() {
+    return sal.getRoles();
+}
+
 // Studies
 
 export function getStudiesApi() {

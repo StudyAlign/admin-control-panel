@@ -9,7 +9,9 @@ import {
     getUsers,
     selectUsers,
     updateUser,
-    deleteUser
+    deleteUser,
+    getRoles,
+    selectRoles
 } from "../../redux/reducers/userSlice";
 
 import LoadingScreen from "../../components/LoadingScreen";
@@ -22,6 +24,7 @@ export default function UserOverview() {
 
     const dispatch = useDispatch()
     const users = useSelector(selectUsers)
+    const roles = useSelector(selectRoles)
 
     const navigate = useNavigate()
 
@@ -41,18 +44,13 @@ export default function UserOverview() {
 
     useEffect(() => {
         dispatch(getUsers())
+        dispatch(getRoles())
         return () => {
             dispatch(userSlice.actions.resetAllUsers())
         }
     }, [])
 
-    const roleNames = {
-        1: 'Admin',
-        2: 'Researcher',
-        3: 'Student'
-    }
-
-    if (users === null) {
+    if (users === null || roles === null) {
         return (
             <>
                 <Topbar />
@@ -60,6 +58,12 @@ export default function UserOverview() {
             </>
         )
     }
+
+    const roleNames = roles.reduce((acc, role) => {
+        acc[role.id] = role.name
+        return acc
+    }, {})
+
 
     const sortData = (data) => {
         return [...data].sort((a, b) => {

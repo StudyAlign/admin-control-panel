@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Button, Col, Row, Container, Modal } from "react-bootstrap";
 import { Eye, EyeSlash } from "react-bootstrap-icons";
 import { Navigate, useLocation } from "react-router-dom";
 
 import UserCreationLayout, { UserSteps } from "./UserCreationLayout";
 
-import { userSlice, getUser, selectUser, createUser } from "../../redux/reducers/userSlice";
+import { userSlice, getUser, selectUser, createUser, getRoles, selectRoles } from "../../redux/reducers/userSlice";
 
 import { useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,9 +17,14 @@ export default function CreateUserForm() {
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
+    useEffect(() => {
+        dispatch(getRoles())
+    }, [])
+
     const location = useLocation()
 
     const user = useSelector(selectUser)
+    const roles = useSelector(selectRoles)
 
     const [formData, setFormData] = useState({
         name: "",
@@ -43,6 +48,11 @@ export default function CreateUserForm() {
         CORRECT: 3
     }
     const [showModal, setShowModal] = useState(modalStates.CORRECT)
+
+    // wait till roles are loaded
+    if (roles === null) {
+        return <LoadingScreen/>
+    }
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target
@@ -194,9 +204,11 @@ export default function CreateUserForm() {
                                 onChange={handleInputChange}
                                 required
                             >
-                                <option value={1}>Admin</option>
-                                <option value={2}>Researcher</option>
-                                {/* <option value={3}>Student</option> */}
+                                {roles.map((role) => (
+                                    <option key={role.id} value={role.id}>
+                                        {role.name}
+                                    </option>
+                                ))}
                             </Form.Select>
                         </Form.Group>
                     </Row>

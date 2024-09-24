@@ -5,7 +5,8 @@ import {
     getUserApi,
     createUserApi,
     updateUserApi,
-    deleteUserApi
+    deleteUserApi,
+    getRolesApi
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
 
@@ -13,6 +14,7 @@ const initialState = {
     users: null,
     user: null,
     userState: null,
+    roles: null,
     api: IDLE,
     error: null,
     status: null,
@@ -20,6 +22,22 @@ const initialState = {
 };
 
 //async thunks
+export const getRoles = createAsyncThunk(
+    'getRoles',
+    async (arg, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().users
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(getRolesApi, arg, dispatch)
+            return response
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
 export const getUsers = createAsyncThunk(
     'getUsers',
     async (arg, { dispatch, getState, rejectWithValue, requestId}) => {
@@ -172,10 +190,26 @@ export const userSlice = createSlice({
                 state.status = action.payload.status
                 state.currentRequestId = undefined
             })
+            //
+            .addCase(getRoles.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(getRoles.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
+                state.roles = action.payload.body
+            })
     },
 });
 
 // selectors
+
+export const selectRoles = (state) => {
+    return state.users.roles;
+}
 
 export const selectUsers = (state) => {
     return state.users.users;

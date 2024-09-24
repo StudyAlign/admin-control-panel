@@ -2,7 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Form, Button, Col, Row, Container, Modal } from "react-bootstrap";
 import { Eye, EyeSlash, PencilSquare } from "react-bootstrap-icons";
 import UserCreationLayout, { UserSteps } from "./UserCreationLayout";
-import { userSlice, getUser, selectUser, updateUser } from "../../redux/reducers/userSlice";
+
+import { useAuth } from "../../components/Auth";
+import { me } from "../../redux/reducers/authSlice";
+import { userSlice, getUser, selectUser, updateUser, getRoles, selectRoles } from "../../redux/reducers/userSlice";
 import { useNavigate, useParams } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -13,9 +16,13 @@ export default function UserInformation(props) {
     const navigate = useNavigate()
     const { user_id } = useParams()
     const user = useSelector(selectUser)
+    const roles = useSelector(selectRoles)
+
+    const auth = useAuth()
 
     useEffect(() => {
         dispatch(getUser(user_id))
+        dispatch(getRoles())
     }, [])
 
     useEffect(() => {
@@ -53,7 +60,7 @@ export default function UserInformation(props) {
     }
     const [showModal, setShowModal] = useState(modalStates.CORRECT)
 
-    if (user === null) {
+    if (user === null || roles === null) {
         return <LoadingScreen />
     }
 
@@ -83,6 +90,9 @@ export default function UserInformation(props) {
                 }
                 dispatch(updateUser({ "userId": user_id, "user": new_Data })).then(() => {
                     dispatch(getUser(user_id))
+                    if(auth.user.id === parseInt(user_id)) {
+                        dispatch(me())
+                    }
                 })
             }
             setEditable(false)
@@ -215,9 +225,11 @@ export default function UserInformation(props) {
                                 required
                                 disabled={!editable}
                             >
-                                <option value={1}>Admin</option>
-                                <option value={2}>Owner</option>
-                                <option value={3}>Collaborator</option>
+                                {roles.map((role) => (
+                                    <option key={role.id} value={role.id}>
+                                        {role.name}
+                                    </option>
+                                ))}
                             </Form.Select>
                         </Form.Group>
                     </Row>
