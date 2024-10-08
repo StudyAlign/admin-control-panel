@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { Container, Row, Col, Button } from "react-bootstrap";
-import { PeopleFill } from "react-bootstrap-icons";
+import { PeopleFill, CalendarDateFill } from "react-bootstrap-icons";
 
 import { useDispatch } from "react-redux";
 import { studySlice, getStudySetupInfo } from "../../redux/reducers/studySlice";
@@ -58,22 +58,42 @@ export default function StudyBox(props) {
         return button
     }
 
-    return(
-        <div className="study-box">
+    return (
+        <div className="study-box" onClick={handleClickOverview}>
             <Container>
                 <Row>
-                    <Col> { getStatusLabel(study.state) } </Col>
-                    <Col> <label className="participants-label"> <PeopleFill/> {doneParticipants + " / " + participants} </label> </Col>
+                    <Col>
+                        <label className="study-name-label"> {study.name} </label>
+                    </Col>
                 </Row>
+
+                <div className="info-box">
+                    <Row>
+                        <Col>
+                            <label className="date-label-header"> Date <CalendarDateFill /> </label>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            <label className="date-label"> {reformatDate(study.startDate) + " - " + reformatDate(study.endDate)} </label>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            <label className="participants-label-header"> Participants <PeopleFill /> </label>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            <label className="participants-label"> {doneParticipants + " / " + participants} </label>
+                        </Col>
+                    </Row>
+                </div>
+
                 <Row>
-                    <Col> <label className="study-name-label"> {study.name} </label> </Col>
-                </Row>
-                <Row>
-                    <Col> <label className="date-label"> {reformatDate(study.startDate) + " - " + reformatDate(study.endDate)} </label> </Col>
-                </Row>
-                <Row style={{"marginTop": "15px"}}>
-                    <Col xs="auto"> <Button className="button1" onClick={handleClickOverview}> Overview </Button> </Col>
-                    <Col> { getButton2(study.state) } </Col>
+                    <Col>
+                        {getStatusLabel(study.state)}
+                    </Col>
                 </Row>
             </Container>
         </div>

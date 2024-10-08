@@ -1,6 +1,6 @@
-import React, {useEffect} from "react";
-import {Container, Row, Col, Button, NavLink} from "react-bootstrap";
-import {useNavigate} from "react-router";
+import React, { useState } from "react";
+import { Container, Row, Col, Button, NavLink, Navbar, Nav, NavDropdown } from "react-bootstrap";
+import { useNavigate } from "react-router";
 
 import { STATES } from "../study_overview/StudyOverviewLayout";
 
@@ -9,8 +9,47 @@ import StudyBox from "./StudyBox";
 import "./Dashboard.css";
 
 export default function FilledDashboard(props) {
+
+    const STUDY_ENUM = {
+        RUNNING: 'running',
+        FINISHED_DONE: 'finished_done',
+        FINISHED_FUTURE: 'finished_future',
+        SETUP_UNFINISHED: 'setup_unfinished'
+    }
+
+    const STUDY_LABELS = {
+        RUNNING: 'Open Studies',
+        FINISHED_DONE: 'Closed Studies [Done]',
+        FINISHED_FUTURE: 'Closed Studies [Future]',
+        SETUP_UNFINISHED: 'Setup Not Finished'
+    }
+
+    const [activeStudyType, setActiveStudyType] = useState(STUDY_ENUM.RUNNING)
+    const [activeLabel, setActiveLabel] = useState(STUDY_LABELS.RUNNING)
+    const [expanded, setExpanded] = useState(false)
+
+    const handleSelect = (eventKey) => {
+        setActiveStudyType(eventKey)
+        setExpanded(false)
+
+        switch (eventKey) {
+            case STUDY_ENUM.RUNNING:
+                setActiveLabel(STUDY_LABELS.RUNNING)
+                break
+            case STUDY_ENUM.FINISHED_DONE:
+                setActiveLabel(STUDY_LABELS.FINISHED_DONE)
+                break
+            case STUDY_ENUM.FINISHED_FUTURE:
+                setActiveLabel(STUDY_LABELS.FINISHED_FUTURE)
+                break
+            case STUDY_ENUM.SETUP_UNFINISHED:
+                setActiveLabel(STUDY_LABELS.SETUP_UNFINISHED)
+                break
+        }
+    }
+
     const navigate = useNavigate()
-    const max_amount_boxes = 3
+    const max_amount_boxes = 5
 
     const handleClickStudyLink = (event, study_id) => {
         event.preventDefault()
@@ -69,37 +108,102 @@ export default function FilledDashboard(props) {
         }
     }
 
+    const renderStudies = () => {
+        let studiesList = null
+
+        switch (activeStudyType) {
+            case STUDY_ENUM.RUNNING:
+                studiesList = running_studies
+                break
+            case STUDY_ENUM.FINISHED_DONE:
+                studiesList = finished_done_studies
+                break
+            case STUDY_ENUM.FINISHED_FUTURE:
+                studiesList = finished_future_studies
+                break
+            case STUDY_ENUM.SETUP_UNFINISHED:
+                studiesList = setup_unfinished_studies
+                break
+        }
+
+        if (!studiesList || studiesList.length === 0) {
+            return <div>No entries available at the moment.</div>
+        }
+
+        return studiesList
+    }
+
     return (
         <>
             <div className="curr-studies">
-                <Container fluid>
-                    <Row>
-                        <label className="headline"> Recent Studies </label>
-                    </Row>
-                    <Row>
-                        {recent_studies}
-                    </Row>
-                    <Row>
-                        <Col>
-                            <Row> <label className="headline"> Open Studies </label> </Row>
-                            {running_studies}
+                <Container fluid className="p-0 mx-auto">
+                    <Row className="justify-content-between">
+                        <Col lg={7}>
+                            <Row>
+                                <label className="headline">Recent Studies</label>
+                            </Row>
+                            <Row className="recent-studies-container">
+                                {recent_studies}
+                            </Row>
+                            <Row className="mt-4 mb-4 d-flex justify-content-center">
+                                <Button className="buttonDashboard mr-3" onClick={handleClickCreateStudy}>
+                                    Create Study
+                                </Button>
+                                <Button className="buttonDashboard" onClick={handleClickImportStudy}>
+                                    Import Study
+                                </Button>
+                            </Row>
                         </Col>
-                        <Col>
-                            <Row> <label className="headline"> Closed Studies [Done] </label> </Row>
-                            {finished_done_studies}
+
+                        <Col xs="auto" className="d-flex justify-content-center align-items-center">
+                            <div className="divider" />
                         </Col>
-                        <Col>
-                            <Row> <label className="headline"> Closed Studies [Future] </label> </Row>
-                            {finished_future_studies}
+
+                        <Col lg={4}>
+                            <Navbar expand={false} className="custom-navbar" variant="dark" expanded={expanded}>
+                                <Navbar.Brand>{activeLabel}</Navbar.Brand>
+                                <Navbar.Toggle
+                                    aria-controls="basic-navbar-nav"
+                                    onClick={() => setExpanded((prev) => !prev)}
+                                />
+                                <Navbar.Collapse id="basic-navbar-nav">
+                                    <Nav className="ml-auto">
+                                        <Nav.Link
+                                            className="custom-navbar__link"
+                                            active={activeStudyType === STUDY_ENUM.RUNNING}
+                                            onClick={() => handleSelect(STUDY_ENUM.RUNNING)}
+                                        >
+                                            {STUDY_LABELS.RUNNING}
+                                        </Nav.Link>
+                                        <Nav.Link
+                                            className="custom-navbar__link"
+                                            active={activeStudyType === STUDY_ENUM.FINISHED_DONE}
+                                            onClick={() => handleSelect(STUDY_ENUM.FINISHED_DONE)}
+                                        >
+                                            {STUDY_LABELS.FINISHED_DONE}
+                                        </Nav.Link>
+                                        <Nav.Link
+                                            className="custom-navbar__link"
+                                            active={activeStudyType === STUDY_ENUM.FINISHED_FUTURE}
+                                            onClick={() => handleSelect(STUDY_ENUM.FINISHED_FUTURE)}
+                                        >
+                                            {STUDY_LABELS.FINISHED_FUTURE}
+                                        </Nav.Link>
+                                        <Nav.Link
+                                            className="custom-navbar__link"
+                                            active={activeStudyType === STUDY_ENUM.SETUP_UNFINISHED}
+                                            onClick={() => handleSelect(STUDY_ENUM.SETUP_UNFINISHED)}
+                                        >
+                                            {STUDY_LABELS.SETUP_UNFINISHED}
+                                        </Nav.Link>
+                                    </Nav>
+                                </Navbar.Collapse>
+                            </Navbar>
+
+                            <div className="study-list mt-3">
+                                {renderStudies()}
+                            </div>
                         </Col>
-                        <Col>
-                            <Row> <label className="headline"> Setup not finished </label> </Row>
-                            {setup_unfinished_studies}
-                        </Col>
-                    </Row>
-                    <Row className="button-center">
-                        <Button className="button1" onClick={handleClickCreateStudy}> Create Study </Button>
-                        <Button className="button1" onClick={handleClickImportStudy}> Import Study </Button>
                     </Row>
                 </Container>
             </div>
