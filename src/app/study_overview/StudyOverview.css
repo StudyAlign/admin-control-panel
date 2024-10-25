@@ -38,16 +38,6 @@
     left: 0px;
 }
 
-table {
-    margin-top: 20px;
-    font-size: 14pt;
-}
-
-tr {
-    height: 60px;
-    vertical-align: top;
-}
-
 .content-name {
     padding-right: 40px;
     color: #494949;
@@ -114,5 +104,36 @@ li {
 .data-table-content {
     border: solid 1px black;
     padding-left: 15px;
+}
+
+.dropdown-table {
+    margin-top: 10px;
+}
+.outer-table {
+    width: 100%;
+    margin-top: 10px;
+}
+.inner-table {
+    width: 100%;
+}
+.inner-table th, .inner-table td {
+    padding: 0.3rem;
+    border: 1px solid #dee2e6;
+    font-size: 0.75rem;
+}
+.inner-table th {
+    font-weight: bold;
+}
+.inner-table thead th {
+    border-bottom: 2px solid black;
+}
+.inner-table thead tr th:first-child {
+    border-right: 1px solid black;
+}
+.inner-table td:first-child {
+    border-right: 1px solid black;
+}
+.font-weight-bold {
+    font-weight: bold;
 }
 

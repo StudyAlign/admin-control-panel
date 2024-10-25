@@ -26,3 +26,13 @@
 .top-bar-item:hover {
     color: #224396 !important;
 }
+
+.top-bar .nav {
+    align-items: center;
+}
+
+.top-bar .nav-link,
+.top-bar .nav-dropdown {
+    display: flex;
+    align-items: center;
+}

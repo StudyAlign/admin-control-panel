@@ -1,0 +1,8 @@
+.action-gap {
+    display: flex;
+    gap: 8px;
+}
+
+.action-gap .btn {
+    flex-shrink: 0;
+}

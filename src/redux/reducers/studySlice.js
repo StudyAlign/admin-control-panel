@@ -83,7 +83,7 @@ export const getStudySetupInfo = createAsyncThunk(
     }
 );
 
-// info no thunk
+// info no thunk, not used
 export const getStudySetupInfoParticipantsNoThunk = async (studyId, dispatch) => {
     try {
         const response = await apiWithAuth(getStudySetupInfoApi, studyId, dispatch)

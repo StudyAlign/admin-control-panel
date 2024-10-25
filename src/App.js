@@ -15,6 +15,11 @@ import CreateCheck from "./app/create_study_flow/CreateCheck";
 import EditInformation from './app/create_study_flow/EditInformation';
 import ImportStudy from './app/create_study_flow/ImportStudy';
 import { StudyStatus } from './app/create_study_flow/navigation_logic/StudyCreationLayout';
+import UserOverview from './app/users/UserOverview';
+import CreateUserForm from './app/users/CreateUserForm';
+import UserCreationLogic from './app/users/UserCreationLogic';
+import UserInformation from './app/users/UserInformation';
+import Profile from './app/users/Profile';
 
 import RequireAuth, {AuthRoute, AuthProvider, useAuth} from "./components/Auth";
 
@@ -61,6 +66,19 @@ export default function App() {
                             <Route path="integrations"  element={<CreateIntegrations status={StudyStatus.Active}/>} />
                             <Route path="check"         element={<CreateCheck/>} />
                             <Route path="*"             element={<h1>ERROR</h1>} />
+                        </Route>
+
+                        <Route path="profile/:user_id/information" element={<Profile editable={false}/>}  />
+
+                    </Route>
+
+                    <Route element={<RequireAuth role={1}/>}>
+                        <Route path='users' element={<UserOverview/>} />
+                        <Route path='users/create' element={<CreateUserForm/>} />
+                        <Route path="users/:user_id"  element={<UserCreationLogic/>} >
+                            <Route path="edit"        element={<UserInformation editable={true}/>} />
+                            <Route path="information" element={<UserInformation editable={false}/>} />
+                            <Route path="*"           element={<h1>ERROR</h1>} />
                         </Route>
                     </Route>
 

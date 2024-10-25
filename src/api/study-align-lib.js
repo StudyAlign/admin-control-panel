@@ -188,6 +188,9 @@ class StudyAlignLib {
     deleteUser(userId) {
         return this.basicDelete("users/" + userId);
     }
+    getRoles() {
+        return this.basicRead("users/roles");
+    }
     // ---- MAINLY FOR USE IN ADMIN FRONTEND ---- //
     // Studies
     getStudies() {
@@ -244,8 +247,8 @@ class StudyAlignLib {
     exportStudySchema(studyId) {
         return this.basicRead("studies/" + studyId + "/export");
     }
-    importStudySchema(studyId, studySchema) {
-        return this.basicCreate("studies/" + studyId + "/import", studySchema);
+    importStudySchema(studySchema) {
+        return this.basicCreate("studies/import", studySchema);
     }
     duplicateStudy(studyId) {
         return this.basicRead("studies/" + studyId + "/duplicate");
@@ -410,6 +413,18 @@ class StudyAlignLib {
     }
     deletePause(pauseId) {
         return this.basicDelete("pauses/" + pauseId);
+    }
+    //Interactions
+    getInteractions(studyId, type, offset = 0, limit = 100) {
+        const options = {
+            method: "GET",
+            path: "interactions",
+            headers: {},
+            params: { study_id: studyId, type: type, offset: offset, limit: limit },
+            asQuery: true
+        };
+        this.setHeaders(options);
+        return this.request(options);
     }
     // ---- MAINLY FOR USE IN STUDY FRONTEND ---- //
     //TODO: read condition config

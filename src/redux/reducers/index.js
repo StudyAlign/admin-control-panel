@@ -6,6 +6,8 @@ import conditions from "./conditionSlice"
 import questionnaires from "./questionnaireSlice"
 import pauses from "./pauseSlice"
 import blocks from "./blockSlice"
+import interactions from "./interactionSlice"
+import users from "./userSlice"
 
 
 export default combineReducers({
@@ -15,5 +17,7 @@ export default combineReducers({
     conditions,
     questionnaires,
     pauses,
-    blocks
+    blocks,
+    interactions,
+    users
 });

@@ -32,7 +32,7 @@ function useProvideAuth() {
         user,
         userApi,
         tokens
-    };
+    }
 }
 
 export function AuthProvider({children}) {
@@ -41,14 +41,14 @@ export function AuthProvider({children}) {
         <authContext.Provider value={auth}>
             {children}
         </authContext.Provider>
-    );
+    )
 }
 
 export function useAuth() {
     return useContext(authContext)
 }
 
-export default function RequireAuth() {
+export default function RequireAuth({ role = 0 }) {
     const auth = useAuth()
     const location = useLocation();
     const dispatch = useDispatch()
@@ -75,5 +75,10 @@ export default function RequireAuth() {
     if (isLoading) {
         return <LoadingScreen text={"Log in..."}/>
     }
-    return auth && auth.isAuthenticated ? <Outlet /> : <Navigate to="/login" state={{ from: location }} replace />;
+
+    if (role === 1) {
+        return auth && auth.isAuthenticated && auth.user.role_id === 1 ? <Outlet /> : <LoadingScreen text={"No Access, go back..."}/>;
+    } else {
+        return auth && auth.isAuthenticated ? <Outlet /> : <Navigate to="/login" state={{ from: location }} replace />;
+    }
 }
