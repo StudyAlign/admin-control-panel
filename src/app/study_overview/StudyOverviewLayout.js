@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { Button, Col, Dropdown, Modal, Row } from "react-bootstrap";
+import {Badge, Button, Col, Dropdown, Modal, Row} from "react-bootstrap";
 import { ThreeDots } from "react-bootstrap-icons";
 
 import { saveAs } from "file-saver";
@@ -34,6 +34,7 @@ import {
     selectStudyExport,
     duplicateStudy,
 } from "../../redux/reducers/studySlice";
+import {UserSteps} from "../users/UserCreationLayout";
 
 export const STATES = {
     SETUP: "setup",
@@ -84,13 +85,21 @@ export default function StudyOverviewLayout() {
 
     useEffect(() => {
         if (study) {
-            if (study.state === STATES.RUNNING) {
-                setEditState(editEnum.Running)
-            } else {
-                setEditState(editEnum.Closed)
-                // Compare Date
-                if(new Date(study.startDate.split('T')[0]) > new Date()) {
-                    setEditState(editEnum.NotOpen)
+            if (study) {
+                switch (study.state) {
+                    case STATES.RUNNING:
+                        if (new Date(study.endDate.split('T')[0]) < new Date()) {
+                            setEditState(editEnum.Closed)
+                        } else {
+                            setEditState(editEnum.Running)
+                        }
+                        return
+                    case STATES.SETUP:
+                        setEditState(editEnum.NotOpen)
+                        return
+                    default:
+                        setEditState(editEnum.Closed)
+                        return
                 }
             }
         }
@@ -274,18 +283,16 @@ export default function StudyOverviewLayout() {
             <SidebarLayout>
                 <Row>
                     <Col>
-                        <h1 className="study-title"> {study.name} <label className="study-id">(#{study_id})</label> </h1>
+                        <h3><Badge bg="secondary">#{study_id}</Badge> {study.name}</h3>
                     </Col>
                     <Col xs="auto">
-                        <Dropdown className="mt-4">
+                        <Dropdown>
                             <Dropdown.Toggle variant="link" bsPrefix="p-0" style={{color:'#494949'}}>
                                 <ThreeDots size="28"/>
                             </Dropdown.Toggle>
 
                             <Dropdown.Menu>
-                                {editState === editEnum.Running || editState === editEnum.NotOpen ? (
-                                    <Dropdown.Item onClick={handleEdit}>Edit</Dropdown.Item>
-                                ) : null}
+                                {editState !== editEnum.Closed && <Dropdown.Item onClick={handleEdit}>Edit</Dropdown.Item>}
                                 <Dropdown.Item onClick={handleDuplicate}>Duplicate</Dropdown.Item>
                                 <Dropdown.Item onClick={() => setShowModal(modalStates.EXPORT)}>Export Study</Dropdown.Item>
                                 <Dropdown.Divider/>

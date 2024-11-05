@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Button, Card, Form } from "react-bootstrap";
+import Logo from "./Logo";
 
 export default function ResetPW(props) {
 
@@ -24,9 +25,9 @@ export default function ResetPW(props) {
 
     return (
         <div className="login-box">
-            <Card>
+            <Logo />
+            <Card className={"shadow"}>
                 <Card.Body>
-                    <Card.Title>StudyAlign</Card.Title>
                     <Form onSubmit={handleSubmit}>
                         <Form.Group className="mb-3">
                             <div className="d-grid">

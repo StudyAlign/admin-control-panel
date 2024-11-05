@@ -1,12 +1,25 @@
 import React, { useState } from "react";
-import { Container, Row, Col, Button, NavLink, Navbar, Nav, NavDropdown } from "react-bootstrap";
+import {
+    Container,
+    Row,
+    Col,
+    Button,
+    NavLink,
+    Navbar,
+    Nav,
+    NavDropdown,
+    Dropdown,
+    DropdownButton,
+    ButtonGroup
+} from "react-bootstrap";
 import { useNavigate } from "react-router";
 
 import { STATES } from "../study_overview/StudyOverviewLayout";
 
 import StudyBox from "./StudyBox";
 
-import "./Dashboard.css";
+import "./Dashboard.scss";
+import {CalendarRange, FunnelFill} from "react-bootstrap-icons";
 
 export default function FilledDashboard(props) {
 
@@ -76,34 +89,28 @@ export default function FilledDashboard(props) {
     let finished_future_studies = []
     let recent_studies = []
     let setup_unfinished_studies = []
-    for(let s of props.studies) {
+
+    for (let s of props.studies) {
         // TODO how to declare which (and how many) studies are shown as boxes
+        const study = <Row key={s.id}> <NavLink onClick={(event) => handleClickStudyLink(event, s.id)}> {s.name} </NavLink> </Row>
         if(recent_studies.length < max_amount_boxes && s.state !== STATES.SETUP) {
             recent_studies.push(
-                <Col key={s.id} xs="auto"> <StudyBox study={s}/> </Col>
+                <Col key={s.id} md={4}> <StudyBox study={s}/> </Col>
             )
         }
         else {
             if(s.state === STATES.RUNNING) {
-                running_studies.push(
-                    <Row key={s.id}> <NavLink onClick={(event) => handleClickStudyLink(event, s.id)}> {s.name} </NavLink> </Row>
-                )
+                running_studies.push(study)
             }
             else if(s.state === STATES.FINISHED) {
                 if (new Date(s.startDate.split('T')[0]) > new Date()) {
-                    finished_future_studies.push(
-                        <Row key={s.id}> <NavLink onClick={(event) => handleClickStudyLink(event, s.id)}> {s.name} </NavLink> </Row>
-                    )
+                    finished_future_studies.push(study)
                 } else {
-                    finished_done_studies.push(
-                        <Row key={s.id}> <NavLink onClick={(event) => handleClickStudyLink(event, s.id)}> {s.name} </NavLink> </Row>
-                    )
+                    finished_done_studies.push(study)
                 }
-                
-            } else {
-                setup_unfinished_studies.push(
-                    <Row key={s.id}> <NavLink onClick={(event) => handleClickSetupStudy(event, s.id)}> {s.name} </NavLink> </Row>
-                )
+            }
+            else {
+                setup_unfinished_studies.push(study)
             }
         }
     }
@@ -138,67 +145,39 @@ export default function FilledDashboard(props) {
             <div className="curr-studies">
                 <Container fluid className="p-0 mx-auto">
                     <Row className="justify-content-between">
-                        <Col lg={7}>
-                            <Row>
-                                <label className="headline">Recent Studies</label>
-                            </Row>
-                            <Row className="recent-studies-container">
+                        <Row>
+                            <h3 className="headline">Recent Studies</h3>
+                        </Row>
+                        <Col lg={9}>
+                            <Row className="g-2">
                                 {recent_studies}
                             </Row>
-                            <Row className="mt-4 mb-4 d-flex justify-content-center">
-                                <Button className="buttonDashboard mr-3" onClick={handleClickCreateStudy}>
-                                    Create Study
-                                </Button>
-                                <Button className="buttonDashboard" onClick={handleClickImportStudy}>
-                                    Import Study
-                                </Button>
-                            </Row>
                         </Col>
 
-                        <Col xs="auto" className="d-flex justify-content-center align-items-center">
-                            <div className="divider" />
-                        </Col>
+                        <Col lg={3}>
 
-                        <Col lg={4}>
-                            <Navbar expand={false} className="custom-navbar" variant="dark" expanded={expanded}>
+                            <Navbar expand={false} className="custom-navbar" expanded={expanded}>
                                 <Navbar.Brand>{activeLabel}</Navbar.Brand>
-                                <Navbar.Toggle
-                                    aria-controls="basic-navbar-nav"
-                                    onClick={() => setExpanded((prev) => !prev)}
-                                />
-                                <Navbar.Collapse id="basic-navbar-nav">
-                                    <Nav className="ml-auto">
-                                        <Nav.Link
-                                            className="custom-navbar__link"
-                                            active={activeStudyType === STUDY_ENUM.RUNNING}
-                                            onClick={() => handleSelect(STUDY_ENUM.RUNNING)}
-                                        >
-                                            {STUDY_LABELS.RUNNING}
-                                        </Nav.Link>
-                                        <Nav.Link
-                                            className="custom-navbar__link"
-                                            active={activeStudyType === STUDY_ENUM.FINISHED_DONE}
-                                            onClick={() => handleSelect(STUDY_ENUM.FINISHED_DONE)}
-                                        >
-                                            {STUDY_LABELS.FINISHED_DONE}
-                                        </Nav.Link>
-                                        <Nav.Link
-                                            className="custom-navbar__link"
-                                            active={activeStudyType === STUDY_ENUM.FINISHED_FUTURE}
-                                            onClick={() => handleSelect(STUDY_ENUM.FINISHED_FUTURE)}
-                                        >
-                                            {STUDY_LABELS.FINISHED_FUTURE}
-                                        </Nav.Link>
-                                        <Nav.Link
-                                            className="custom-navbar__link"
-                                            active={activeStudyType === STUDY_ENUM.SETUP_UNFINISHED}
-                                            onClick={() => handleSelect(STUDY_ENUM.SETUP_UNFINISHED)}
-                                        >
-                                            {STUDY_LABELS.SETUP_UNFINISHED}
-                                        </Nav.Link>
-                                    </Nav>
-                                </Navbar.Collapse>
+                                <NavDropdown align="end" title={<FunnelFill />} id="custom-navbar-dropdown">
+                                    <NavDropdown.Item active={activeStudyType === STUDY_ENUM.RUNNING}
+                                                      onClick={() => handleSelect(STUDY_ENUM.RUNNING)}>
+                                        {STUDY_LABELS.RUNNING}
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item active={activeStudyType === STUDY_ENUM.FINISHED_DONE}
+                                                      onClick={() => handleSelect(STUDY_ENUM.FINISHED_DONE)}>
+                                        {STUDY_LABELS.FINISHED_DONE}
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item  active={activeStudyType === STUDY_ENUM.FINISHED_FUTURE}
+                                                       onClick={() => handleSelect(STUDY_ENUM.FINISHED_FUTURE)}>
+                                        {STUDY_LABELS.FINISHED_FUTURE}
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item active={activeStudyType === STUDY_ENUM.SETUP_UNFINISHED}
+                                                      onClick={() => handleSelect(STUDY_ENUM.SETUP_UNFINISHED)}>
+                                        {STUDY_LABELS.SETUP_UNFINISHED}
+                                    </NavDropdown.Item>
+                                </NavDropdown>
                             </Navbar>
+
 
                             <div className="study-list mt-3">
                                 {renderStudies()}

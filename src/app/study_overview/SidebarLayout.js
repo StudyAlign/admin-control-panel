@@ -3,7 +3,7 @@ import { Container, Row, Col, Nav } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router";
 
 import "./StudyOverview.css";
-import "../SidebarAndReactStyles.css";
+import "../SidebarAndReactStyles.scss";
 
 export default function SidebarLayout(props){
     const navigate = useNavigate();
@@ -35,9 +35,9 @@ export default function SidebarLayout(props){
     return (
         <>
             <Container fluid>
-                <Row>
-                    <Col xs={"auto"} id="sidebar-wrapper">
-                        <Nav className="col-md-12 d-none d-md-block sidebar">
+                <Row className="d-flex flex-nowrap">
+                    <Col id="sidebar-wrapper">
+                        <Nav className="d-none d-md-block sidebar">
                             <Nav.Item>
                                 <Nav.Link className={getClassName("overview")} onClick={handleClickOverview}>Overview</Nav.Link>
                             </Nav.Item>
@@ -49,8 +49,12 @@ export default function SidebarLayout(props){
                             </Nav.Item>
                         </Nav>
                     </Col>
-                    <Col xs={10} id="page-content-wrapper">
-                        {props.children}
+                    <Col id="page-content-wrapper">
+                        <Row>
+                            <Col xs={12} md={12} lg={10} xl={8}>
+                                {props.children}
+                            </Col>
+                        </Row>
                     </Col>
                 </Row>
             </Container>

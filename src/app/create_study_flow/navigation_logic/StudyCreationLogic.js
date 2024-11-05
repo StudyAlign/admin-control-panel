@@ -37,12 +37,12 @@ export default function StudyCreationLogic(props) {
 
     const get_step = (path) => {
         const path_split = path.split('/')
+        console.log(path_split)
         if(path_split.size < 4) {
             return ''
         }
-        else {
-            return path_split.slice(3).join('/')
-        }
+        console.log(path_split.slice(3).join('/'))
+        return path_split.slice(3).join('/')
     }
 
     // Status 404 -> navigate to dashboard
@@ -58,7 +58,11 @@ export default function StudyCreationLogic(props) {
         // If creation is done, navigate to study overview
         return <Navigate to={"/study/" + study_id + "/overview"} replace state={{ from: location }} />
     }
-    else if (get_step(location.pathname) === next_step(studySetupInfo.current_setup_step)) {
+    else if (studySetupInfo.state !== "setup") {
+        return <Outlet/>
+    }
+    else if (CreationOrder.indexOf(get_step(location.pathname)) <= CreationOrder.indexOf(next_step(studySetupInfo.current_setup_step))) {
+    //else if (get_step(location.pathname) === next_step(studySetupInfo.current_setup_step)) {
         return <Outlet/>
     }
     else {

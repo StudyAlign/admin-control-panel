@@ -3,7 +3,7 @@ import { Button, Card, Form } from "react-bootstrap";
 import { ArrowLeft } from 'react-bootstrap-icons';
 import { Link } from "react-router-dom";
 
-import "./Login.css";
+import Logo from "./Logo";
 
 export default function ForgotPW(props) {
 
@@ -20,9 +20,9 @@ export default function ForgotPW(props) {
 
     return (
         <div className="login-box">
-            <Card>
+            <Logo />
+            <Card className={"shadow"}>
                 <Card.Body>
-                    <Card.Title>StudyAlign</Card.Title>
                     <Form onSubmit={handleSubmit}>
                         <Form.Group className="mb-3">
                             <div className="d-grid">

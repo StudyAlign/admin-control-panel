@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useImperativeHandle, forwardRef, useContext } from 'react';
 import { DragHandleComponent } from 'react-sortful'
-import { Accordion, Form, Button, Tooltip, OverlayTrigger } from "react-bootstrap";
+import {Accordion, Form, Button, Tooltip, OverlayTrigger, Badge} from "react-bootstrap";
 import { Trash3, Save } from "react-bootstrap-icons";
 import { useDispatch} from "react-redux";
 
@@ -12,7 +12,7 @@ import { createCondition, updateCondition } from "../../redux/reducers/condition
 import { createQuestionnaire, updateQuestionnaire } from "../../redux/reducers/questionnaireSlice";
 import { createPause, updatePause } from "../../redux/reducers/pauseSlice";
 
-import styles from './CreateProcedure.module.css'
+import styles from './CreateProcedure.module.scss'
 
 
 
@@ -25,6 +25,8 @@ export const ProcedureTypes = {
         id: 0,
         key: "text",
         label: "Text Page",
+        class: "procedure-text",
+        btnclass: "procedure-text-button",
         color: "rgb(13,4,73)",
         emptyContent: { "title": "", "body": "", "study_id": -1 }
     },
@@ -32,6 +34,8 @@ export const ProcedureTypes = {
         id: 1,
         key: "condition",
         label: "Condition",
+        class: "procedure-condition",
+        btnclass: "procedure-condition-button",
         color: "rgb(191,96,16)",
         emptyContent: { "name": "", "config": "", "url": "", "study_id": -1 }
     },
@@ -39,6 +43,8 @@ export const ProcedureTypes = {
         id: 2,
         key: "questionnaire",
         label: "Questionnaire",
+        class: "procedure-questionnaire",
+        btnclass: "procedure-questionnaire-button",
         color: "rgb(144,30,64)",
         emptyContent: { "url": "", "system": "", "study_id": -1}
     },
@@ -46,6 +52,8 @@ export const ProcedureTypes = {
         id: 3,
         key: "pause",
         label: "Pause",
+        class: "procedure-pause",
+        btnclass: "procedure-pause-button",
         color: "rgb(81,99,39)",
         emptyContent: { "title": "", "body": "", "proceed_body": "", "type": "time_based", "config": "", "study_id": -1 }
     },
@@ -53,6 +61,8 @@ export const ProcedureTypes = {
         id: 4,
         key: "block",
         label: "Block Element",
+        class: "procedure-block",
+        btnclass: "procedure-block-button",
         color: "rgb(173,189,231)",
         emptyContent: { "study_id": -1 }
     },
@@ -245,7 +255,8 @@ const dotsSVG = (
 
 
 const ProcedureObject = forwardRef((props, ref) => {
- 
+
+    const procedureType = props.type
     // ---------------------------------------------------------------------------------------------------------
     // Sector: React States and References: Start --------------------------------------------------------------
 
@@ -528,12 +539,12 @@ const ProcedureObject = forwardRef((props, ref) => {
                 header = procedureType.label
                 break
         }
-        if(!stored) {
-            header += ' [Not Stored]'
-        }else if(stored && updateError) {
-            header += ' [Update Error]'
-        }
-        return header
+
+        const notStoredBadge = !stored && <Badge pill bg="secondary" className="status-pill ms-1">not stored</Badge>
+        const updateErrorBadge = (stored && updateError) && <Badge pill bg="danger" className="status-pill ms-1">update error</Badge>
+        return <>
+            { header } { notStoredBadge } { updateErrorBadge }
+        </>
     }
 
     const getColor = (procedureType) => {
@@ -553,18 +564,15 @@ const ProcedureObject = forwardRef((props, ref) => {
     // Sector: ProcedureObject FrontEnd interactions: End --------------------------------------------------------------
     // -----------------------------------------------------------------------------------------------------------------
 
-    
-    
-    
+
     return (
-        <div className={styles.procedureElement}>
+        <div className={`${styles.procedureElement} ${styles[procedureType.class]}`}>
             <DragHandleComponent className={disabled ? styles.dragHandleNotAllowed : styles.dragHandle}>
                 {dotsSVG}
             </DragHandleComponent>
 
-
-            <Accordion.Item eventKey={props.id} className={styles.accordionItem}>
-                <Accordion.Header style={{borderBottom: `1px solid ${getColor(props.type)}`}}>{getHeader(props.type, content)}</Accordion.Header>
+            <Accordion.Item eventKey={props.id} className={`${styles.accordionItem}`}>
+                <Accordion.Header>{getHeader(props.type, content)}</Accordion.Header>
                 <Accordion.Body>
                     {getForm(props.type, content, editContent)}
                 </Accordion.Body>

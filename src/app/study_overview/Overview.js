@@ -9,7 +9,7 @@ import { getStudy, updateStudy } from "../../redux/reducers/studySlice";
 import { reformatDate } from "../../components/CommonFunctions";
 
 import "./StudyOverview.css";
-import "../SidebarAndReactStyles.css";
+import "../SidebarAndReactStyles.scss";
 
 export default function Overview(props) {
     const dispatch = useDispatch()
@@ -22,10 +22,27 @@ export default function Overview(props) {
 
     const getButton = (state) => {
         if (state === STATES.RUNNING) {
-            return <Button type="button" className="big-button" onClick={(event) => handleStudyActive(event, "finished")}> Close Study </Button>
+            return <Button onClick={(event) => handleStudyActive(event, "finished")}> Close Study </Button>
         }
         else if (state === STATES.FINISHED) {
-            return <Button type="button" className="big-button" onClick={(event) => handleStudyActive(event, "running")}> Open Study </Button>
+            return <Button onClick={(event) => handleStudyActive(event, "running")}> Open Study </Button>
+        }
+    }
+
+    const getStatus = () => {
+        switch (props.study.state) {
+            case STATES.RUNNING:
+                return "Running"
+            case STATES.SETUP:
+                return "Setup"
+            default:
+                return "Closed"
+        }
+    }
+
+    const getStudyIsOver = () => {
+        if (new Date(props.study.endDate.split('T')[0]) < new Date()) {
+            return "(is over)"
         }
     }
 
@@ -41,7 +58,7 @@ export default function Overview(props) {
                 </tr>
                 <tr>
                     <td className="content-name"> Status: </td>
-                    <td> {(props.study.state === STATES.RUNNING) ? 'Running' : 'Closed'} </td>
+                    <td> {getStatus()} {getStudyIsOver()} </td>
                 </tr>
                 <tr>
                     <td className="content-name"> Start Date: </td>
@@ -61,13 +78,13 @@ export default function Overview(props) {
                 </tr>
                 </tbody>
             </table>
-            <hr/>
-            <h1 className="small-title"> Collaborators </h1>
+            {getButton(props.study.state)}
+            <hr />
+            <h3> Collaborators </h3>
             <ul>
                 <li> N.A. </li>
             </ul>
             <Button type="button" className="small-button"> + Add </Button>
-            {getButton(props.study.state)}
         </>
     )
 }

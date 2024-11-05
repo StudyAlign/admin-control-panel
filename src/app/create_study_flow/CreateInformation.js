@@ -55,8 +55,8 @@ export default function CreateInformation() {
         event.preventDefault()
         let study = {
             "name": title,
-            "startDate": startDate + "T15:08:50.161Z",
-            "endDate": endDate  + "T15:08:50.161Z",
+            "startDate": startDate + "T00:00:00.000Z",
+            "endDate": endDate  + "T00:00:00.000Z",
             "state": STATES.SETUP, // "setup", "running", "finished"
             "owner_id": auth.user.id,
             "invite_only": false, // TODO how to indicate if invite_only or not? Checkbox?
@@ -79,7 +79,7 @@ export default function CreateInformation() {
     }
 
     return(
-        <StudyCreationLayout step={CreationSteps.Information} static={true}>
+        <StudyCreationLayout step={CreationSteps.Information}>
 
             <Container>
                 <Form onSubmit={handleSubmit}>
@@ -108,8 +108,8 @@ export default function CreateInformation() {
 
                     <Row>
                         <Form.Group className="mb-3" controlId="formParticipants">
-                            <Form.Label>Amount Participants</Form.Label>
-                            <Form.Control required type="number" placeholder="Amount Participants" value={amountParticipants} onChange={handleParticipants}/>
+                            <Form.Label>Number of Participants</Form.Label>
+                            <Form.Control required type="number" placeholder="Number of  Participants" value={amountParticipants} onChange={handleParticipants}/>
                         </Form.Group>
                     </Row>
 
@@ -128,7 +128,7 @@ export default function CreateInformation() {
                     </Row>
 
                     <Row>
-                        <Col> <Button type="submit" size="lg">Save and Proceed</Button> </Col>
+                        <Col> <Button type="submit">Save and Continue</Button> </Col>
                     </Row>
                 </Form>
             </Container>

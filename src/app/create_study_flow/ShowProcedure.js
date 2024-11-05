@@ -7,9 +7,12 @@ import { getProcedureConfigOverview, selectStudyProcedureOverview } from "../../
 
 import { ProcedureTypes } from "./ProcedureObject";
 
-import styles from "./CreateProcedure.module.css";
+import styles from "./CreateProcedure.module.scss";
+import "./CreateProcedure.scss";
 
 function ShowProdecureObject(props) {
+
+    const procedureType = props.type
 
     // -----------------------------------------------------------------------------------------------------------
     // Sector: ProcedureObject content forms: Start --------------------------------------------------------------
@@ -131,18 +134,14 @@ function ShowProdecureObject(props) {
         }
         return header
     }
-
-    const getColor = (procedureType) => {
-        return procedureType.color
-    }
     
     // Sector: ProcedureObject content forms: End --------------------------------------------------------------
     // ---------------------------------------------------------------------------------------------------------
 
     return (
         <div className={styles.procedureElement}>
-            <Accordion.Item eventKey={props.id} className={styles.accordionItem}>
-                <Accordion.Header style={{borderBottom: `1px solid ${getColor(props.type)}`}}>{getHeader(props.type, props.content)}</Accordion.Header>
+            <Accordion.Item eventKey={props.id} className={`${styles.accordionItem} ${styles[procedureType.class]}`}>
+                <Accordion.Header>{getHeader(props.type, props.content)}</Accordion.Header>
                 <Accordion.Body>
                     {getForm(props.type, props.content)}
                 </Accordion.Body>

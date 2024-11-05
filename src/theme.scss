@@ -1,0 +1,62 @@
+@import 'colors.scss';
+
+$primary: #0044aa;
+// change the theme
+$theme-colors: (
+        "sal-darkgrey": $sal-darkgrey,
+        "sal-mediumgrey": $sal-mediumgrey,
+        "sal-lightgrey": $sal-lightgrey,
+        "sal-primarylight": #5599ff,
+        "sal-darkgold": $sal-darkgold,
+        "primary": $primary,
+        "danger": #e63c3c,
+        "success": #31d772,
+        "warning": #e6c83c
+);
+
+$input-border-radius: 0.22rem;
+$input-border-color: $input-border-color;
+
+//e.g. input field blur (box shadow)
+$component-active-bg: $sal-darkgold;
+
+$form-check-input-checked-bg-color:       $primary;
+$form-check-input-checked-border-color:   $primary;
+$form-check-input-focus-border:           tint-color($primary, 50%);
+
+
+
+$input-btn-focus-width: .25rem;
+$input-btn-focus-color-opacity: .25;
+$input-check-focus-color: rgba($primary, $input-btn-focus-color-opacity);
+$input-btn-focus-blur: 0;
+$form-check-input-focus-box-shadow: 0 0 $input-btn-focus-blur $input-btn-focus-width $input-check-focus-color;
+
+
+// Import Bootstrap and its default variables
+@import '~bootstrap/scss/bootstrap.scss';
+
+
+// custom link button
+.btn-link-sal {
+  font-weight: $font-weight-normal;
+  color: $sal-btn-link-color;
+  text-decoration: none;
+
+  &:hover {
+    color: $btn-link-hover-color;
+    text-decoration: $link-hover-decoration;
+  }
+
+  &:focus {
+    text-decoration: $link-hover-decoration;
+  }
+
+  &:disabled,
+  &.disabled {
+    color: $btn-link-disabled-color;
+  }
+
+  // No need for an active state here
+}
+

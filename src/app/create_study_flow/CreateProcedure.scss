@@ -1,0 +1,22 @@
+@import "../../colors";
+
+.accordion-button {
+  background: none !important;
+}
+
+.accordion-button:not(.collapsed) {
+  color: $sal-darkgrey !important;
+  box-shadow: none !important;
+}
+
+.accordion-button:focus, .accordion-button:active {
+  //outline: none !important;
+  box-shadow: none !important;
+}
+
+.procedure-alert {
+  z-index: 1000;
+  top: -1.5vh;
+  left: 2vh;
+  width: calc(100% - 4vh);
+}

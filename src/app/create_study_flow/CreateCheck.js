@@ -100,34 +100,39 @@ export default function CreateCheck() {
     return (
         <StudyCreationLayout step={CreationSteps.Check}>
         <Container>
-            <Row> <h3> Overview </h3> </Row>
             <Row>
-                <Col xs={2}> <b> Name: </b> </Col>
+                <Col className="mb-4">Please check your input. You cannot edit the procedure order after creating the study.</Col>
+            </Row>
+        </Container>
+        <Container>
+            <Row> <h4> Study Details </h4> </Row>
+            <Row>
+                <Col xs={3}> <b> Name: </b> </Col>
                 <Col> {study.name} </Col>
             </Row>
             <Row>
-                <Col xs={2}> <b> Start Date: </b> </Col>
+                <Col xs={3}> <b> Start Date: </b> </Col>
                 <Col> {reformatDate(study.startDate)} </Col>
             </Row>
             <Row>
-                <Col xs={2}> <b> End Date: </b> </Col>
+                <Col xs={3}> <b> End Date: </b> </Col>
                 <Col> {reformatDate(study.endDate)} </Col>
             </Row>
             <Row>
-                <Col xs={2}> <b> Number Participants: </b> </Col>
+                <Col xs={3}> <b> Number Participants: </b> </Col>
                 <Col> {studySetupInfo.planned_number_participants} </Col>
             </Row>
             <Row>
-                <Col xs={2}> <b> Description: </b> </Col>
+                <Col xs={3}> <b> Description: </b> </Col>
                 <Col> {study.description} </Col>
             </Row>
             <Row>
-                <Col xs={2}> <b> Consent: </b> </Col>
+                <Col xs={3}> <b> Consent: </b> </Col>
                 <Col> {study.consent} </Col>
             </Row>
 
             <Row className="mt-3"> <hr/> </Row>
-            <Row> <h3> Procedure </h3></Row>
+            <Row> <h4> Procedure </h4></Row>
             <Row>
                 <ShowProcedure procedureId={procedureConfig && procedureConfig.id} />
             </Row>

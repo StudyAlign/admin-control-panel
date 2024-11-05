@@ -424,7 +424,7 @@ export default function CreateIntegrations(props) {
                     </Row>
 
                     <Row className='mt-3' xs="auto">
-                        <Button size="lg" onClick={handleProceed}>Save and Proceed</Button>
+                        <Button onClick={handleProceed}>Save and Proceed</Button>
                     </Row>
                 </>
             )
@@ -439,7 +439,7 @@ export default function CreateIntegrations(props) {
                     </Row>
 
                     <Row className='mt-3' xs="auto">
-                        <Button size="lg" onClick={handleProceed} disabled={!checked}>Save and Proceed</Button>
+                        <Button onClick={handleProceed} disabled={!checked}>Save and Continue</Button>
                     </Row>
                 </>
             )

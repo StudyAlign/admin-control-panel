@@ -17,7 +17,7 @@ import {
 import LoadingScreen from "../../components/LoadingScreen";
 import Topbar from "../../components/Topbar";
 
-import "../SidebarAndReactStyles.css";
+import "../SidebarAndReactStyles.scss";
 import "./UserOverview.css";
 
 export default function UserOverview() {
@@ -178,7 +178,7 @@ export default function UserOverview() {
             <Topbar />
             <div xs={10} id="page-content-wrapper" style={{ padding: "10px" }}>
 
-                <h1 className="page-title">Overview Users</h1>
+                <h3 className="headline">Users Overview</h3>
 
                 <div className="mb-3">
                     <Button variant="primary" onClick={handleNewUser}>

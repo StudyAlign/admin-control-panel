@@ -6,6 +6,7 @@ import { getStudies, selectStudies } from "../../redux/reducers/studySlice";
 import Topbar from "../../components/Topbar";
 import EmptyDashboard from "./EmptyDashboard";
 import FilledDashboard from "./FilledDashboard";
+import LoadingScreen from "../../components/LoadingScreen";
 
 
 export default function Dashboard() {
@@ -57,11 +58,14 @@ export default function Dashboard() {
     }, [])
 
     let dashboard
-    if(studies != null && studies.length > 0) {
-        dashboard = <FilledDashboard studies={studies}/>
+    if (studies == null) {
+        dashboard = <LoadingScreen />
+    }
+    else if (studies.length == 0) {
+        dashboard = <EmptyDashboard/>
     }
     else {
-        dashboard = <EmptyDashboard/>
+        dashboard = <FilledDashboard studies={studies} />
     }
 
     return (

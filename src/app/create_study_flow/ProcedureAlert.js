@@ -22,7 +22,7 @@ export default function ProcedureAlert(props) {
     }, [props.message])
 
     return (
-        <Alert variant={props.message.type} dismissible show={visible} onClose={() => setVisible(false)}>
+        <Alert className="position-absolute procedure-alert" variant={props.message.type} dismissible show={visible} onClose={() => setVisible(false)}>
             {props.message.text}
         </Alert>
     );
