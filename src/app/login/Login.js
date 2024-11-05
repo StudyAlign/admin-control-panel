@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Button, Card, Form } from "react-bootstrap";
+import {Button, Card, Col, Form, Image, Row} from "react-bootstrap";
 import { Link, Navigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
 import { authSlice, me, userLogin } from "../../redux/reducers/authSlice";
 
 import { useAuth } from "../../components/Auth";
+import Logo from "./Logo";
 
-import "./Login.css";
+import "./Login.scss";
 
 export default function Login(props) {
     //useDispatch to dispatch redux actions
@@ -58,25 +59,25 @@ export default function Login(props) {
     }
 
     return <div className="login-box">
-        <Card>
+        <Logo />
+        <Card className={"shadow"}>
             <Card.Body>
-                <Card.Title>StudyAlign</Card.Title>
-                    <Form onSubmit={handleSubmit}>
-                        <Form.Group className="mb-3" controlId="formEmail">
-                            <Form.Label>Username</Form.Label>
-                            <Form.Control required type="text" placeholder="Username" value={username} onChange={handleUsername}/>
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="formPassword">
-                            <Form.Label>Password</Form.Label>
-                            <Form.Control required type="password" placeholder="Password" value={password} onChange={handlePassword}/>
-                        </Form.Group>
-                        <div className="d-grid">
-                            <Button type="submit" size="lg">Login</Button>
-                            <Form.Text>
-                                <Link to="/login/forgot">Forgot Password</Link>
-                            </Form.Text>
-                        </div>
-                    </Form>
+                <Form onSubmit={handleSubmit}>
+                    <Form.Group className="mb-3" controlId="formEmail">
+                        <Form.Label>Username</Form.Label>
+                        <Form.Control required type="text" placeholder="Username" value={username} onChange={handleUsername}/>
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="formPassword">
+                        <Form.Label>Password</Form.Label>
+                        <Form.Control required type="password" placeholder="Password" value={password} onChange={handlePassword}/>
+                    </Form.Group>
+                    <div className="d-grid">
+                        <Button type="submit" size="lg">Login</Button>
+                        <Form.Text>
+                            <Link to="/login/forgot">Forgot Password</Link>
+                        </Form.Text>
+                    </div>
+                </Form>
             </Card.Body>
         </Card>
     </div>

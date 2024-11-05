@@ -269,7 +269,7 @@ export default function ImportStudy() {
         <>
             <Topbar />
             <div style={{ position: 'relative', padding: '20px' }}>
-                <h1 className="page-title"> Import Study </h1>
+                <h3 className="headline">Import Study</h3>
                 {isDragging && !isDraggingOverTextArea && (
                     <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', pointerEvents: 'none', fontSize: '24px', color: '#aaa' }}>
                         Drop file here

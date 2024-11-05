@@ -1,6 +1,7 @@
 import React from "react";
 import Topbar from "../../components/Topbar";
 import SidebarLayout from "./SidebarLayout";
+import {Col, Container, Row} from "react-bootstrap";
 
 export const UserOrder = [
     "create",
@@ -32,10 +33,15 @@ export default function UserCreationLayout(props) {
     return (
         <>
             <Topbar />
-            <SidebarLayout step={props.step}>
-                <h1 className="page-title"> {getTitle(props.step)} </h1>
-                {props.children}
-            </SidebarLayout>
+            <Container>
+                <Row>
+                    <Col id="page-content-wrapper">
+                        <h3 className="headline"> {getTitle(props.step)} </h3>
+                        {props.children}
+                    </Col>
+                </Row>
+            </Container>
+
         </>
     )
 }

@@ -104,7 +104,11 @@ export default function EditInformation(props) {
             }
         }))
         await dispatch(getStudySetupInfo(study_id))
-        navigate("/edit/" + study_id + "/procedure")
+        if (studySetupInfo.state === "setup") {
+            navigate("/create/" + study_id + "/procedure")
+        } else {
+            navigate("/edit/" + study_id + "/procedure")
+        }
     }
 
     return(
@@ -138,8 +142,8 @@ export default function EditInformation(props) {
 
                     <Row>
                         <Form.Group className="mb-3" controlId="formParticipants">
-                            <Form.Label>Amount Participants</Form.Label>
-                            <Form.Control min={disabled ? amountParticipantsRef.current : 0} required type="number" placeholder="Amount Participants" value={amountParticipants} onChange={handleParticipants}/>
+                            <Form.Label>Number of Participants</Form.Label>
+                            <Form.Control min={disabled ? amountParticipantsRef.current : 0} required type="number" placeholder="Number of Participants" value={amountParticipants} onChange={handleParticipants}/>
                         </Form.Group>
                     </Row>
 
@@ -158,7 +162,7 @@ export default function EditInformation(props) {
                     </Row>
 
                     <Row>
-                        <Col> <Button type="submit" size="lg">Update and Proceed</Button> </Col>
+                        <Col> <Button type="submit">Update and Continue</Button> </Col>
                     </Row>
                 </Form>
             </Container>

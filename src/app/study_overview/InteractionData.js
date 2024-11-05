@@ -18,7 +18,7 @@ import {
 } from "../../redux/reducers/interactionSlice";
 
 import "./StudyOverview.css"
-import "../SidebarAndReactStyles.css";
+import "../SidebarAndReactStyles.scss";
 
 export default function InteractionData() {
     const { study_id } = useParams()
@@ -89,7 +89,7 @@ export default function InteractionData() {
 
     // if no logs return
     if (availableTabs.length === 0) {
-        return <h1>No data available</h1>
+        return <h4>No data available</h4>
     }
 
     const sortData = (data) => {

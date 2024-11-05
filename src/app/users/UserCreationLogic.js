@@ -50,6 +50,8 @@ export default function UserCreationLogic(props) {
         )
     }
 
+    console.log(userState, get_step(location.pathname) === next_step(userState))
+
     if (userState === "done" || next_step(userState) === "done") {
         // If creation is done, navigate to user overview
         return <Navigate to={"/users"} replace state={{ from: location }} />

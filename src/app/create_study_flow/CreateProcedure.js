@@ -29,7 +29,7 @@ import StudyCreationLayout, { CreationSteps, StudyStatus } from "./navigation_lo
 import ProcedureAlert from "./ProcedureAlert";
 import ProcedureObject, { ProcedureTypes } from "./ProcedureObject";
 
-import styles from "./CreateProcedure.module.css";
+import styles from "./CreateProcedure.module.scss";
 
 // ---------------------------------------------------------------------------------------------------
 // Sector: Empty Procedure Order --------------------------------------------------------------
@@ -677,7 +677,7 @@ export default function CreateProcedure(props) {
                 <Col xs={'auto'} key={ProcedureTypes[t].id}>
                     <Button
                         type="button"
-                        style={{ backgroundColor: ProcedureTypes[t].color, borderColor: ProcedureTypes[t].color }}
+                        className={`${styles[ProcedureTypes[t].btnclass]}`}
                         onClick={(event) => createProcedureStep(event, ProcedureTypes[t])}> {ProcedureTypes[t].label} </Button>
                 </Col>
             )
@@ -1014,12 +1014,7 @@ export default function CreateProcedure(props) {
                 <Container>
 
                     <Row className='mt-3'>
-                        <div style={{ height: 50, width: '100%' }}>
-                            <ProcedureAlert message={message} />
-                        </div>
-                    </Row>
-
-                    <Row className='mt-3'>
+                        <ProcedureAlert message={message} />
                         {disabled ? (
                             <p style={{ color: 'red' }}>*You can only change the content in the existing order</p>
                         ) : (
@@ -1029,34 +1024,36 @@ export default function CreateProcedure(props) {
 
 
                     <Row className='mt-3'>
-                        <Card>
-                            <Card.Header> Procedure Order </Card.Header>
-                            <Card.Body>
-                                <div className={styles.ProcedureOrder}>
-                                    <List
-                                        className={styles.wrapper}
-                                        renderDropLine={renderDropLineElement}
-                                        renderGhost={renderGhostElement}
-                                        renderStackedGroup={renderStackedGroupElement}
-                                        onDragEnd={onDragEnd}
-                                        onDragStart={onDragStart}
-                                        isDisabled={disabled}
-                                    >
-                                        <Accordion
-                                            onSelect={(eventKey) => onCollapseListener(eventKey)}
-                                            defaultActiveKey="0"
-                                            flush
+                        <Container>
+                            <Card>
+                                <Card.Header>Procedure Order</Card.Header>
+                                <Card.Body>
+                                    <div className={styles.ProcedureOrder}>
+                                        <List
+                                            className={styles.wrapper}
+                                            renderDropLine={renderDropLineElement}
+                                            renderGhost={renderGhostElement}
+                                            renderStackedGroup={renderStackedGroupElement}
+                                            onDragEnd={onDragEnd}
+                                            onDragStart={onDragStart}
+                                            isDisabled={disabled}
                                         >
-                                            {procedureObjects}
-                                        </Accordion>
-                                    </List>
-                                </div>
-                            </Card.Body>
-                        </Card>
+                                            <Accordion
+                                                onSelect={(eventKey) => onCollapseListener(eventKey)}
+                                                defaultActiveKey="0"
+                                                flush
+                                            >
+                                                {procedureObjects}
+                                            </Accordion>
+                                        </List>
+                                    </div>
+                                </Card.Body>
+                            </Card>
+                        </Container>
                     </Row>
 
                     <Row className='mt-3'>
-                        <Col> <Button size="lg" onClick={handleProceed}>Save and Proceed</Button> </Col>
+                        <Col> <Button onClick={handleProceed}>Save and Continue</Button> </Col>
                     </Row>
 
                 </Container>

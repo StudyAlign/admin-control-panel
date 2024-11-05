@@ -1,0 +1,15 @@
+.login-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 400px;
+}
+
+.login-logo {
+  max-width: 100%;
+}
+
+.card {
+  border: 1px solid  rgba(0, 0, 0, 0.125) !important;
+}

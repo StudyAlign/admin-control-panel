@@ -147,7 +147,7 @@ export default function Profile(props) {
             <Topbar />
             <div xs={10} id="page-content-wrapper" style={{ padding: "10px" }}>
 
-                <h1 className="page-title">Profile</h1>
+                <h3 className="headline">Profile</h3>
 
                 <Container>
                     <Row className="mb-3">

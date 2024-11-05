@@ -1,3 +1,5 @@
+@import "../colors.scss";
+
 /* Over write react styles */
 .accordion-button:not(.collapsed) {
     color: inherit; 
@@ -32,25 +34,28 @@
 .sidebar {
     left: 0;
     min-height: 100%;
-    padding: 10px 10px 0 10px;
-    background-color: #ececec;
+    padding: 10px 0px 0 10px;
+    background-color: $sal-superlightgrey;
 }
 
-#sidebar-wrapper{
-    height: 93vh;
+#sidebar-wrapper {
+    min-height: 100vh !important;
+    max-height: 100% !important;
+    min-width: 20vw !important;
+    max-width: 20vw !important;
     margin-left: -1rem;
     -webkit-transition: margin .25s ease-out;
     -moz-transition: margin .25s ease-out;
     -o-transition: margin .25s ease-out;
     transition: margin .25s ease-out;
-    width: 250px;
 }
 
 #page-content-wrapper {
     position: relative;
+    margin-top: 2vh !important;
 }
 
-.sidebar-item{
+.sidebar-item {
     color: black;
     font-size: 16pt;
     margin-bottom: 5px;
@@ -58,12 +63,14 @@
 
 .sidebar-item:hover {
     color: #224396;
+    background-color: $sal-lightgrey;
     cursor: pointer;
 }
 
 .sidebar-item-selected,
 .sidebar-item-selected:hover {
     color: #224396;
+    background-color: $sal-lightgrey;
     font-weight: bold;
 }
 
@@ -94,10 +101,7 @@
 }
 
 .study-title {
-    color: #494949;
-    font-size: 32pt;
-    font-weight: bold;
-    margin-top: 10px;
+    font-size: 1.15rem;
 }
 
 .page-title {

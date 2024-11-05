@@ -26,7 +26,7 @@ import RequireAuth, {AuthRoute, AuthProvider, useAuth} from "./components/Auth";
 import { authSlice } from "./redux/reducers/authSlice";
 
 import './App.css';
-import 'bootstrap/dist/css/bootstrap.css';
+import './theme.scss';
 
 
 export default function App() {
@@ -51,7 +51,7 @@ export default function App() {
                         <Route path="/study/:study_id/:page"    element={<StudyOverviewLayout/>} />
 
                         <Route path="import"            element={<ImportStudy/>} />
-                        <Route path="create"            element={<CreateInformation/>} />
+                        <Route path="create"            element={<CreateProcedureContextProvider><CreateInformation/></CreateProcedureContextProvider>} />
                         <Route path="create/:study_id"  element={<CreateProcedureContextProvider><StudyCreationLogic/></CreateProcedureContextProvider>}>
                             <Route path="information"   element={<EditInformation status={StudyStatus.Creation}/>} />
                             <Route path="procedure"     element={<CreateProcedure status={StudyStatus.Creation}/>} />

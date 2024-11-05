@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { Container, Row, Col, Button } from "react-bootstrap";
-import { PeopleFill, CalendarDateFill } from "react-bootstrap-icons";
+import {Container, Row, Col, Button, Badge, Card} from "react-bootstrap";
+import {
+    PeopleFill,
+    CalendarDateFill,
+    CalendarFill,
+    Calendar,
+    CalendarRange,
+    CalendarRangeFill
+} from "react-bootstrap-icons";
 
 import { useDispatch } from "react-redux";
 import { studySlice, getStudySetupInfo } from "../../redux/reducers/studySlice";
@@ -10,7 +17,7 @@ import { STATES } from "../study_overview/StudyOverviewLayout";
 
 import { reformatDate } from "../../components/CommonFunctions";
 
-import "./Dashboard.css";
+import "./Dashboard.scss";
 import LoadingScreen from "../../components/LoadingScreen";
 
 export default function StudyBox(props) {
@@ -37,14 +44,10 @@ export default function StudyBox(props) {
     }
 
     function getStatusLabel(state) {
-        let label
         if (state === STATES.RUNNING) {
-            label = <label className={"status-label running"}> Running </label>
+            return <Badge pill bg="success" className="ms-auto status-pill">Running</Badge>
         }
-        else {
-            label = <label className={"status-label finished"}> Closed </label>
-        }
-        return label
+        return <Badge pill bg="secondary" className="ms-auto status-pill">Closed</Badge>
     }
 
     function getButton2(state) {
@@ -59,43 +62,42 @@ export default function StudyBox(props) {
     }
 
     return (
+        <Card className={"study-box"} onClick={handleClickOverview}>
+            <Card.Body>
+                <Card.Title className="d-flex align-items-start">
+                    <span className="study-title">{study.name}</span>
+                    {getStatusLabel(study.state)}
+                </Card.Title>
+                <Card.Text>
+                    <div className="study-info">
+                        <span className="label"><span className="icon"><CalendarRangeFill /></span> Date</span>
+                        <span className="data"> {reformatDate(study.startDate) + " - " + reformatDate(study.endDate)} </span>
+                    </div>
+                    <div className="study-info">
+                        <span className="label"><span className="icon"><PeopleFill/></span> Participants</span>
+                        <span className="data"> {doneParticipants + " / " + participants} </span>
+                    </div>
+                </Card.Text>
+            </Card.Body>
+        </Card>
+    )
+
+/*    return (
         <div className="study-box" onClick={handleClickOverview}>
             <Container>
                 <Row>
                     <Col>
-                        <label className="study-name-label"> {study.name} </label>
+                        <h5 className="study-name-label"> {study.name} </h5> {getStatusLabel(study.state)}
                     </Col>
                 </Row>
 
-                <div className="info-box">
-                    <Row>
-                        <Col>
-                            <label className="date-label-header"> Date <CalendarDateFill /> </label>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col>
-                            <label className="date-label"> {reformatDate(study.startDate) + " - " + reformatDate(study.endDate)} </label>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col>
-                            <label className="participants-label-header"> Participants <PeopleFill /> </label>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col>
-                            <label className="participants-label"> {doneParticipants + " / " + participants} </label>
-                        </Col>
-                    </Row>
+                <div>
+                    <label className="date-label-header"> Date <CalendarDateFill /> </label>
+                    <label className="date-label"> {reformatDate(study.startDate) + " - " + reformatDate(study.endDate)} </label>
+                    <label className="participants-label-header"> Participants <PeopleFill /> </label>
+                    <label className="participants-label"> {doneParticipants + " / " + participants} </label>
                 </div>
-
-                <Row>
-                    <Col>
-                        {getStatusLabel(study.state)}
-                    </Col>
-                </Row>
             </Container>
         </div>
-    )
+    )*/
 }
