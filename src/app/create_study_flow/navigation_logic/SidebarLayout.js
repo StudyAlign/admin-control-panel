@@ -15,8 +15,6 @@ export default function SidebarLayout(props){
 
     const studySetupInfo = useSelector(selectStudySetupInfo)
 
-    console.log(studySetupInfo)
-
     const { setEmptyOrder, emptyOrderListener } = useContext(CreateProcedureContext)
 
     const { study_id } = useParams()
@@ -33,7 +31,6 @@ export default function SidebarLayout(props){
 
     const handleNavigation = async (event, step, navTo) => {
         // return if the step is already selected
-        console.log(props.step + 1 === CreationOrder.indexOf(navTo))
         if (props.step + 1 === CreationOrder.indexOf(navTo)) {
             event.preventDefault()
             return

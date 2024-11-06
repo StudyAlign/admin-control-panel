@@ -6,10 +6,10 @@ $theme-colors: (
         "sal-darkgrey": $sal-darkgrey,
         "sal-mediumgrey": $sal-mediumgrey,
         "sal-lightgrey": $sal-lightgrey,
-        "sal-primarylight": #5599ff,
+        "sal-primarylight": $sal-lightblue,
         "sal-darkgold": $sal-darkgold,
         "primary": $primary,
-        "danger": #e63c3c,
+        "danger": $sal-red,
         "success": #31d772,
         "warning": #e6c83c
 );

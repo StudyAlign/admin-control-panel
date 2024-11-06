@@ -37,11 +37,9 @@ export default function StudyCreationLogic(props) {
 
     const get_step = (path) => {
         const path_split = path.split('/')
-        console.log(path_split)
         if(path_split.size < 4) {
             return ''
         }
-        console.log(path_split.slice(3).join('/'))
         return path_split.slice(3).join('/')
     }
 

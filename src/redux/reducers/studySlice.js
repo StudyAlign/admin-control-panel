@@ -199,7 +199,6 @@ export const getProcedureConfigOverview = createAsyncThunk(
             return
         }
         try {
-            console.log(procedureConfigId)
             const response = await apiWithAuth(getProcedureConfigOverviewApi, procedureConfigId, dispatch)
             return response
         } catch (err) {

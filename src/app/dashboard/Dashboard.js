@@ -65,7 +65,7 @@ export default function Dashboard() {
         dashboard = <EmptyDashboard/>
     }
     else {
-        dashboard = <EmptyDashboard />
+        dashboard = <FilledDashboard studies={studies} />
     }
 
     return (
