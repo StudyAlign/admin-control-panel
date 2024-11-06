@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
 import { useDispatch} from "react-redux";
 
 import { STATES } from "./StudyOverviewLayout";
 
-import { getStudy, updateStudy } from "../../redux/reducers/studySlice";
+import { studySlice, getStudySetupInfo, getStudy, updateStudy } from "../../redux/reducers/studySlice";
 
 import { reformatDate } from "../../components/CommonFunctions";
 
@@ -12,12 +12,25 @@ import "./StudyOverview.css";
 import "../SidebarAndReactStyles.scss";
 
 export default function Overview(props) {
+    const [participants, setParticipants] = useState("loading...")
+    const [doneParticipants, setDoneParticipants] = useState("loading...")
+
     const dispatch = useDispatch()
+    const study = props.study
+
+    useEffect(async () => {
+        await dispatch(getStudySetupInfo(study.id)).then((response) => {
+            const tempParticipants = response.payload.body.planned_number_participants
+            setParticipants(tempParticipants)
+            setDoneParticipants(tempParticipants - response.payload.body.remaining_participants)
+            dispatch(studySlice.actions.resetStudySetupInfo())
+        })
+    }, [])
 
     const handleStudyActive = async (event, state) => {
         event.preventDefault()
-        await dispatch(updateStudy({studyId: props.study.id, study: {"state": state}}));
-        await dispatch(getStudy(props.study.id));
+        await dispatch(updateStudy({studyId: study.id, study: {"state": state}}));
+        await dispatch(getStudy(study.id));
     }
 
     const getButton = (state) => {
@@ -30,7 +43,7 @@ export default function Overview(props) {
     }
 
     const getStatus = () => {
-        switch (props.study.state) {
+        switch (study.state) {
             case STATES.RUNNING:
                 return "Running"
             case STATES.SETUP:
@@ -41,12 +54,10 @@ export default function Overview(props) {
     }
 
     const getStudyIsOver = () => {
-        if (new Date(props.study.endDate.split('T')[0]) < new Date()) {
+        if (new Date(study.endDate.split('T')[0]) < new Date()) {
             return "(is over)"
         }
     }
-
-    // TODO fetch partcicipant informations in order to display the amount of participants
 
     return(
         <>
@@ -54,7 +65,7 @@ export default function Overview(props) {
                 <tbody>
                 <tr>
                     <td className="content-name"> Description: </td>
-                    <td> {props.study.description} </td>
+                    <td> {study.description} </td>
                 </tr>
                 <tr>
                     <td className="content-name"> Status: </td>
@@ -62,15 +73,15 @@ export default function Overview(props) {
                 </tr>
                 <tr>
                     <td className="content-name"> Start Date: </td>
-                    <td> {reformatDate(props.study.startDate)} </td>
+                    <td> {reformatDate(study.startDate)} </td>
                 </tr>
                 <tr>
                     <td className="content-name"> End Date: </td>
-                    <td> {reformatDate(props.study.endDate)} </td>
+                    <td> {reformatDate(study.endDate)} </td>
                 </tr>
                 <tr>
                     <td className="content-name"> Participants: </td>
-                    <td> N.A. / N.A. </td>
+                    <td> {doneParticipants} / {participants} </td>
                 </tr>
                 <tr>
                     <td className="content-name"> Invite Link: </td>
@@ -78,7 +89,7 @@ export default function Overview(props) {
                 </tr>
                 </tbody>
             </table>
-            {getButton(props.study.state)}
+            {getButton(study.state)}
             <hr />
             <h3> Collaborators </h3>
             <ul>
