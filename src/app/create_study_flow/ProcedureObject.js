@@ -6,6 +6,9 @@ import { useDispatch} from "react-redux";
 
 import { CreateProcedureContext } from './CreateProcedure';
 
+import HtmlEditor from './procedure_editors/HtmlEditor';
+import JsonEditor from './procedure_editors/JsonEditor';
+
 import { createSingleProcedureConfigStep } from "../../redux/reducers/studySlice"
 import { createText, updateText } from "../../redux/reducers/textSlice";
 import { createCondition, updateCondition } from "../../redux/reducers/conditionSlice";
@@ -79,21 +82,28 @@ export const ProcedureTypes = {
 
 function TextPageForm(props) {
 
-    const onChange = (event) => {
-        event.preventDefault()
-        props.editProcedureStep(event.target.id, event.target.value)
+    const onChange = (id, value) => {
+        props.editProcedureStep(id, value);
     }
 
     return (
-        <Form onSubmit={(event) => {event.preventDefault()}}>
+        <Form onSubmit={(event) => { event.preventDefault() }}>
             <Form.Group className="mb-3" controlId="title">
                 <Form.Label> Title </Form.Label>
-                <Form.Control type="text" value={props.content.title} onChange={onChange} required/>
+                <Form.Control
+                    type="text"
+                    value={props.content.title}
+                    onChange={(event) => onChange(event.target.id, event.target.value)}
+                    required
+                />
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="body">
                 <Form.Label> Body </Form.Label>
-                <Form.Control as="textarea" rows={3} value={props.content.body} onChange={onChange} required/>
+                <HtmlEditor
+                    value={props.content.body}
+                    onChange={(value) => onChange('body', value)}
+                />
             </Form.Group>
         </Form>
     )
@@ -101,36 +111,32 @@ function TextPageForm(props) {
 
 function ConditionForm(props) {
 
-    const onChange = (event) => {
-        event.preventDefault()
-        props.editProcedureStep(event.target.id, event.target.value)
+    const onChange = (id, value) => {
+        props.editProcedureStep(id, value);
     }
 
     return (
         <Form onSubmit={(event) => {event.preventDefault()}}>
             <Form.Group className="mb-3" controlId="name">
                 <Form.Label> Name </Form.Label>
-                <Form.Control type="text" value={props.content.name} onChange={onChange} required/>
+                <Form.Control type="text" value={props.content.name} onChange={(event) => onChange(event.target.id, event.target.value)} required/>
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="config">
                 <Form.Label className={props.error ? styles.invalidLabel : ''}>
                     {props.error ? 'Config*' : 'Config'}
                 </Form.Label>
-                <Form.Control
-                    as="textarea"
-                    rows={3}
+                <JsonEditor
+                    id="config"
                     value={props.content.config}
                     onChange={onChange}
-                    required
-                    className={props.error ? 'is-invalid' : ''}
                 />
-                {props.error && <div className="invalid-feedback">Not a valid JSON.</div>}
+                {props.error && <div style={{display:"flex"}} className="invalid-feedback">Not a valid JSON.</div>}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="url">
                 <Form.Label> URL </Form.Label>
-                <Form.Control type="url" value={props.content.url} onChange={onChange} required/>
+                <Form.Control type="url" value={props.content.url} onChange={(event) => onChange(event.target.id, event.target.value)} required/>
             </Form.Group>
         </Form>
     )
@@ -197,31 +203,36 @@ function QuestionnaireForm(props) {
 
 function PauseForm(props) {
 
-    const onChange = (event) => {
-        event.preventDefault()
-        props.editProcedureStep(event.target.id, event.target.value)
+    const onChange = (id, value) => {
+        props.editProcedureStep(id, value);
     }
 
     return (
         <Form onSubmit={(event) => {event.preventDefault()}}>
             <Form.Group className="mb-3" controlId="title">
                 <Form.Label> Title </Form.Label>
-                <Form.Control type="text" value={props.content.title} onChange={onChange} required/>
+                <Form.Control type="text" value={props.content.title} onChange={(event) => onChange(event.target.id, event.target.value)} required/>
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="body">
                 <Form.Label> Body </Form.Label>
-                <Form.Control as="textarea" rows={3} value={props.content.body} onChange={onChange} required/>
+                <HtmlEditor
+                    value={props.content.body}
+                    onChange={(value) => onChange('body', value)}
+                />
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="proceed_body">
                 <Form.Label> Proceed Body </Form.Label>
-                <Form.Control as="textarea" rows={3} value={props.content.proceed_body} onChange={onChange} required/>
+                <HtmlEditor
+                    value={props.content.proceed_body}
+                    onChange={(value) => onChange('proceed_body', value)}
+                />
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="type">
                 <Form.Label> Type </Form.Label>
-                <Form.Select value={props.content.type} onChange={onChange}>
+                <Form.Select value={props.content.type} onChange={(event) => onChange(event.target.id, event.target.value)}>
                     <option disabled value={""}> -- Select a Type -- </option>
                     <option value={"time_based"}> Time based </option>
                     <option value={"controlled"}> Controlled </option>
@@ -229,8 +240,15 @@ function PauseForm(props) {
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="config">
-                <Form.Label> Config </Form.Label>
-                <Form.Control as="textarea" rows={3} value={props.content.config} onChange={onChange} required/>
+                <Form.Label className={props.error ? styles.invalidLabel : ''}>
+                    {props.error ? 'Config*' : 'Config'}
+                </Form.Label>
+                <JsonEditor
+                    id="config"
+                    value={props.content.config}
+                    onChange={onChange}
+                />
+                {props.error && <div style={{display:"flex"}} className="invalid-feedback">Not a valid JSON.</div>}
             </Form.Group>
         </Form>
     )
@@ -346,6 +364,7 @@ const ProcedureObject = forwardRef((props, ref) => {
         if(props.type === ProcedureTypes.TextPage) {
             // create object
             response_create = await dispatch(createText(content))
+            console.log(response_create, content)
             // create step
             response_step = await dispatch(createSingleProcedureConfigStep({
                 "procedureConfigId": props.rootBackendId,
@@ -457,13 +476,19 @@ const ProcedureObject = forwardRef((props, ref) => {
                 }}))
         }
         else if (props.type === ProcedureTypes.Pause) {
-            response = await dispatch(updatePause({pauseId: backendId, pause: {
+            try {
+                const pauseConfig = JSON.parse(content.config)
+                response = await dispatch(updatePause({pauseId: backendId, pause: {
                     "title": content.title,
                     "body": content.body,
                     "proceed_body": content.proceed_body,
                     "type": content.type,
-                    "config": content.config
+                    "config": pauseConfig //
                 }}))
+            } catch (error) {
+                props.setMessage({type: "danger", text: "Error while parsing config to JSON"})
+                setUpdateError(true)
+            } 
         }
         // if response successful status 204
         if (response.payload.status === 204) {
@@ -521,7 +546,11 @@ const ProcedureObject = forwardRef((props, ref) => {
             case ProcedureTypes.Questionnaire:
                 return <QuestionnaireForm content={content} editProcedureStep={editProcedureStep}/>
             case ProcedureTypes.Pause:
-                return <PauseForm content={content} editProcedureStep={editProcedureStep}/>
+                // if content.config is not a string, convert it to a string
+                if (typeof content.config !== "string") {
+                    content.config = JSON.stringify(content.config)
+                }
+                return <PauseForm error={updateError} content={content} editProcedureStep={editProcedureStep}/>
         }
     }
 
