@@ -1,3 +1,4 @@
+@import '../../../colors.scss';
 @import url('https://fonts.googleapis.com/css2?family=Oswald&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
@@ -11,6 +12,15 @@
 	font-family: 'Lato';
 	width: 100%;
 	box-sizing: border-box;
+    border: 0.5px solid #a6a6a6;
+	border-radius: 4px;
+}
+
+.main-container:focus,
+.main-container:focus-visible,
+.main-container:focus-within {
+    border-color: $sal-gold;
+    box-shadow: 0 0 0 0.25rem rgba($sal-darkgold, 0.25);
 }
 
 .ck-content {
@@ -23,8 +33,39 @@
 	width: 100%;
 	max-width: 100%;
 	box-sizing: border-box;
-    border: 0.5px solid #a6a6a6;
-	border-radius: 4px;
+    // border: 0.5px solid #a6a6a6;
+	// border-radius: 4px;
+}
+
+.editor-container .ck.ck-content:focus,
+.editor-container .ck.ck-content:focus-visible,
+.editor-container .ck.ck-content:focus-within {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+// ckeditor logo
+.ck.ck-balloon-panel.ck-powered-by-balloon[class*="position_border"] {
+    border: none !important;
+}
+.ck.ck-balloon-panel.ck-powered-by-balloon .ck.ck-powered-by {
+    display: none !important;
+    border: none;
+}
+
+.editor-container-general {
+    --ck-border-radius: 0;
+    --ck-focus-ring: none;
+    --ck-powered-by-border-color: transparent;
+    --ck-color-focus-border: transparent;
+    --ck-color-toolbar-border: transparent;
+    --ck-color-editor-border: transparent;
+    --ck-color-base-border: transparent;
+}
+
+.editor-container-readOnly {
+    --ck-color-base-background: #e9ecef;
 }
 
 .ck-content h3.category {
@@ -179,7 +220,8 @@
 }
 
 .cm-editor.cm-focused {
-    border: 1px solid #007bff !important;
+    border: 1px solid $sal-gold !important;
+    box-shadow: 0 0 0 0.25rem rgba($sal-darkgold, 0.25);
     outline: none !important;
     padding: 2px;
     border-radius: 4px;

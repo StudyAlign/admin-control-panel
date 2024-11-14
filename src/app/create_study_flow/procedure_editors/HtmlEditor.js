@@ -239,7 +239,7 @@ function HtmlEditor({ value, onChange }) {
 
 	return (
 		<div className="main-container">
-			<div className="editor-container editor-container_classic-editor editor-container_include-style" ref={editorContainerRef}>
+			<div className="editor-container-general editor-container editor-container_classic-editor editor-container_include-style" ref={editorContainerRef}>
 				<div className="editor-container__editor">
 					<div ref={editorRef}>
 						{isLayoutReady && (

@@ -73,7 +73,6 @@ export default function StudyBox(props) {
                         <span className="label"><span className="icon"><CalendarRangeFill /></span> Date</span>
                         <span className="data"> {reformatDate(study.startDate) + " - " + reformatDate(study.endDate)} </span>
                     </span>
-                    <br/>
                     <span className="study-info">
                         <span className="label"><span className="icon"><PeopleFill/></span> Participants</span>
                         <span className="data"> {doneParticipants + " / " + participants} </span>
