@@ -208,10 +208,6 @@
     cursor: text;
 }
 
-.json-editor-wrapper.read-only {
-    background-color: #e9ecef;
-}
-
 .cm-editor {
     border: 1px solid #a6a6a6 !important;
     outline: none !important;
@@ -219,10 +215,40 @@
     border-radius: 4px;
 }
 
+.cm-editor ::selection {
+    background: grey !important;
+    background-color: grey !important;
+    caret-color: grey !important;
+    color: grey !important;
+}
+
+
 .cm-editor.cm-focused {
     border: 1px solid $sal-gold !important;
     box-shadow: 0 0 0 0.25rem rgba($sal-darkgold, 0.25);
     outline: none !important;
     padding: 2px;
     border-radius: 4px;
+}
+
+.cm-selectionMatch {
+    background-color: rgba($sal-gold, 0.5) !important;
+}
+
+.json-editor-wrapper.read-only {
+    .cm-editor {
+        background-color: #e9ecef !important;
+    }
+
+    .cm-gutters {
+        background-color: #e9ecef !important;
+    }
+
+    .cm-activeLineGutter {
+        background-color: #e9ecef !important;
+    }
+
+    .cm-activeLine {
+        background-color: #e9ecef !important;
+    }
 }
