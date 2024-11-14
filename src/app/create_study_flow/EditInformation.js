@@ -12,6 +12,8 @@ import {
     addParticipants
 } from "../../redux/reducers/studySlice";
 
+import HtmlEditor from "./procedure_editors/HtmlEditor";
+
 import LoadingScreen from "../../components/LoadingScreen";
 import StudyCreationLayout, { CreationSteps, StudyStatus } from "./navigation_logic/StudyCreationLayout";
 
@@ -75,12 +77,12 @@ export default function EditInformation(props) {
         setAmountParticipants(event.target.value)
     }
 
-    const handleDescription = (event) => {
-        setDescription(event.target.value)
+    const handleDescription = (_, value) => {
+        setDescription(value)
     }
 
-    const handleConsent = (event) => {
-        setConsent(event.target.value)
+    const handleConsent = (_, value) => {
+        setConsent(value)
     }
 
     const handleSubmit = async (event) => {
@@ -150,14 +152,14 @@ export default function EditInformation(props) {
                     <Row>
                         <Form.Group className="mb-3" controlId="formDescription">
                             <Form.Label>Description</Form.Label>
-                            <Form.Control required type="text" as="textarea" rows={4} placeholder="Description" value={description} onChange={handleDescription}/>
+                            <HtmlEditor value={description} onChange={(value) => handleDescription('description', value)}/>
                         </Form.Group>
                     </Row>
 
                     <Row>
                         <Form.Group className="mb-3" controlId="formConsent">
                             <Form.Label>Consent</Form.Label>
-                            <Form.Control required type="text" as="textarea" rows={4} placeholder="Consent" value={consent} onChange={handleConsent}/>
+                            <HtmlEditor value={consent} onChange={(value) => handleConsent('consent', value)}/>
                         </Form.Group>
                     </Row>
 
