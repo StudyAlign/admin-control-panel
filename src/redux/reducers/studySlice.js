@@ -332,6 +332,9 @@ export const studySlice = createSlice({
         resetStudyExport: (state, _action) => {
             state.studyExport = null
         },
+        resetStudies: (state, _action) => {
+            state.studies = null
+        }
     },
     extraReducers: (builder) => {
         builder

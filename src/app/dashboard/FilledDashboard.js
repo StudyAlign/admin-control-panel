@@ -14,9 +14,9 @@ import {
 } from "react-bootstrap";
 import { useNavigate } from "react-router";
 
-import { STATES } from "../study_overview/StudyOverviewLayout";
-
 import StudyBox from "./StudyBox";
+
+import { STATES } from "../study_overview/StudyOverviewLayout";
 
 import "./Dashboard.scss";
 import {CalendarRange, FunnelFill} from "react-bootstrap-icons";
@@ -24,16 +24,19 @@ import {CalendarRange, FunnelFill} from "react-bootstrap-icons";
 export default function FilledDashboard(props) {
 
     const STUDY_ENUM = {
-        RUNNING: 'running',
-        FINISHED_DONE: 'finished_done',
-        FINISHED_FUTURE: 'finished_future',
-        SETUP_UNFINISHED: 'setup_unfinished'
+        RECENT: 'recent',
+        ALL: 'all',
+        RUNNING: STATES.RUNNING,
+        FUTURE: 'future',
+        CLOSED: STATES.FINISHED,
+        SETUP_UNFINISHED: STATES.SETUP
     }
 
     const STUDY_LABELS = {
+        ALL: 'All Studies',
         RUNNING: 'Open Studies',
-        FINISHED_DONE: 'Closed Studies [Done]',
-        FINISHED_FUTURE: 'Closed Studies [Future]',
+        FUTURE: 'Future Studies',
+        CLOSED: 'Closed Studies',
         SETUP_UNFINISHED: 'Setup Not Finished'
     }
 
@@ -46,14 +49,17 @@ export default function FilledDashboard(props) {
         setExpanded(false)
 
         switch (eventKey) {
+            case STUDY_ENUM.ALL:
+                setActiveLabel(STUDY_LABELS.ALL)
+                break
             case STUDY_ENUM.RUNNING:
                 setActiveLabel(STUDY_LABELS.RUNNING)
                 break
-            case STUDY_ENUM.FINISHED_DONE:
-                setActiveLabel(STUDY_LABELS.FINISHED_DONE)
+            case STUDY_ENUM.FUTURE:
+                setActiveLabel(STUDY_LABELS.FUTURE)
                 break
-            case STUDY_ENUM.FINISHED_FUTURE:
-                setActiveLabel(STUDY_LABELS.FINISHED_FUTURE)
+            case STUDY_ENUM.CLOSED:
+                setActiveLabel(STUDY_LABELS.CLOSED)
                 break
             case STUDY_ENUM.SETUP_UNFINISHED:
                 setActiveLabel(STUDY_LABELS.SETUP_UNFINISHED)
@@ -83,53 +89,67 @@ export default function FilledDashboard(props) {
         event.preventDefault()
         navigate("/import")
     }
-
-    let running_studies = []
-    let finished_done_studies = []
-    let finished_future_studies = []
-    let recent_studies = []
-    let setup_unfinished_studies = []
+    
+    const study_dict = {
+        [STUDY_ENUM.RECENT]: [],
+        [STUDY_ENUM.ALL]: [],
+        [STUDY_ENUM.RUNNING]: [],
+        [STUDY_ENUM.FUTURE]: [],
+        [STUDY_ENUM.CLOSED]: [],
+        [STUDY_ENUM.SETUP_UNFINISHED]: []
+    }
 
     for (let s of props.studies) {
-        // TODO how to declare which (and how many) studies are shown as boxes
+
         const study = <Row key={s.id}> <NavLink onClick={(event) => handleClickStudyLink(event, s.id)}> {s.name} </NavLink> </Row>
-        if(recent_studies.length < max_amount_boxes && s.state !== STATES.SETUP) {
-            recent_studies.push(
-                <Col key={s.id} md={4}> <StudyBox study={s}/> </Col>
-            )
+
+        if(s.state !== STUDY_ENUM.SETUP_UNFINISHED) {
+
+            study_dict[STUDY_ENUM.ALL].push(study)
+
+            // recent = first studies in backend order
+            if(study_dict[STUDY_ENUM.RECENT].length < max_amount_boxes) {
+                study_dict[STUDY_ENUM.RECENT].push(
+                    <Col key={s.id} md={4}> <StudyBox study={s}/> </Col>
+                )
+            }
+
+            if (s.state === STUDY_ENUM.RUNNING) {
+                study_dict[STUDY_ENUM.RUNNING].push(study)
+            }
+
+            if (s.state === STUDY_ENUM.CLOSED) {
+                study_dict[STUDY_ENUM.CLOSED].push(study)
+            }
+
+            if (new Date(s.startDate.split('T')[0]) > new Date()) {
+                study_dict[STUDY_ENUM.FUTURE].push(study)
+            }
+
+        } else {
+            study_dict[STUDY_ENUM.SETUP_UNFINISHED].push(study)
         }
-        else {
-            if(s.state === STATES.RUNNING) {
-                running_studies.push(study)
-            }
-            else if(s.state === STATES.FINISHED) {
-                if (new Date(s.startDate.split('T')[0]) > new Date()) {
-                    finished_future_studies.push(study)
-                } else {
-                    finished_done_studies.push(study)
-                }
-            }
-            else {
-                setup_unfinished_studies.push(study)
-            }
-        }
+        
     }
 
     const renderStudies = () => {
         let studiesList = null
 
         switch (activeStudyType) {
+            case STUDY_ENUM.ALL:
+                studiesList = study_dict[STUDY_ENUM.ALL]
+                break
             case STUDY_ENUM.RUNNING:
-                studiesList = running_studies
+                studiesList = study_dict[STUDY_ENUM.RUNNING]
                 break
-            case STUDY_ENUM.FINISHED_DONE:
-                studiesList = finished_done_studies
+            case STUDY_ENUM.FUTURE:
+                studiesList = study_dict[STUDY_ENUM.FUTURE]
                 break
-            case STUDY_ENUM.FINISHED_FUTURE:
-                studiesList = finished_future_studies
+            case STUDY_ENUM.CLOSED:
+                studiesList = study_dict[STUDY_ENUM.CLOSED]
                 break
             case STUDY_ENUM.SETUP_UNFINISHED:
-                studiesList = setup_unfinished_studies
+                studiesList = study_dict[STUDY_ENUM.SETUP_UNFINISHED]
                 break
         }
 
@@ -150,7 +170,7 @@ export default function FilledDashboard(props) {
                         </Row>
                         <Col lg={9}>
                             <Row className="g-2">
-                                {recent_studies}
+                                {study_dict[STUDY_ENUM.RECENT]}
                             </Row>
                         </Col>
 
@@ -159,17 +179,21 @@ export default function FilledDashboard(props) {
                             <Navbar expand={false} className="custom-navbar" expanded={expanded}>
                                 <Navbar.Brand>{activeLabel}</Navbar.Brand>
                                 <NavDropdown align="end" title={<FunnelFill />} id="custom-navbar-dropdown">
+                                    <NavDropdown.Item active={activeStudyType === STUDY_ENUM.ALL}
+                                                      onClick={() => handleSelect(STUDY_ENUM.ALL)}>
+                                        {STUDY_LABELS.ALL}
+                                    </NavDropdown.Item>
                                     <NavDropdown.Item active={activeStudyType === STUDY_ENUM.RUNNING}
                                                       onClick={() => handleSelect(STUDY_ENUM.RUNNING)}>
                                         {STUDY_LABELS.RUNNING}
                                     </NavDropdown.Item>
-                                    <NavDropdown.Item active={activeStudyType === STUDY_ENUM.FINISHED_DONE}
-                                                      onClick={() => handleSelect(STUDY_ENUM.FINISHED_DONE)}>
-                                        {STUDY_LABELS.FINISHED_DONE}
+                                    <NavDropdown.Item active={activeStudyType === STUDY_ENUM.FUTURE}
+                                                      onClick={() => handleSelect(STUDY_ENUM.FUTURE)}>
+                                        {STUDY_LABELS.FUTURE}
                                     </NavDropdown.Item>
-                                    <NavDropdown.Item  active={activeStudyType === STUDY_ENUM.FINISHED_FUTURE}
-                                                       onClick={() => handleSelect(STUDY_ENUM.FINISHED_FUTURE)}>
-                                        {STUDY_LABELS.FINISHED_FUTURE}
+                                    <NavDropdown.Item  active={activeStudyType === STUDY_ENUM.CLOSED}
+                                                       onClick={() => handleSelect(STUDY_ENUM.CLOSED)}>
+                                        {STUDY_LABELS.CLOSED}
                                     </NavDropdown.Item>
                                     <NavDropdown.Item active={activeStudyType === STUDY_ENUM.SETUP_UNFINISHED}
                                                       onClick={() => handleSelect(STUDY_ENUM.SETUP_UNFINISHED)}>

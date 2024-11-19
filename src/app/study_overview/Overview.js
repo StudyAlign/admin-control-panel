@@ -68,6 +68,10 @@ export default function Overview(props) {
                     <td> {study.description} </td>
                 </tr>
                 <tr>
+                    <td className="content-name"> Consent: </td>
+                    <td> {study.consent} </td>
+                </tr>
+                <tr>
                     <td className="content-name"> Status: </td>
                     <td> {getStatus()} {getStudyIsOver()} </td>
                 </tr>
