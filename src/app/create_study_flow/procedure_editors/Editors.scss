@@ -56,13 +56,54 @@
 }
 
 .editor-container-general {
-    --ck-border-radius: 0;
-    --ck-focus-ring: none;
-    --ck-powered-by-border-color: transparent;
-    --ck-color-focus-border: transparent;
-    --ck-color-toolbar-border: transparent;
-    --ck-color-editor-border: transparent;
-    --ck-color-base-border: transparent;
+    --ck-border-radius: 0 !important;
+    --ck-focus-ring: 0.5px solid $sal-gold !important;
+    --ck-focus-outer-shadow: 0 0 0 0.25rem rgba($sal-darkgold, 0.25) !important;
+    --ck-powered-by-border-color: transparent !important;
+    --ck-color-focus-border: $sal-gold !important;
+    --ck-color-toolbar-border: transparent !important;
+    --ck-color-editor-border: transparent !important;
+    --ck-color-base-border: transparent !important;
+}
+
+.ck {
+    --ck-focus-ring: 0.5px solid #{$sal-gold} !important;
+    --ck-focus-outer-shadow: 0 0 0 0.25rem rgba(#{$sal-darkgold}, 0.25) !important;
+    --ck-color-button-on-color: #{$sal-darkgold} !important;
+    --ck-color-focus-outer-shadow: #{$sal-gold} !important;
+    --ck-color-base-active: #{$sal-gold} !important;
+    --ck-color-base-active-focus: #{$sal-gold} !important;
+    --ck-color-focus-border: #{$sal-gold} !important;
+    --ck-color-focus-outer-geometry: #{$sal-gold} !important;
+    --ck-color-button-on-hover-background: rgba(#{$sal-darkgold}, 0.25) !important;
+    --ck-color-button-default-hover-background: rgba(#{$sal-darkgold}, 0.25) !important;
+    --ck-color-button-on-background: rgba(#{$sal-gold}, 0.25) !important;
+    --ck-color-button-default-active-background: rgba(#{$sal-darkgold}, 0.25) !important;
+    //--ck-color-button-default-active-border: #{$sal-gold} !important;
+    --ck-color-button-on-active-background: rgba(#{$sal-gold}, 0.5) !important;
+    //--ck-color-button-on-active-border: rgba(#{$sal-darkgold}, 0.5) !important;
+    //--ck-color-color-grid-check-icon: #{$sal-darkgold} !important;
+    //--ck-color-base-background: #{$sal-gold} !important;
+}
+
+.ck.ck-editor__editable.ck-focused:not(.ck-editor__nested-editable) {
+    // just border top in grey
+    border-top: 0.5px solid #a6a6a6 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+.ck ck-input:focus,
+.ck ck-input:focus-visible,
+.ck ck-input:focus-within {
+    // border gold
+    --ck-focus-ring: 0.5px solid $sal-gold !important;
+    border: 0.5px solid $sal-gold !important;
+    border-color: $sal-gold !important;
+    // shadow gold
+    box-shadow: 0 0 0 0.25rem rgba($sal-gold, 0.25) !important;
 }
 
 .editor-container-readOnly {
@@ -239,6 +280,17 @@
 
 .cm-selectionMatch {
     background-color: rgba($sal-gold, 0.5) !important;
+}
+
+.ck .ck-insert-table-dropdown-grid-box.ck-on {
+    border-color: $sal-darkgold !important;
+    color: rgba($sal-gold, 0.5) !important;
+    background: rgba($sal-gold, 0.5) !important;
+    background-color: rgba($sal-gold, 0.5) !important;
+}
+
+.ck .ck-insert-table-dropdown-grid-box {
+    border: 1px solid $sal-darkgold !important;
 }
 
 .json-editor-wrapper.read-only {
