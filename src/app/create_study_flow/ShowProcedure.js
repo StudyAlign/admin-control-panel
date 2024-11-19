@@ -111,7 +111,7 @@ function ShowProdecureObject(props) {
                 <Form.Group className="mb-3" controlId="config">
                     <Form.Label>Config</Form.Label>
                     <JsonEditorReadOnly
-                        value={JSON.stringify(props.content.config)}
+                        value={props.content.config}
                     />
                 </Form.Group>
             </Form>

@@ -89,7 +89,7 @@ function TextPageForm(props) {
             const errorUpdate = {}
             for (let key in props.content) {
                 if (key in errorObj) {
-                    !props.content[key] ? errorUpdate[key] = true : errorUpdate[key] = false
+                    errorUpdate[key] = switch_case(key, props.content[key], true)
                 }
             }
             setErrorObj(errorUpdate)
@@ -98,13 +98,16 @@ function TextPageForm(props) {
 
     const onChange = (id, value) => {
         props.editProcedureStep(id, value)
+        switch_case(id, value)
+    }
 
-        // switch validation
+    const switch_case = (id, value, should_return = false) => {
         switch (id) {
             case 'title':
+                if (should_return) return !value
                 !value ? setErrorObj({...errorObj, title: true}) : setErrorObj({...errorObj, title: false})
-                break
             case 'body':
+                if (should_return) return isBodyEmpty(value)
                 isBodyEmpty(value) ? setErrorObj({...errorObj, body: true}) : setErrorObj({...errorObj, body: false})
                 break
         }
@@ -147,7 +150,7 @@ function ConditionForm(props) {
             const errorUpdate = {}
             for (let key in props.content) {
                 if (key in errorObj) {
-                    !props.content[key] ? errorUpdate[key] = true : errorUpdate[key] = false
+                    errorUpdate[key] = switch_case(key, props.content[key], true)
                 }
             }
             setErrorObj(errorUpdate)
@@ -156,15 +159,27 @@ function ConditionForm(props) {
 
     const onChange = (id, value) => {
         props.editProcedureStep(id, value)
+        switch_case(id, value)        
+    }
 
+    const switch_case = (id, value, should_return = false) => {
         switch (id) {
             case 'name':
+                if (should_return) return !value
                 !value ? setErrorObj({...errorObj, name: true}) : setErrorObj({...errorObj, name: false})
                 break
             case 'config':
-                !value ? setErrorObj({...errorObj, config: true}) : setErrorObj({...errorObj, config: false})
+                try {
+                    JSON.parse(value)
+                    if (should_return) return false
+                    setErrorObj({...errorObj, config: false})
+                } catch (error) {
+                    if (should_return) return true
+                    setErrorObj({...errorObj, config: true})
+                }
                 break
             case 'url':
+                if (should_return) return !value
                 !value ? setErrorObj({...errorObj, url: true}) : setErrorObj({...errorObj, url: false})
                 break
         }
@@ -181,16 +196,15 @@ function ConditionForm(props) {
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="config">
-                <Form.Label className={(errorObj.config || props.error) ? styles.invalidLabel : ''}>
-                    {(errorObj.config || props.error) ? 'Config*' : 'Config'}
+                <Form.Label className={errorObj.config ? styles.invalidLabel : ''}>
+                    {errorObj.config ? 'Config*' : 'Config'}
                 </Form.Label>
                 <JsonEditor
                     id="config"
                     value={props.content.config}
                     onChange={onChange}
                 />
-                {props.error && <div style={{display:"flex"}} className="invalid-feedback">Not a valid JSON.</div>}
-                {(errorObj.config && !props.error) && <div style={{ display: "flex" }} className="invalid-feedback"> Config can't be empty </div>}
+                {errorObj.config && <div style={{display:"flex"}} className="invalid-feedback">Not a valid JSON.</div>}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="url">
@@ -213,7 +227,7 @@ function QuestionnaireForm(props) {
             const errorUpdate = {}
             for (let key in props.content) {
                 if (key in errorObj) {
-                    !props.content[key] ? errorUpdate[key] = true : errorUpdate[key] = false
+                    errorUpdate[key] = switch_case(key, props.content[key], true)
                 }
             }
             setErrorObj(errorUpdate)
@@ -254,11 +268,17 @@ function QuestionnaireForm(props) {
             props.editProcedureStep(id, value)
         }
 
+        switch_case(id, value)
+    }
+
+    const switch_case = (id, value, should_return = false) => {
         switch (id) {
             case 'url':
+                if (should_return) return !value
                 !value ? setErrorObj({...errorObj, url: true}) : setErrorObj({...errorObj, url: false})
                 break
             case 'system':
+                if (should_return) return !value
                 !value ? setErrorObj({...errorObj, system: true}) : setErrorObj({...errorObj, system: false})
                 break
         }
@@ -302,7 +322,7 @@ function PauseForm(props) {
             const errorUpdate = {}
             for (let key in props.content) {
                 if (key in errorObj) {
-                    !props.content[key] ? errorUpdate[key] = true : errorUpdate[key] = false
+                    errorUpdate[key] = switch_case(key, props.content[key], true)
                 }
             }
             setErrorObj(errorUpdate)
@@ -311,19 +331,32 @@ function PauseForm(props) {
 
     const onChange = (id, value) => {
         props.editProcedureStep(id, value)
+        switch_case(id, value)
+    }
 
+    const switch_case = (id, value, should_return = false) => {
         switch (id) {
             case 'title':
+                if (should_return) return !value
                 !value ? setErrorObj({...errorObj, title: true}) : setErrorObj({...errorObj, title: false})
                 break
             case 'body':
+                if (should_return) return isBodyEmpty(value)
                 isBodyEmpty(value) ? setErrorObj({...errorObj, body: true}) : setErrorObj({...errorObj, body: false})
                 break
             case 'proceed_body':
+                if (should_return) return isBodyEmpty(value)
                 isBodyEmpty(value) ? setErrorObj({...errorObj, proceed_body: true}) : setErrorObj({...errorObj, proceed_body: false})
                 break
             case 'config':
-                !value ? setErrorObj({...errorObj, config: true}) : setErrorObj({...errorObj, config: false})
+                try {
+                    JSON.parse(value)
+                    if (should_return) return false
+                    setErrorObj({...errorObj, config: false})
+                } catch (error) {
+                    if (should_return) return true
+                    setErrorObj({...errorObj, config: true})
+                }
                 break
         }
     }
@@ -370,16 +403,15 @@ function PauseForm(props) {
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="config">
-                <Form.Label className={(errorObj.config || props.error) ? styles.invalidLabel : ''}>
-                    {(errorObj.config || props.error) ? 'Config*' : 'Config'}
+                <Form.Label className={errorObj.config ? styles.invalidLabel : ''}>
+                    {errorObj.config ? 'Config*' : 'Config'}
                 </Form.Label>
                 <JsonEditor
                     id="config"
                     value={props.content.config}
                     onChange={onChange}
                 />
-                {props.error && <div style={{display:"flex"}} className="invalid-feedback">Not a valid JSON.</div>}
-                {(errorObj.config && !props.error) && <div style={{ display: "flex" }} className="invalid-feedback"> Config can't be empty </div>}
+                {errorObj.config && <div style={{display:"flex"}} className="invalid-feedback">Not a valid JSON.</div>}
             </Form.Group>
         </Form>
     )
@@ -731,10 +763,6 @@ const ProcedureObject = forwardRef((props, ref) => {
             case ProcedureTypes.Questionnaire:
                 return <QuestionnaireForm error={updateError} content={content} editProcedureStep={editProcedureStep}/>
             case ProcedureTypes.Pause:
-                // if content.config is not a string, convert it to a string
-                if (typeof content.config !== "string") {
-                    content.config = JSON.stringify(content.config)
-                }
                 return <PauseForm error={updateError} content={content} editProcedureStep={editProcedureStep}/>
         }
     }
