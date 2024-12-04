@@ -20,6 +20,7 @@ import {
     updateProcedure,
     updateStudy,
     getStudySetupInfo,
+    selectStudySetupInfo,
     getProcedureConfigOverview,
     selectStudyProcedureOverview
 } from "../../redux/reducers/studySlice";
@@ -172,6 +173,7 @@ export default function CreateProcedure(props) {
 
     const procedureConfig = useSelector(selectStudyProcedure)
     const procedureConfigOverview = useSelector(selectStudyProcedureOverview)
+    const studySetupInfo = useSelector(selectStudySetupInfo)
 
     useEffect(() => {
         Promise.all([
@@ -1017,7 +1019,11 @@ export default function CreateProcedure(props) {
         }))
         await dispatch(getStudySetupInfo(study_id))
         setEmptyOrderListener(false)
-        navigate("/create/" + study_id + "/integrations")
+        if (studySetupInfo.state === "setup") {
+            navigate("/create/" + study_id + "/integrations")
+        } else {
+            navigate("/edit/" + study_id + "/integrations")
+        }
     }
 
     // Navigate currently deactivated
