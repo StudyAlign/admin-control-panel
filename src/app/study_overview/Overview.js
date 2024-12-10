@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button, Tabs, Tab } from "react-bootstrap";
+import { useNavigate } from "react-router";
 import { useDispatch} from "react-redux";
 
 import { STATES } from "./StudyOverviewLayout";
@@ -19,7 +20,10 @@ export default function Overview(props) {
     const [participants, setParticipants] = useState("loading...")
     const [doneParticipants, setDoneParticipants] = useState("loading...")
     const [isClicked, setIsClicked] = useState(false)
+
     const dispatch = useDispatch()
+    const navigate = useNavigate()
+
     const study = props.study
     const collab_url = url + study.id + "/"
 
@@ -33,23 +37,37 @@ export default function Overview(props) {
     }, [])
 
     const handleCopy = () => {
-        navigator.clipboard.writeText(collab_url);
-        setIsClicked(true);
-        setTimeout(() => setIsClicked(false), 500); // Rücksetzen nach 500ms
+        navigator.clipboard.writeText(collab_url)
+        setIsClicked(true)
+        setTimeout(() => setIsClicked(false), 500)
     }
 
     const handleStudyActive = async (event, state) => {
         event.preventDefault()
-        await dispatch(updateStudy({studyId: study.id, study: {"state": state}}));
-        await dispatch(getStudy(study.id));
+        await dispatch(updateStudy({studyId: study.id, study: {"state": state}}))
+        await dispatch(getStudy(study.id))
+    }
+
+    const handleEdit = async (event) => {
+        event.preventDefault()
+        await dispatch(updateStudy({
+            "studyId": study.id,
+            "study": {
+                "current_setup_step": "study"
+            }
+        }))
+        await dispatch(getStudySetupInfo(study.id))
+        navigate("/create/" + study.id + "/information")
     }
 
     const getButton = (state) => {
-        if (state === STATES.RUNNING) {
-            return <Button onClick={(event) => handleStudyActive(event, "finished")}> Close Study </Button>
-        }
-        else if (state === STATES.FINISHED) {
-            return <Button onClick={(event) => handleStudyActive(event, "running")}> Open Study </Button>
+        switch (state) {
+            case STATES.RUNNING:
+                return <Button onClick={(event) => handleStudyActive(event, "finished")}> Close Study </Button>
+            case STATES.FINISHED:
+                return <Button onClick={(event) => handleStudyActive(event, "running")}> Open Study </Button>
+            case STATES.SETUP:
+                return <Button onClick={(event) => handleEdit(event)}> Finish Setup </Button>
         }
     }
 
@@ -79,6 +97,10 @@ export default function Overview(props) {
                             <tr>
                                 <td className="content-name"> Status: </td>
                                 <td> {getStatus()} {getStudyIsOver()} </td>
+                            </tr>
+                            <tr>
+                                <td className="content-name"> Private Study: </td>
+                                <td> {study.invite_only ? "Yes" : "No"} </td>
                             </tr>
                             <tr>
                                 <td className="content-name"> Start Date: </td>

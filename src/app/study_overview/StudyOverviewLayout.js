@@ -12,6 +12,7 @@ import SidebarLayout from "./SidebarLayout";
 import Overview from "./Overview";
 import Procedure from "./Procedure";
 import InteractionData from "./InteractionData";
+import Participants from "./Participants";
 import LoadingScreen from "../../components/LoadingScreen";
 
 import {
@@ -78,6 +79,7 @@ export default function StudyOverviewLayout() {
             dispatch(studySlice.actions.resetStudyExport())
             dispatch(studySlice.actions.resetStudySetupInfo())
             dispatch(studySlice.actions.resetProcedureOverview())
+            dispatch(studySlice.actions.resetParticipants())
             // Interaction Data
             dispatch(interactionSlice.actions.resetAllInteractions())
         }
@@ -135,6 +137,8 @@ export default function StudyOverviewLayout() {
         }
         else if(page === 'data') {
             content = <InteractionData/>
+        } else if(page === 'participants') {
+            content = <Participants/>
         }
         else {
             content = "Error - Page not found"

@@ -32,6 +32,7 @@ export default function EditInformation(props) {
     const [amountParticipants, setAmountParticipants] = useState('')
     const [description, setDescription] = useState('')
     const [consent, setConsent] = useState('')
+    const [privateStudy, setPrivateStudy] = useState(false)
 
     const endDateRef = useRef('')
     const amountParticipantsRef = useRef('')
@@ -54,6 +55,7 @@ export default function EditInformation(props) {
             amountParticipantsRef.current = studySetupInfo.planned_number_participants
             setDescription(study.description)
             setConsent(study.consent)
+            setPrivateStudy(study.invite_only)
         }
     }, [study, studySetupInfo])
 
@@ -75,6 +77,10 @@ export default function EditInformation(props) {
 
     const handleParticipants = (event) => {
         setAmountParticipants(event.target.value)
+    }
+
+    const handlePrivateStudy = (event) => {
+        setPrivateStudy(event.target.checked)
     }
 
     const handleDescription = (_, value) => {
@@ -99,6 +105,7 @@ export default function EditInformation(props) {
                 "name": title,
                 "startDate": startDate + "T15:08:50.161Z",
                 "endDate": endDate + "T15:08:50.161Z",
+                "invite_only": privateStudy,
                 "description": description,
                 "consent": consent,
                 "planned_number_participants": amountParticipants,
@@ -143,6 +150,27 @@ export default function EditInformation(props) {
                     </Row>
 
                     <Row>
+                        <Form.Group as={Row} className="mb-3 align-items-center" controlId="formPrivateStudy">
+                            <Form.Label column sm={2}>Private Study</Form.Label>
+                            <Col sm={10}>
+                                <Form.Check
+                                    type="checkbox"
+                                    name="is_active"
+                                    checked={privateStudy}
+                                    onChange={handlePrivateStudy}
+                                    className="me-2"
+                                />
+                            </Col>
+                        </Form.Group>
+                    </Row>
+
+                    <Row>
+                        {/* <Col xs="auto">
+                            <Form.Group className="mb-3" controlId="formPrivateStudy">
+                                <Form.Label>Private Study</Form.Label>
+                                <Form.Check type="checkbox" checked={privateStudy} onChange={handlePrivateStudy} />
+                            </Form.Group>
+                        </Col> */}
                         <Form.Group className="mb-3" controlId="formParticipants">
                             <Form.Label>Number of Participants</Form.Label>
                             <Form.Control min={disabled ? amountParticipantsRef.current : 0} required type="number" placeholder="Number of Participants" value={amountParticipants} onChange={handleParticipants}/>

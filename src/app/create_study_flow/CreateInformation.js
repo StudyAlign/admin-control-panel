@@ -24,6 +24,7 @@ export default function CreateInformation() {
     const [amountParticipants, setAmountParticipants] = useState('')
     const [description, setDescription] = useState('')
     const [consent, setConsent] = useState('')
+    const [privateStudy, setPrivateStudy] = useState(false)
 
     const [created, setCreated] = useState(false)
 
@@ -45,6 +46,10 @@ export default function CreateInformation() {
         setAmountParticipants(event.target.value)
     }
 
+    const handlePrivateStudy = (event) => {
+        setPrivateStudy(event.target.checked)
+    }
+
     const handleDescription = (_, value) => {
         setDescription(value)
     }
@@ -61,7 +66,7 @@ export default function CreateInformation() {
             "endDate": endDate  + "T00:00:00.000Z",
             "state": STATES.SETUP, // "setup", "running", "finished"
             "owner_id": auth.user.id,
-            "invite_only": false, // TODO how to indicate if invite_only or not? Checkbox?
+            "invite_only": privateStudy,
             "description": description,
             "consent": consent,
             "planned_number_participants": amountParticipants,
@@ -106,6 +111,21 @@ export default function CreateInformation() {
                                 <Form.Control required type="date" placeholder="End Date" min={startDate} value={endDate} onChange={handleEndDate}/>
                             </Form.Group>
                         </Col>
+                    </Row>
+
+                    <Row>
+                        <Form.Group as={Row} className="mb-3 align-items-center" controlId="formPrivateStudy">
+                            <Form.Label column sm={2}>Private Study</Form.Label>
+                            <Col sm={10}>
+                                <Form.Check
+                                    type="checkbox"
+                                    name="is_active"
+                                    checked={privateStudy}
+                                    onChange={handlePrivateStudy}
+                                    className="me-2"
+                                />
+                            </Col>
+                        </Form.Group>
                     </Row>
 
                     <Row>

@@ -32,6 +32,11 @@ export default function SidebarLayout(props){
         navigate("/study/"+study_id+"/data")
     }
 
+    const handleClickParticipants = (event) => {
+        event.preventDefault()
+        navigate("/study/"+study_id+"/participants")
+    }
+
     return (
         <>
             <Container fluid>
@@ -47,6 +52,9 @@ export default function SidebarLayout(props){
                             <Nav.Item>
                                 <Nav.Link className={getClassName("data")} onClick={handleClickData}>Interaction Data</Nav.Link>
                             </Nav.Item>
+                            <Nav.Item>
+                                <Nav.Link className={getClassName("participants")} onClick={handleClickParticipants}>Participants</Nav.Link>
+                            </Nav.Item>
                         </Nav>
                     </Col>
                     <Col id="page-content-wrapper">
@@ -59,5 +67,5 @@ export default function SidebarLayout(props){
                 </Row>
             </Container>
         </>
-    );
-};
+    )
+}
