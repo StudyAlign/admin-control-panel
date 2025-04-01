@@ -20,6 +20,7 @@ import {
     updateProcedure,
     updateStudy,
     getStudySetupInfo,
+    selectStudySetupInfo,
     getProcedureConfigOverview,
     selectStudyProcedureOverview
 } from "../../redux/reducers/studySlice";
@@ -172,6 +173,7 @@ export default function CreateProcedure(props) {
 
     const procedureConfig = useSelector(selectStudyProcedure)
     const procedureConfigOverview = useSelector(selectStudyProcedureOverview)
+    const studySetupInfo = useSelector(selectStudySetupInfo)
 
     useEffect(() => {
         Promise.all([
@@ -723,7 +725,7 @@ export default function CreateProcedure(props) {
                                     </DragHandleComponent>
                                     {!disabled &&
                                         <Button
-                                            className={styles.deleteButton}
+                                            className={styles.deleteButtonBlock}
                                             onClick={() => deleteProcedureObject(procedureObject.id)}
                                             variant="danger"
                                             size="sm"
@@ -927,20 +929,55 @@ export default function CreateProcedure(props) {
             const procedureObject = procedureObjectMapState.get(identifier)
             if (procedureObject === undefined) return
 
-            // TODO maybe change div content
             if (isGroup) {
+                ///console.log(procedureObject, procedureConfig)
+                let childrenContent = []
+                if(procedureObject.children.length > 0) {
+                    // get all children content
+                    for (let childId of procedureObject.children) {
+                        const childProcedureObject = procedureObjectMapState.get(childId)
+                        if(childProcedureObject){
+                            let showString = childProcedureObject.type.label
+                            switch (childProcedureObject.type.key) {
+                                case ProcedureTypes.TextPage.key:
+                                case ProcedureTypes.Pause.key:
+                                    if(childProcedureObject.content.title.length !== 0) showString = childProcedureObject.content.title + ` - ${showString}`
+                                    break
+                                case ProcedureTypes.Condition.key:
+                                    if(childProcedureObject.content.name.length !== 0) showString = childProcedureObject.content.name + ` - ${showString}`
+                                break
+                            }
+                            childrenContent.push(
+                                <div key={childId} className={styles.procedureElementInBlockGhost}>
+                                    {showString}
+                                </div>
+                            )
+                        }
+                    }
+                }
                 return (
                     <div className={classnames(styles.block, styles.ghost)}>
                         <div className={styles.heading}>
                             {procedureObject.type.label}
                         </div>
+                        {childrenContent.length > 0 ? childrenContent : null}
                     </div>
                 )
             }
-
+            
+            let showString = procedureObject.type.label
+            switch (procedureObject.type.key) {
+                case ProcedureTypes.TextPage.key:
+                case ProcedureTypes.Pause.key:
+                    if(procedureObject.content.title.length !== 0) showString = procedureObject.content.title + ` - ${showString}`
+                    break
+                case ProcedureTypes.Condition.key:
+                    if(procedureObject.content.name.length !== 0) showString = procedureObject.content.name + ` - ${showString}`
+                    break
+            }
             return (
                 <div className={classnames(styles.procedureElement, styles.ghost)}>
-                    {procedureObject.type.label + " - " + procedureObject.id}
+                    {showString}
                 </div>
             )
         },
@@ -982,7 +1019,11 @@ export default function CreateProcedure(props) {
         }))
         await dispatch(getStudySetupInfo(study_id))
         setEmptyOrderListener(false)
-        navigate("/create/" + study_id + "/integrations")
+        if (studySetupInfo.state === "setup") {
+            navigate("/create/" + study_id + "/integrations")
+        } else {
+            navigate("/edit/" + study_id + "/integrations")
+        }
     }
 
     // Navigate currently deactivated

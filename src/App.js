@@ -56,7 +56,7 @@ export default function App() {
                             <Route path="information"   element={<EditInformation status={StudyStatus.Creation}/>} />
                             <Route path="procedure"     element={<CreateProcedure status={StudyStatus.Creation}/>} />
                             <Route path="integrations"  element={<CreateIntegrations status={StudyStatus.Creation}/>} />
-                            <Route path="check"         element={<CreateCheck/>} />
+                            <Route path="check"         element={<CreateCheck status={StudyStatus.Creation}/>} />
                             <Route path="*"             element={<h1>ERROR</h1>} />
                         </Route>
 
@@ -64,7 +64,7 @@ export default function App() {
                             <Route path="information"   element={<EditInformation status={StudyStatus.Active}/>} />
                             <Route path="procedure"     element={<CreateProcedure status={StudyStatus.Active}/>} />
                             <Route path="integrations"  element={<CreateIntegrations status={StudyStatus.Active}/>} />
-                            <Route path="check"         element={<CreateCheck/>} />
+                            <Route path="check"         element={<CreateCheck status={StudyStatus.Active}/>} />
                             <Route path="*"             element={<h1>ERROR</h1>} />
                         </Route>
 

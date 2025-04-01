@@ -7,6 +7,9 @@ import { getProcedureConfigOverview, selectStudyProcedureOverview } from "../../
 
 import { ProcedureTypes } from "./ProcedureObject";
 
+import JsonEditorReadOnly from "./procedure_editors/JsonEditorReadOnly";
+import HtmlEditorReadOnly from "./procedure_editors/HtmlEditorReadOnly";
+
 import styles from "./CreateProcedure.module.scss";
 import "./CreateProcedure.scss";
 
@@ -28,7 +31,9 @@ function ShowProdecureObject(props) {
 
                 <Form.Group className="mb-3" controlId="body">
                     <Form.Label> Body </Form.Label>
-                    <Form.Control as="textarea" rows={3} value={props.content.body} readOnly/>
+                    <HtmlEditorReadOnly
+                        value={props.content.body}
+                    />
                 </Form.Group>
             </Form>
         )
@@ -45,7 +50,9 @@ function ShowProdecureObject(props) {
 
                 <Form.Group className="mb-3" controlId="config">
                     <Form.Label> Config </Form.Label>
-                    <Form.Control as="textarea" rows={3} value={props.content.config} readOnly/>
+                    <JsonEditorReadOnly
+                        value={props.content.config}
+                    />
                 </Form.Group>
 
                 <Form.Group className="mb-3" controlId="url">
@@ -84,12 +91,16 @@ function ShowProdecureObject(props) {
 
                 <Form.Group className="mb-3" controlId="body">
                     <Form.Label> Body </Form.Label>
-                    <Form.Control as="textarea" rows={3} value={props.content.body} readOnly/>
+                    <HtmlEditorReadOnly
+                        value={props.content.body}
+                    />
                 </Form.Group>
 
                 <Form.Group className="mb-3" controlId="proceed_body">
                     <Form.Label> Proceed Body </Form.Label>
-                    <Form.Control as="textarea" rows={3} value={props.content.proceed_body} readOnly/>
+                    <HtmlEditorReadOnly
+                        value={props.content.proceed_body}
+                    />
                 </Form.Group>
 
                 <Form.Group className="mb-3" controlId="type">
@@ -98,8 +109,10 @@ function ShowProdecureObject(props) {
                 </Form.Group>
 
                 <Form.Group className="mb-3" controlId="config">
-                    <Form.Label> Config </Form.Label>
-                    <Form.Control as="textarea" rows={3} value={props.content.config} readOnly/>
+                    <Form.Label>Config</Form.Label>
+                    <JsonEditorReadOnly
+                        value={props.content.config}
+                    />
                 </Form.Group>
             </Form>
         )

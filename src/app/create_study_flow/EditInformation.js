@@ -12,6 +12,8 @@ import {
     addParticipants
 } from "../../redux/reducers/studySlice";
 
+import HtmlEditor from "./procedure_editors/HtmlEditor";
+
 import LoadingScreen from "../../components/LoadingScreen";
 import StudyCreationLayout, { CreationSteps, StudyStatus } from "./navigation_logic/StudyCreationLayout";
 
@@ -30,6 +32,7 @@ export default function EditInformation(props) {
     const [amountParticipants, setAmountParticipants] = useState('')
     const [description, setDescription] = useState('')
     const [consent, setConsent] = useState('')
+    const [privateStudy, setPrivateStudy] = useState(false)
 
     const endDateRef = useRef('')
     const amountParticipantsRef = useRef('')
@@ -52,6 +55,7 @@ export default function EditInformation(props) {
             amountParticipantsRef.current = studySetupInfo.planned_number_participants
             setDescription(study.description)
             setConsent(study.consent)
+            setPrivateStudy(study.invite_only)
         }
     }, [study, studySetupInfo])
 
@@ -75,12 +79,16 @@ export default function EditInformation(props) {
         setAmountParticipants(event.target.value)
     }
 
-    const handleDescription = (event) => {
-        setDescription(event.target.value)
+    const handlePrivateStudy = (event) => {
+        setPrivateStudy(event.target.checked)
     }
 
-    const handleConsent = (event) => {
-        setConsent(event.target.value)
+    const handleDescription = (_, value) => {
+        setDescription(value)
+    }
+
+    const handleConsent = (_, value) => {
+        setConsent(value)
     }
 
     const handleSubmit = async (event) => {
@@ -97,6 +105,7 @@ export default function EditInformation(props) {
                 "name": title,
                 "startDate": startDate + "T15:08:50.161Z",
                 "endDate": endDate + "T15:08:50.161Z",
+                "invite_only": privateStudy,
                 "description": description,
                 "consent": consent,
                 "planned_number_participants": amountParticipants,
@@ -141,6 +150,27 @@ export default function EditInformation(props) {
                     </Row>
 
                     <Row>
+                        <Form.Group as={Row} className="mb-3 align-items-center" controlId="formPrivateStudy">
+                            <Form.Label column sm={2}>Private Study</Form.Label>
+                            <Col sm={10}>
+                                <Form.Check
+                                    type="checkbox"
+                                    name="is_active"
+                                    checked={privateStudy}
+                                    onChange={handlePrivateStudy}
+                                    className="me-2"
+                                />
+                            </Col>
+                        </Form.Group>
+                    </Row>
+
+                    <Row>
+                        {/* <Col xs="auto">
+                            <Form.Group className="mb-3" controlId="formPrivateStudy">
+                                <Form.Label>Private Study</Form.Label>
+                                <Form.Check type="checkbox" checked={privateStudy} onChange={handlePrivateStudy} />
+                            </Form.Group>
+                        </Col> */}
                         <Form.Group className="mb-3" controlId="formParticipants">
                             <Form.Label>Number of Participants</Form.Label>
                             <Form.Control min={disabled ? amountParticipantsRef.current : 0} required type="number" placeholder="Number of Participants" value={amountParticipants} onChange={handleParticipants}/>
@@ -150,14 +180,14 @@ export default function EditInformation(props) {
                     <Row>
                         <Form.Group className="mb-3" controlId="formDescription">
                             <Form.Label>Description</Form.Label>
-                            <Form.Control required type="text" as="textarea" rows={4} placeholder="Description" value={description} onChange={handleDescription}/>
+                            <HtmlEditor value={description} onChange={(value) => handleDescription('description', value)}/>
                         </Form.Group>
                     </Row>
 
                     <Row>
                         <Form.Group className="mb-3" controlId="formConsent">
                             <Form.Label>Consent</Form.Label>
-                            <Form.Control required type="text" as="textarea" rows={4} placeholder="Consent" value={consent} onChange={handleConsent}/>
+                            <HtmlEditor value={consent} onChange={(value) => handleConsent('consent', value)}/>
                         </Form.Group>
                     </Row>
 

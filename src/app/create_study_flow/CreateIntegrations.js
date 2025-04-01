@@ -124,6 +124,7 @@ export default function CreateIntegrations(props) {
 
     const procedureConfig = useSelector(selectStudyProcedure)
     const procedureConfigOverview = useSelector(selectStudyProcedureOverview)
+    const studySetupInfo = useSelector(selectStudySetupInfo)
 
     useEffect(() => {
         dispatch(getProcedureConfig(study_id)).then((response) => {
@@ -151,7 +152,11 @@ export default function CreateIntegrations(props) {
             }
         }))
         await dispatch(getStudySetupInfo(study_id))
-        navigate("/create/" + study_id + "/check")
+        if (studySetupInfo.state === "setup") {
+            navigate("/create/" + study_id + "/check")
+        } else {
+            navigate("/edit/" + study_id + "/check")
+        }
     }
 
     const checkForQuestionnaires = () => {

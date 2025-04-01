@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { Container, Row, Col, Nav } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router";
 import {useDispatch, useSelector} from "react-redux";
+import { useLocation } from "react-router-dom";
 
 import { CreationSteps } from "./StudyCreationLayout";
 import {studySlice, updateStudy, getStudySetupInfo, selectStudySetupInfo} from "../../../redux/reducers/studySlice";
@@ -15,12 +16,11 @@ export default function SidebarLayout(props){
 
     const studySetupInfo = useSelector(selectStudySetupInfo)
 
-    console.log(studySetupInfo)
-
     const { setEmptyOrder, emptyOrderListener } = useContext(CreateProcedureContext)
 
     const { study_id } = useParams()
     const dispatch = useDispatch()
+    const location = useLocation()
     const navigate = useNavigate()
 
     const getClassName = (step) => {
@@ -33,22 +33,22 @@ export default function SidebarLayout(props){
 
     const handleNavigation = async (event, step, navTo) => {
         // return if the step is already selected
-        console.log(props.step + 1 === CreationOrder.indexOf(navTo))
         if (props.step + 1 === CreationOrder.indexOf(navTo)) {
             event.preventDefault()
             return
         }
-        // return if the order is empty
-        // if (props.step === CreationSteps.Procedure) {
-        //     await dispatch(studySlice.actions.resetProcedureOverview())
-        //     if(emptyOrderListener) {
-        //         event.preventDefault()
-        //         setEmptyOrder(true)
-        //         return
-        //     }
-        // }
 
-        // else update and navigate
+        // return if the order is empty
+        if (props.step === CreationSteps.Procedure) {
+            await dispatch(studySlice.actions.resetProcedureOverview())
+            if(emptyOrderListener) {
+                event.preventDefault()
+                setEmptyOrder(true)
+                return
+            }
+        }
+
+        // // else update and navigate
         // await dispatch(updateStudy({
         //     "studyId": study_id,
         //     "study": {
@@ -56,7 +56,9 @@ export default function SidebarLayout(props){
         //     }
         // }))
         // await dispatch(getStudySetupInfo(study_id))
-        navigate("/create/" + study_id + "/" + navTo)
+        
+        const path = location.pathname.split("/")
+        navigate("/" + path[path.length - 3] + "/" + study_id + "/" + navTo)
     }
 
     const getLink = (label, step, navStep, navTo) => {

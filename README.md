@@ -3,6 +3,7 @@
 Create a .env file in the root directory (on the same level as the package.json), with content as follows:
 
 `REACT_APP_STUDY_ALIGN_URL=https://hciaitools.uni-bayreuth.de/study-align-dev`
+`REACT_APP_STUDY_ALIGN_STUDY_FRONTEND_URL=https://hciaitools.uni-bayreuth.de/studies-dev/`
 
 This way, our dev instance of the backend will be used for the frontend development. After that, restart the frontend
 with `npm start`.

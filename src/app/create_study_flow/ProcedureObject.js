@@ -6,6 +6,9 @@ import { useDispatch} from "react-redux";
 
 import { CreateProcedureContext } from './CreateProcedure';
 
+import HtmlEditor from './procedure_editors/HtmlEditor';
+import JsonEditor from './procedure_editors/JsonEditor';
+
 import { createSingleProcedureConfigStep } from "../../redux/reducers/studySlice"
 import { createText, updateText } from "../../redux/reducers/textSlice";
 import { createCondition, updateCondition } from "../../redux/reducers/conditionSlice";
@@ -79,21 +82,60 @@ export const ProcedureTypes = {
 
 function TextPageForm(props) {
 
-    const onChange = (event) => {
-        event.preventDefault()
-        props.editProcedureStep(event.target.id, event.target.value)
+    const [errorObj, setErrorObj] = useState({title: false, body: false})
+
+    useEffect(() => {
+        if (props.error) {
+            const errorUpdate = {}
+            for (let key in props.content) {
+                if (key in errorObj) {
+                    errorUpdate[key] = switch_case(key, props.content[key], true)
+                }
+            }
+            setErrorObj(errorUpdate)
+        }
+    }, [props.error])
+
+    const onChange = (id, value) => {
+        props.editProcedureStep(id, value)
+        switch_case(id, value)
+    }
+
+    const switch_case = (id, value, should_return = false) => {
+        switch (id) {
+            case 'title':
+                if (should_return) return !value
+                !value ? setErrorObj({...errorObj, title: true}) : setErrorObj({...errorObj, title: false})
+            case 'body':
+                if (should_return) return isBodyEmpty(value)
+                isBodyEmpty(value) ? setErrorObj({...errorObj, body: true}) : setErrorObj({...errorObj, body: false})
+                break
+        }
     }
 
     return (
         <Form onSubmit={(event) => {event.preventDefault()}}>
             <Form.Group className="mb-3" controlId="title">
-                <Form.Label> Title </Form.Label>
-                <Form.Control type="text" value={props.content.title} onChange={onChange} required/>
+                <Form.Label className={errorObj.title ? styles.invalidLabel : ''}>
+                    {errorObj.title ? 'Title*' : 'Title'}
+                </Form.Label>
+                <Form.Control
+                    type="text"
+                    value={props.content.title}
+                    onChange={(event) => onChange(event.target.id, event.target.value)}
+                />
+                {errorObj.title && <div style={{ display: "flex" }} className="invalid-feedback">Title can't be empty</div>}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="body">
-                <Form.Label> Body </Form.Label>
-                <Form.Control as="textarea" rows={3} value={props.content.body} onChange={onChange} required/>
+                <Form.Label className={errorObj.body ? styles.invalidLabel : ''}>
+                    {errorObj.body ? 'Body*' : 'Body'}
+                </Form.Label>
+                <HtmlEditor
+                    value={props.content.body}
+                    onChange={(value) => onChange('body', value)}
+                />
+                {errorObj.body && <div style={{display:"flex"}} className="invalid-feedback">Body can't be empty</div>}
             </Form.Group>
         </Form>
     )
@@ -101,42 +143,97 @@ function TextPageForm(props) {
 
 function ConditionForm(props) {
 
-    const onChange = (event) => {
-        event.preventDefault()
-        props.editProcedureStep(event.target.id, event.target.value)
+    const [errorObj, setErrorObj] = useState({name: false, config: false, url: false})
+
+    useEffect(() => {
+        if (props.error) {
+            const errorUpdate = {}
+            for (let key in props.content) {
+                if (key in errorObj) {
+                    errorUpdate[key] = switch_case(key, props.content[key], true)
+                }
+            }
+            setErrorObj(errorUpdate)
+        }
+    }, [props.error])
+
+    const onChange = (id, value) => {
+        props.editProcedureStep(id, value)
+        switch_case(id, value)        
+    }
+
+    const switch_case = (id, value, should_return = false) => {
+        switch (id) {
+            case 'name':
+                if (should_return) return !value
+                !value ? setErrorObj({...errorObj, name: true}) : setErrorObj({...errorObj, name: false})
+                break
+            case 'config':
+                try {
+                    JSON.parse(value)
+                    if (should_return) return false
+                    setErrorObj({...errorObj, config: false})
+                } catch (error) {
+                    if (should_return) return true
+                    setErrorObj({...errorObj, config: true})
+                }
+                break
+            case 'url':
+                if (should_return) return !value
+                !value ? setErrorObj({...errorObj, url: true}) : setErrorObj({...errorObj, url: false})
+                break
+        }
     }
 
     return (
         <Form onSubmit={(event) => {event.preventDefault()}}>
             <Form.Group className="mb-3" controlId="name">
-                <Form.Label> Name </Form.Label>
-                <Form.Control type="text" value={props.content.name} onChange={onChange} required/>
+                <Form.Label className={errorObj.name ? styles.invalidLabel : ''}>
+                    {errorObj.name ? 'Name*' : 'Name'}
+                </Form.Label>
+                <Form.Control type="text" value={props.content.name} onChange={(event) => onChange(event.target.id, event.target.value)}/>
+                {errorObj.name && <div style={{ display: "flex" }} className="invalid-feedback">Name can't be empty</div>}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="config">
-                <Form.Label className={props.error ? styles.invalidLabel : ''}>
-                    {props.error ? 'Config*' : 'Config'}
+                <Form.Label className={errorObj.config ? styles.invalidLabel : ''}>
+                    {errorObj.config ? 'Config*' : 'Config'}
                 </Form.Label>
-                <Form.Control
-                    as="textarea"
-                    rows={3}
+                <JsonEditor
+                    id="config"
                     value={props.content.config}
                     onChange={onChange}
-                    required
-                    className={props.error ? 'is-invalid' : ''}
                 />
-                {props.error && <div className="invalid-feedback">Not a valid JSON.</div>}
+                {errorObj.config && <div style={{display:"flex"}} className="invalid-feedback">Not a valid JSON.</div>}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="url">
-                <Form.Label> URL </Form.Label>
-                <Form.Control type="url" value={props.content.url} onChange={onChange} required/>
+                <Form.Label className={errorObj.url ? styles.invalidLabel : ''}>
+                    {errorObj.url ? 'Url*' : 'Url'}
+                </Form.Label>
+                <Form.Control type="url" value={props.content.url} onChange={(event) => onChange(event.target.id, event.target.value)}/>
+                {errorObj.url && <div style={{ display: "flex" }} className="invalid-feedback">Url can't be empty</div>}
             </Form.Group>
         </Form>
     )
 }
 
 function QuestionnaireForm(props) {
+
+    const [errorObj, setErrorObj] = useState({url: false, system: false})
+
+    useEffect(() => {
+        if (props.error) {
+            const errorUpdate = {}
+            for (let key in props.content) {
+                if (key in errorObj) {
+                    errorUpdate[key] = switch_case(key, props.content[key], true)
+                }
+            }
+            setErrorObj(errorUpdate)
+        }
+    }, [props.error])
+
     // Questionnaire Context
     const {
         questionnaireUpdateList,
@@ -170,17 +267,37 @@ function QuestionnaireForm(props) {
         } else {
             props.editProcedureStep(id, value)
         }
+
+        switch_case(id, value)
+    }
+
+    const switch_case = (id, value, should_return = false) => {
+        switch (id) {
+            case 'url':
+                if (should_return) return !value
+                !value ? setErrorObj({...errorObj, url: true}) : setErrorObj({...errorObj, url: false})
+                break
+            case 'system':
+                if (should_return) return !value
+                !value ? setErrorObj({...errorObj, system: true}) : setErrorObj({...errorObj, system: false})
+                break
+        }
     }
 
     return (
         <Form onSubmit={(event) => {event.preventDefault()}}>
             <Form.Group className="mb-3" controlId="url">
-                <Form.Label> URL </Form.Label>
-                <Form.Control type="url" value={props.content.url} onChange={onChange} required/>
+                <Form.Label className={errorObj.url ? styles.invalidLabel : ''}>
+                    {errorObj.url ? 'Url*' : 'Url'}
+                </Form.Label>
+                <Form.Control type="url" value={props.content.url} onChange={onChange}/>
+                {errorObj.url && <div style={{ display: "flex" }} className="invalid-feedback">Url can't be empty</div>}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="system">
-                <Form.Label> System </Form.Label>
+                <Form.Label className={(props.error && errorObj.system) ? styles.invalidLabel : ''}>
+                    {(props.error && errorObj.system) ? 'System*' : 'System'}
+                </Form.Label>
                 <Form.Select value={props.content.system} onChange={onChange}>
                     <option disabled value={""}> -- Select a System -- </option>
                     <option value={"limesurvey"}> Limesurvey </option>
@@ -190,6 +307,7 @@ function QuestionnaireForm(props) {
                     <option value={"typeform"}> Typeform </option>
                     <option value={"jotform"}> Jotform </option> */}
                 </Form.Select>
+                {(props.error && errorObj.system) && <div style={{display:"flex"}} className="invalid-feedback">Please select a system.</div>}
             </Form.Group>
         </Form>
     )
@@ -197,31 +315,87 @@ function QuestionnaireForm(props) {
 
 function PauseForm(props) {
 
-    const onChange = (event) => {
-        event.preventDefault()
-        props.editProcedureStep(event.target.id, event.target.value)
+    const [errorObj, setErrorObj] = useState({title: false, body: false, proceed_body: false, config: false})
+
+    useEffect(() => {
+        if (props.error) {
+            const errorUpdate = {}
+            for (let key in props.content) {
+                if (key in errorObj) {
+                    errorUpdate[key] = switch_case(key, props.content[key], true)
+                }
+            }
+            setErrorObj(errorUpdate)
+        }
+    }, [props.error])
+
+    const onChange = (id, value) => {
+        props.editProcedureStep(id, value)
+        switch_case(id, value)
+    }
+
+    const switch_case = (id, value, should_return = false) => {
+        switch (id) {
+            case 'title':
+                if (should_return) return !value
+                !value ? setErrorObj({...errorObj, title: true}) : setErrorObj({...errorObj, title: false})
+                break
+            case 'body':
+                if (should_return) return isBodyEmpty(value)
+                isBodyEmpty(value) ? setErrorObj({...errorObj, body: true}) : setErrorObj({...errorObj, body: false})
+                break
+            case 'proceed_body':
+                if (should_return) return isBodyEmpty(value)
+                isBodyEmpty(value) ? setErrorObj({...errorObj, proceed_body: true}) : setErrorObj({...errorObj, proceed_body: false})
+                break
+            case 'config':
+                try {
+                    JSON.parse(value)
+                    if (should_return) return false
+                    setErrorObj({...errorObj, config: false})
+                } catch (error) {
+                    if (should_return) return true
+                    setErrorObj({...errorObj, config: true})
+                }
+                break
+        }
     }
 
     return (
         <Form onSubmit={(event) => {event.preventDefault()}}>
             <Form.Group className="mb-3" controlId="title">
-                <Form.Label> Title </Form.Label>
-                <Form.Control type="text" value={props.content.title} onChange={onChange} required/>
+                <Form.Label className={errorObj.title ? styles.invalidLabel : ''}>
+                    {errorObj.title ? 'Title*' : 'Title'}
+                </Form.Label>
+                <Form.Control type="text" value={props.content.title} onChange={(event) => onChange(event.target.id, event.target.value)}/>
+                {errorObj.title && <div style={{ display: "flex" }} className="invalid-feedback">Title can't be empty</div>}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="body">
-                <Form.Label> Body </Form.Label>
-                <Form.Control as="textarea" rows={3} value={props.content.body} onChange={onChange} required/>
+                <Form.Label className={errorObj.body ? styles.invalidLabel : ''}>
+                    {errorObj.body ? 'Body*' : 'Body'}
+                </Form.Label>
+                <HtmlEditor
+                    value={props.content.body}
+                    onChange={(value) => onChange('body', value)}
+                />
+                {errorObj.body && <div style={{display:"flex"}} className="invalid-feedback">Body can't be empty</div>}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="proceed_body">
-                <Form.Label> Proceed Body </Form.Label>
-                <Form.Control as="textarea" rows={3} value={props.content.proceed_body} onChange={onChange} required/>
+                <Form.Label className={errorObj.proceed_body ? styles.invalidLabel : ''}>
+                    {errorObj.proceed_body ? 'Proceed Body*' : 'Proceed Body'}
+                </Form.Label>
+                <HtmlEditor
+                    value={props.content.proceed_body}
+                    onChange={(value) => onChange('proceed_body', value)}
+                />
+                {errorObj.proceed_body && <div style={{display:"flex"}} className="invalid-feedback">Proceed Body can't be empty</div>}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="type">
                 <Form.Label> Type </Form.Label>
-                <Form.Select value={props.content.type} onChange={onChange}>
+                <Form.Select value={props.content.type} onChange={(event) => onChange(event.target.id, event.target.value)}>
                     <option disabled value={""}> -- Select a Type -- </option>
                     <option value={"time_based"}> Time based </option>
                     <option value={"controlled"}> Controlled </option>
@@ -229,11 +403,23 @@ function PauseForm(props) {
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="config">
-                <Form.Label> Config </Form.Label>
-                <Form.Control as="textarea" rows={3} value={props.content.config} onChange={onChange} required/>
+                <Form.Label className={errorObj.config ? styles.invalidLabel : ''}>
+                    {errorObj.config ? 'Config*' : 'Config'}
+                </Form.Label>
+                <JsonEditor
+                    id="config"
+                    value={props.content.config}
+                    onChange={onChange}
+                />
+                {errorObj.config && <div style={{display:"flex"}} className="invalid-feedback">Not a valid JSON.</div>}
             </Form.Group>
         </Form>
     )
+}
+
+const isBodyEmpty = (value) => {
+    const emptyParagraphPattern = /^<p>\s*(&nbsp;|\s)*<\/p>$/;
+    return !value || emptyParagraphPattern.test(value.trim());
 }
 
 // Drag Element for Procedure Object
@@ -305,7 +491,66 @@ const ProcedureObject = forwardRef((props, ref) => {
         let required = Object.keys(props.type.emptyContent).filter(k => k !== "study_id")
         for (let k of required) {
             if (content[k] === "") {
+                if (k === "system") {
+                    props.setMessage({type: "danger", text: "Please select a system!"})
+                } else {
+                    props.setMessage({type: "danger", text: "There are still some fields missing that need to be filled in!"})
+                }
                 return false
+            }
+        }
+        return true
+    }
+
+    const contentWrong = () => {
+        if (props.type === ProcedureTypes.TextPage) {
+            if (isBodyEmpty(content.body)) {
+                props.setMessage({type: "danger", text: "Body can't be empty"})
+                return false
+            } else {
+                return true
+            }
+        }
+        if (props.type === ProcedureTypes.Condition) {
+            try {
+                JSON.parse(content.config)
+                return true
+            } catch (error) {
+                props.setMessage({type: "danger", text: "Error while parsing config to JSON"})
+                return false
+            }
+        }
+        if (props.type === ProcedureTypes.Pause) {
+            const pauseChecklist = {
+                body: false,
+                proceed_body: false,
+                config: false
+            }
+            if (isBodyEmpty(content.body)) {
+                props.setMessage({type: "danger", text: "Body can't be empty"})
+                return false
+            } else {
+                pauseChecklist.body = true
+            }
+            if (isBodyEmpty(content.proceed_body)) {
+                props.setMessage({type: "danger", text: "Proceed Body can't be empty"})
+                return false
+            } else {
+                pauseChecklist.proceed_body = true
+            }
+            try {
+                JSON.parse(content.config)
+                pauseChecklist.config = true
+            } catch (error) {
+                props.setMessage({type: "danger", text: "Error while parsing config to JSON"})
+                return false
+            }
+            for (let key in pauseChecklist) {
+                if (!pauseChecklist[key]) {
+                    props.setMessage({type: "danger", text: "Something went fatally wrong, ask your developer"})
+                    return false
+                }
+                return true
             }
         }
         return true
@@ -314,8 +559,6 @@ const ProcedureObject = forwardRef((props, ref) => {
     const updateQuestionnaireRef = async (newContent) => {
         // if not stored or not complete return
         if (!stored || !contentComplete()) return
-
-        console.log("Update Questionnaire via Ref",newContent)
 
         // update Questionnaire in Backend
         const response = await dispatch(updateQuestionnaire({questionnaireId: backendId, questionnaire: {
@@ -333,10 +576,12 @@ const ProcedureObject = forwardRef((props, ref) => {
 
     const storeContent = async () => {
         if (!contentComplete()) {
-            props.setMessage({
-                type: "danger",
-                text: "There are still some fields missing that need to be filled in!",
-                duration: 4000})
+            setUpdateError(true)
+            return
+        }
+
+        if (!contentWrong()) {
+            setUpdateError(true)
             return
         }
 
@@ -356,23 +601,16 @@ const ProcedureObject = forwardRef((props, ref) => {
             }))
         }
         else if(props.type === ProcedureTypes.Condition) {
-            // try to parse config into object
-            try {
-                const conditionContent = {...content}
-                conditionContent.config = JSON.parse(content.config)
-                console.log(conditionContent)
-                response_create = await dispatch(createCondition(conditionContent))
-                response_step = await dispatch(createSingleProcedureConfigStep({
-                    "procedureConfigId": props.rootBackendId,
-                    "procedureConfigStep" : {
-                        "counterbalance" : props.counterbalance,
-                        "condition_id" : response_create.payload.body.id
-                    }
-                }))
-            } catch (error) {
-                props.setMessage({type: "danger", text: "Error while parsing config to JSON"})
-                setUpdateError(true)
-            }
+            const conditionContent = { ...content }
+            conditionContent.config = JSON.parse(content.config)
+            response_create = await dispatch(createCondition(conditionContent))
+            response_step = await dispatch(createSingleProcedureConfigStep({
+                "procedureConfigId": props.rootBackendId,
+                "procedureConfigStep": {
+                    "counterbalance": props.counterbalance,
+                    "condition_id": response_create.payload.body.id
+                }
+            }))
         }
         else if(props.type === ProcedureTypes.Questionnaire) {
             response_create = await dispatch(createQuestionnaire(content))
@@ -385,6 +623,8 @@ const ProcedureObject = forwardRef((props, ref) => {
             }))
         }
         else if(props.type === ProcedureTypes.Pause) {
+            const pauseContent = { ...content }
+            pauseContent.config = JSON.parse(content.config)
             response_create = await dispatch(createPause(content))
             response_step = await dispatch(createSingleProcedureConfigStep({
                 "procedureConfigId": props.rootBackendId,
@@ -422,10 +662,12 @@ const ProcedureObject = forwardRef((props, ref) => {
         }
 
         if (!contentComplete()) {
-            props.setMessage({
-                type: "danger",
-                text: "There are still some fields missing that need to be filled in!",
-                duration: 4000})
+            setUpdateError(true)
+            return
+        }
+
+        if (!contentWrong()) {
+            setUpdateError(true)
             return
         }
 
@@ -438,17 +680,14 @@ const ProcedureObject = forwardRef((props, ref) => {
                 }}))
         }
         else if (props.type === ProcedureTypes.Condition) {
-            try {
-                const conditionConfig = JSON.parse(content.config)
-                response = await dispatch(updateCondition({conditionId: backendId, condition: {
+            const conditionConfig = JSON.parse(content.config)
+            response = await dispatch(updateCondition({
+                conditionId: backendId, condition: {
                     "name": content.name,
                     "config": conditionConfig,
                     "url": content.url
-                }}))
-            } catch (error) {
-                props.setMessage({type: "danger", text: "Error while parsing config to JSON"})
-                setUpdateError(true)
-            } 
+                }
+            }))
         }
         else if (props.type === ProcedureTypes.Questionnaire) {
             response = await dispatch(updateQuestionnaire({questionnaireId: backendId, questionnaire: {
@@ -457,13 +696,16 @@ const ProcedureObject = forwardRef((props, ref) => {
                 }}))
         }
         else if (props.type === ProcedureTypes.Pause) {
-            response = await dispatch(updatePause({pauseId: backendId, pause: {
+            const pauseConfig = JSON.parse(content.config)
+            response = await dispatch(updatePause({
+                pauseId: backendId, pause: {
                     "title": content.title,
                     "body": content.body,
                     "proceed_body": content.proceed_body,
                     "type": content.type,
-                    "config": content.config
-                }}))
+                    "config": pauseConfig //
+                }
+            }))
         }
         // if response successful status 204
         if (response.payload.status === 204) {
@@ -515,13 +757,13 @@ const ProcedureObject = forwardRef((props, ref) => {
     const getForm = (procedureType, content, editProcedureStep) => {
         switch (procedureType) {
             case ProcedureTypes.TextPage:
-                return <TextPageForm content={content} editProcedureStep={editProcedureStep}/>
+                return <TextPageForm error={updateError} content={content} editProcedureStep={editProcedureStep}/>
             case ProcedureTypes.Condition:
                 return <ConditionForm error={updateError} content={content} editProcedureStep={editProcedureStep}/>
             case ProcedureTypes.Questionnaire:
-                return <QuestionnaireForm content={content} editProcedureStep={editProcedureStep}/>
+                return <QuestionnaireForm error={updateError} content={content} editProcedureStep={editProcedureStep}/>
             case ProcedureTypes.Pause:
-                return <PauseForm content={content} editProcedureStep={editProcedureStep}/>
+                return <PauseForm error={updateError} content={content} editProcedureStep={editProcedureStep}/>
         }
     }
 

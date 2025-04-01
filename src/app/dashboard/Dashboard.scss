@@ -16,7 +16,13 @@
 }
 
 .text-button-box {
-    margin-bottom: 80px;
+    margin-bottom: 20px;
+}
+
+.headline-noStudies {
+    font-size: 38px;
+    font-weight: bold;
+    margin-bottom: 10px
 }
 
 .headline {
@@ -73,6 +79,10 @@
     margin: 10px 0;
     text-align: left;
     box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.study-info {
+    display: block;
 }
 
 .study-info .label {

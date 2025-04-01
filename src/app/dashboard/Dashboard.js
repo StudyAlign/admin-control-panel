@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { getStudies, selectStudies } from "../../redux/reducers/studySlice";
+import { studySlice, getStudies, selectStudies } from "../../redux/reducers/studySlice";
 
 import Topbar from "../../components/Topbar";
 import EmptyDashboard from "./EmptyDashboard";
@@ -52,9 +52,11 @@ export default function Dashboard() {
         }
     ]
 
-    // Currently, this effect is only called after the initial rendering
-    useEffect(( ) => {
-        dispatch(getStudies()); //Dispatching getStudies Action from studySlice
+    useEffect(() => {
+        dispatch(getStudies())
+        return () => {
+            dispatch(studySlice.actions.resetStudies())
+        }
     }, [])
 
     let dashboard

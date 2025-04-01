@@ -7,6 +7,8 @@ import { createStudy, selectStudy } from "../../redux/reducers/studySlice";
 
 import { STATES } from "../study_overview/StudyOverviewLayout";
 
+import HtmlEditor from './procedure_editors/HtmlEditor';
+
 import { useAuth } from "../../components/Auth";
 import LoadingScreen from "../../components/LoadingScreen";
 import StudyCreationLayout, { CreationSteps } from "./navigation_logic/StudyCreationLayout";
@@ -22,6 +24,7 @@ export default function CreateInformation() {
     const [amountParticipants, setAmountParticipants] = useState('')
     const [description, setDescription] = useState('')
     const [consent, setConsent] = useState('')
+    const [privateStudy, setPrivateStudy] = useState(false)
 
     const [created, setCreated] = useState(false)
 
@@ -43,12 +46,16 @@ export default function CreateInformation() {
         setAmountParticipants(event.target.value)
     }
 
-    const handleDescription = (event) => {
-        setDescription(event.target.value)
+    const handlePrivateStudy = (event) => {
+        setPrivateStudy(event.target.checked)
     }
 
-    const handleConsent = (event) => {
-        setConsent(event.target.value)
+    const handleDescription = (_, value) => {
+        setDescription(value)
+    }
+
+    const handleConsent = (_, value) => {
+        setConsent(value)
     }
 
     const handleSubmit = async (event) => {
@@ -59,7 +66,7 @@ export default function CreateInformation() {
             "endDate": endDate  + "T00:00:00.000Z",
             "state": STATES.SETUP, // "setup", "running", "finished"
             "owner_id": auth.user.id,
-            "invite_only": false, // TODO how to indicate if invite_only or not? Checkbox?
+            "invite_only": privateStudy,
             "description": description,
             "consent": consent,
             "planned_number_participants": amountParticipants,
@@ -107,6 +114,21 @@ export default function CreateInformation() {
                     </Row>
 
                     <Row>
+                        <Form.Group as={Row} className="mb-3 align-items-center" controlId="formPrivateStudy">
+                            <Form.Label column sm={2}>Private Study</Form.Label>
+                            <Col sm={10}>
+                                <Form.Check
+                                    type="checkbox"
+                                    name="is_active"
+                                    checked={privateStudy}
+                                    onChange={handlePrivateStudy}
+                                    className="me-2"
+                                />
+                            </Col>
+                        </Form.Group>
+                    </Row>
+
+                    <Row>
                         <Form.Group className="mb-3" controlId="formParticipants">
                             <Form.Label>Number of Participants</Form.Label>
                             <Form.Control required type="number" placeholder="Number of  Participants" value={amountParticipants} onChange={handleParticipants}/>
@@ -116,14 +138,14 @@ export default function CreateInformation() {
                     <Row>
                         <Form.Group className="mb-3" controlId="formDescription">
                             <Form.Label>Description</Form.Label>
-                            <Form.Control required type="text" as="textarea" rows={4} placeholder="Description" value={description} onChange={handleDescription}/>
+                            <HtmlEditor value={description} onChange={(value) => handleDescription('description', value)}/>
                         </Form.Group>
                     </Row>
 
                     <Row>
                         <Form.Group className="mb-3" controlId="formConsent">
                             <Form.Label>Consent</Form.Label>
-                            <Form.Control required type="text" as="textarea" rows={4} placeholder="Consent" value={consent} onChange={handleConsent}/>
+                            <HtmlEditor value={consent} onChange={(value) => handleConsent('consent', value)}/>
                         </Form.Group>
                     </Row>
 

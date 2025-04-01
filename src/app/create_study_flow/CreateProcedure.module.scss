@@ -15,23 +15,29 @@
 
 .saveButton {
     margin-left: 10px;
-    background: none;
-    border: none;
-    display: flex;
     align-items: center;
     justify-content: center;
-    color: rgb(0, 115, 160);
+    background: $sal-lightblue !important;
+    border: none !important;
     &:disabled {
-        color: #6c757d;
-        background: none;
+        color: #6c757d !important;
+        background: rgb(185, 185, 185) !important;
+        border: none !important;
     };
 }
 
 .deleteButton {
     margin-left: 10px;
-    color: rgb(85, 0, 0);
-    background: none;
-    border: none;
+    color: rgb(85, 0, 0) !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.deleteButtonBlock {
+    margin-left: 10px;
+    color: rgb(85, 0, 0) !important;
+    background: none !important;
+    border: none !important;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -232,8 +238,23 @@
 }
 .procedureElement.ghost {
     /* Drag procedureElement */
+    padding-left: 15px;
     background-color: #f6f9fc;
     z-index: 1000; /* Ensure it stays on top */
+}
+
+.procedureElementInBlockGhost {
+    padding: 15px 0px 15px 15px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-grow: 1;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 48px;
+    border: 1px solid #cfd4db;
+    border-radius: 4px;
+    padding-right: 10px;
+    background-color: white;
 }
 
 .ghost {

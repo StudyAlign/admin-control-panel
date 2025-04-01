@@ -16,6 +16,7 @@ import {
     duplicateStudyApi,
     generateProceduresApi,
     generateParticipantsApi,
+    getParticipantsApi,
     // populateSurveyParticipantsApi, // DEPRECATED
     addParticipantsApi,
 } from "../../api/studyAlignApi";
@@ -28,6 +29,7 @@ const initialState = {
     studyProcedure: null, // Procedure Config State
     procedureOverview: null, // Procedure Config Overview State
     studyExport: null,
+    participants: null,
     api: IDLE,
     error: null,
     status: null,
@@ -76,6 +78,22 @@ export const getStudySetupInfo = createAsyncThunk(
         }
         try {
             const response = await apiWithAuth(getStudySetupInfoApi, studyId, dispatch)
+            return response
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
+export const getParticipants = createAsyncThunk(
+    'getParticipants',
+    async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(getParticipantsApi, studyId, dispatch)
             return response
         } catch (err) {
             return rejectWithValue(err)
@@ -199,7 +217,6 @@ export const getProcedureConfigOverview = createAsyncThunk(
             return
         }
         try {
-            console.log(procedureConfigId)
             const response = await apiWithAuth(getProcedureConfigOverviewApi, procedureConfigId, dispatch)
             return response
         } catch (err) {
@@ -333,6 +350,12 @@ export const studySlice = createSlice({
         resetStudyExport: (state, _action) => {
             state.studyExport = null
         },
+        resetStudies: (state, _action) => {
+            state.studies = null
+        },
+        resetParticipants: (state, _action) => {
+            state.participants = null
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -439,6 +462,18 @@ export const studySlice = createSlice({
                 state.status = action.payload.status
                 state.currentRequestId = undefined
                 state.procedureOverview = action.payload.body
+            })
+            // Participants
+            .addCase(getParticipants.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(getParticipants.fulfilled, (state, action) => {
+                const { requestId } = action.meta
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
+                state.participants = action.payload.body
             })
             //
             // Procedure Config Cases
@@ -591,6 +626,10 @@ export const selectStudyProcedure = (state) => {
 
 export const selectStudyProcedureOverview = (state) => {
     return state.studies.procedureOverview
+}
+
+export const selectParticipants = (state) => {
+    return state.studies.participants
 }
 
 export default studySlice.reducer;
