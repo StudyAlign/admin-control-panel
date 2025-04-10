@@ -219,8 +219,27 @@ class StudyAlignLib {
     getProcedureConfigMain(studyId) {
         return this.basicRead("studies/" + studyId + "/procedure-config");
     }
-    getParticipants(studyId) {
-        return this.basicRead("studies/" + studyId + "/participants");
+    getParticipants(studyId, offset = 0, limit = 100, orderBy = "id", direction = "asc") {
+        const options = {
+            method: "GET",
+            path: "studies/" + studyId + "/participants",
+            headers: {},
+            params: { offset: offset, limit: limit, order_by: orderBy, direction: direction },
+            asQuery: true
+        };
+        this.setHeaders(options);
+        return this.request(options);
+    }
+    getParticipantsCount(studyId, participant_state, paused, proceed) {
+        const options = {
+            method: "GET",
+            path: "studies/" + studyId + "/participants/count",
+            headers: {},
+            params: { participant_state: participant_state, paused: paused, proceed: proceed },
+            asQuery: true
+        };
+        this.setHeaders(options);
+        return this.request(options);
     }
     generateParticipants(studyId, amount) {
         const options = {
@@ -332,6 +351,16 @@ class StudyAlignLib {
     getPauses(studyId) {
         return this.basicRead("studies/" + studyId + "/pauses");
     }
+    // Collaborators
+    getCollaborators(studyId) {
+        return this.basicRead("collaborators/study/" + studyId);
+    }
+    createCollaborator(collaborator) {
+        return this.basicCreate("collaborators", collaborator);
+    }
+    deleteCollaborator(collaboratorId) {
+        return this.basicDelete("collaborators/" + collaboratorId);
+    }
     // Procedures
     getProcedures(studyId) {
         const options = {
@@ -343,6 +372,9 @@ class StudyAlignLib {
         };
         this.setHeaders(options);
         return this.request(options);
+    }
+    procedureStepPush(participantToken) {
+        return this.basicRead("procedures/push/" + participantToken);
     }
     // Participants
     getParticipantsByProcedure(procedureId) {
@@ -415,12 +447,45 @@ class StudyAlignLib {
         return this.basicDelete("pauses/" + pauseId);
     }
     //Interactions
-    getInteractions(studyId, type, offset = 0, limit = 100) {
+    getInteractions(studyId, type, offset = 0, limit = 100, orderBy = "id", direction = "asc") {
         const options = {
             method: "GET",
             path: "interactions",
             headers: {},
-            params: { study_id: studyId, type: type, offset: offset, limit: limit },
+            params: { study_id: studyId, type: type, offset: offset, limit: limit, order_by: orderBy, direction: direction },
+            asQuery: true
+        };
+        this.setHeaders(options);
+        return this.request(options);
+    }
+    getInteractionCount(studyId, type) {
+        const options = {
+            method: "GET",
+            path: "interactions/count",
+            headers: {},
+            params: { study_id: studyId, type: type },
+            asQuery: true
+        };
+        this.setHeaders(options);
+        return this.request(options);
+    }
+    getInteractionCounts(studyId) {
+        const options = {
+            method: "GET",
+            path: "interactions/counts",
+            headers: {},
+            params: { study_id: studyId },
+            asQuery: true
+        };
+        this.setHeaders(options);
+        return this.request(options);
+    }
+    getInteractionExport(studyId) {
+        const options = {
+            method: "GET",
+            path: "interactions/export",
+            headers: {},
+            params: { study_id: studyId },
             asQuery: true
         };
         this.setHeaders(options);
