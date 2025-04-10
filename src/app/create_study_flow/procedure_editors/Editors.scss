@@ -8,6 +8,19 @@
 	}
 }
 
+/*show top bar only in HtmlEditor.js*/
+.ck-wrapper .ck-editor__editable {
+    flex: 1 1 auto !important;
+    max-height: 100% !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+    border-top: 0.5px solid #a6a6a6 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
 .main-container {
 	font-family: 'Lato';
 	width: 100%;
