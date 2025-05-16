@@ -51,8 +51,14 @@ export default function EditInformation(props) {
             setStartDate(study.startDate.split('T')[0])
             setEndDate(study.endDate.split('T')[0])
             endDateRef.current = study.endDate.split('T')[0]
-            setAmountParticipants(studySetupInfo.planned_number_participants)
-            amountParticipantsRef.current = studySetupInfo.planned_number_participants
+            let amount;
+            if (studySetupInfo.state === "setup") {
+                amount = studySetupInfo.planned_number_participants
+            } else {
+                amount = study.total_participants
+            }
+            setAmountParticipants(amount)
+            amountParticipantsRef.current = amount
             setDescription(study.description)
             setConsent(study.consent)
             setPrivateStudy(study.invite_only)

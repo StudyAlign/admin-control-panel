@@ -10,7 +10,8 @@ import {
     selectUserApi,
     selectUserTokens,
     authSlice,
-    selectIsAuthenticated
+    selectIsAuthenticated,
+    selectUserError,
 } from "../redux/reducers/authSlice";
 
 import LoadingScreen from "./LoadingScreen";
@@ -26,12 +27,14 @@ function useProvideAuth() {
     const user = useSelector(selectUser)
     const userApi = useSelector(selectUserApi)
     const tokens = useSelector(selectUserTokens)
+    const error = useSelector(selectUserError)
 
     return {
         isAuthenticated,
         user,
         userApi,
-        tokens
+        tokens,
+        error,
     }
 }
 
@@ -76,8 +79,13 @@ export default function RequireAuth({ role = 0 }) {
         return <LoadingScreen text={"Log in..."}/>
     }
 
+    // Errors happening while authenticated
+    if (auth.error && auth.error.status && auth.isAuthenticated) {
+        return <Navigate to={`/error/${auth.error.status}`} replace />;
+    }
+
     if (role === 1) {
-        return auth && auth.isAuthenticated && auth.user.role_id === 1 ? <Outlet /> : <LoadingScreen text={"No Access, go back..."}/>;
+        return auth && auth.isAuthenticated && auth.user.role_id === 1 ? <Outlet /> : <Navigate to="/error/403" replace />;
     } else {
         return auth && auth.isAuthenticated ? <Outlet /> : <Navigate to="/login" state={{ from: location }} replace />;
     }

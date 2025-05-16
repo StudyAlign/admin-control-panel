@@ -128,3 +128,9 @@
 .copy-button.clicked {
     background-color: $sal-darkgold;
 }
+
+.nested-value-td {
+    max-width: 25vw;
+    white-space: normal;
+    word-break: break-all;
+}
