@@ -1,0 +1,49 @@
+version: '3.7'
+networks:
+  outside:
+    external:
+      name: studyalign-network
+  inside:
+    driver: bridge
+  traefik-net:
+    external: true
+
+services:
+  # builds the frontend
+  study-align-admin-frontend:
+    container_name: study-align-admin-frontend
+    environment:
+      - PUBLIC_URL=/studyalign-admin
+      - REACT_APP_STUDY_ALIGN_URL=https://PATH-TO-YOUR-BACKEND
+      - REACT_APP_STUDY_ALIGN_STUDY_FRONTEND_URL=https://PATH-TO-YOUR-STUDY-FRONTEND
+    build:
+      context: ./
+      dockerfile: Dockerfile.prod
+    networks:
+      - inside
+    volumes:
+      - ./build/:/ui/build
+      - ./public:/ui/public
+      - ./src/:/ui/src
+  # serves the frontend
+  study-align-framework-nginx:
+    container_name: study-align-admin-frontend-nginx
+    image: nginx
+    ports:
+      - 8003:80
+    volumes:
+      - ./build/:/ui/build
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - study-align-admin-frontend
+    networks:
+      - inside
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=8088" # port of the traefik instance
+      - "traefik.docker.network=traefik-net" # traefik network
+      - "traefik.http.routers.study-align-admin-frontend.rule=PathPrefix(`/studyalign-admin`)" # URL path to your backend, replace YOUR-BACKEND with an unique string to name your router
+      - "traefik.http.middlewares.study-align-admin-frontend.stripprefix.prefixes=/studyalign-admin" # declare strip prefix middleware from above, replace strip-YOUR-PATH with an unique name
+      - "traefik.http.routers.study-align-admin-frontend.middlewares=study-align-admin-frontend@docker" # add middleware that strips of your path, replace YOUR-BACKEND with the router name above, replace strip>
+

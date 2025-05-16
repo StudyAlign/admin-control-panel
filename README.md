@@ -8,6 +8,13 @@ Create a .env file in the root directory (on the same level as the package.json)
 
 After that, restart the frontend with `npm start`.
 
+## Deployment
+
+Modify docker-compose.prod.yml according to your needs, e.g. change paths to backend and study frontend.
+
+On your server then execute `docker compose -f docker-compose.prod.yml up -d`. Docker compose builds the frontend
+and serves it via a nginx at port 8003.
+
 
 ## Project Conventions:
 
