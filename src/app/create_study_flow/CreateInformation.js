@@ -115,7 +115,7 @@ export default function CreateInformation() {
 
                     <Row>
                         <Form.Group as={Row} className="mb-3 align-items-center" controlId="formPrivateStudy">
-                            <Form.Label column sm={2}>Private Study</Form.Label>
+                            <Form.Label column sm={2}>Private Study (invite only)</Form.Label>
                             <Col sm={10}>
                                 <Form.Check
                                     type="checkbox"

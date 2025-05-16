@@ -1,6 +1,6 @@
-import React, {createContext, useEffect, useState} from 'react';
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import {useDispatch, useSelector, useStore} from "react-redux";
+import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {useDispatch, useStore} from "react-redux";
 
 import Login from './app/login/Login';
 import ForgotPW from './app/login/ForgotPW';
@@ -21,7 +21,8 @@ import UserCreationLogic from './app/users/UserCreationLogic';
 import UserInformation from './app/users/UserInformation';
 import Profile from './app/users/Profile';
 
-import RequireAuth, {AuthRoute, AuthProvider, useAuth} from "./components/Auth";
+import RequireAuth, { AuthProvider } from "./components/Auth";
+import ErrorPage from './components/ErrorPage';
 
 import { authSlice } from "./redux/reducers/authSlice";
 
@@ -86,6 +87,11 @@ export default function App() {
                     <Route path="/logout"           element={<Login logout/>} />
                     <Route path="/login/forgot"     element={<ForgotPW/>} />
                     <Route path="/login/reset"      element={<ResetPW/>} />
+
+                    {/*dedicated Error*/}
+                    <Route path="/error/:status" element={<ErrorPage/>} />
+                    {/* Catch-All */}
+                    <Route path="*" element={<Navigate to="/error/404" replace />} />
 
                 </Routes>
             </BrowserRouter>

@@ -1,8 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import { Table, Pagination, Button, Dropdown, ButtonGroup, Modal } from "react-bootstrap";
-import { ArrowUp, ArrowDown, Trash, PencilSquare, ToggleOn, ToggleOff, Display } from "react-bootstrap-icons";
+import { Button, Modal } from "react-bootstrap";
+import {
+    Trash,
+    PencilSquare,
+    ToggleOn,
+    ToggleOff,
+    Display,
+} from "react-bootstrap-icons";
 
 import {
     userSlice,
@@ -11,292 +17,263 @@ import {
     updateUser,
     deleteUser,
     getRoles,
-    selectRoles
+    selectRoles,
 } from "../../redux/reducers/userSlice";
 
 import LoadingScreen from "../../components/LoadingScreen";
+import PaginatedSortableTable from "../../components/PaginatedSortableTable";
 import Topbar from "../../components/Topbar";
 
 import "../SidebarAndReactStyles.scss";
 import "./UserOverview.css";
 
 export default function UserOverview() {
+    const dispatch = useDispatch();
+    const usersData = useSelector(selectUsers);
+    const roles = useSelector(selectRoles);
 
-    const dispatch = useDispatch()
-    const users = useSelector(selectUsers)
-    const roles = useSelector(selectRoles)
+    const navigate = useNavigate();
 
-    const navigate = useNavigate()
-
-    const [activePage, setActivePage] = useState(1)
-    const [itemsPerPage, setItemsPerPage] = useState(10)
-    const [sortColumn, setSortColumn] = useState('id')
-    const [sortDirection, setSortDirection] = useState('asc')
     // modalstates
     const modalStates = {
         DELETE: 0,
         ACTIVATED: 1,
         DEACTIVATED: 2,
-        CORRECT: 3
-    }
-    const [showModal, setShowModal] = useState(modalStates.CORRECT)
-    const [selectedUser, setSelectedUser] = useState(null)
+        CORRECT: 3,
+    };
+    const [showModal, setShowModal] = useState(modalStates.CORRECT);
+    const [selectedUser, setSelectedUser] = useState(null);
+
+    // toggle flag to force PaginatedSortableTable to refresh its data after updates
+    const [refreshTableFlag, setRefreshTableFlag] = useState(false);
+
+    // initial table settings
+    const initialItemsPerPage = 10;
+    const initialSortColumn = "id";
+    const initialSortDirection = "asc";
 
     useEffect(() => {
-        dispatch(getUsers())
-        dispatch(getRoles())
+        // initial fetch
+        dispatch(
+            getUsers({
+                offset: 0,
+                limit: initialItemsPerPage,
+                orderBy: initialSortColumn,
+                direction: initialSortDirection,
+            })
+        );
+        dispatch(getRoles());
         return () => {
-            dispatch(userSlice.actions.resetAllUsers())
-        }
-    }, [])
+            dispatch(userSlice.actions.resetAllUsers());
+        };
+    }, [dispatch]);
 
-    if (users === null || roles === null) {
+    // --- helpers ---
+    const roleNames = roles
+        ? roles.reduce((acc, role) => {
+              acc[role.id] = role.name;
+              return acc;
+          }, {})
+        : {};
+
+    // PaginatedSortableTable fetch callback
+    const fetchData = useCallback(
+        ({ offset, limit, orderBy, direction }) => {
+            dispatch(getUsers({ offset, limit, orderBy, direction }));
+        },
+        [dispatch]
+    );
+
+    // --- action handlers ---
+    const handleDelete = (id) => {
+        setSelectedUser(id);
+        setShowModal(modalStates.DELETE);
+    };
+
+    const handleEdit = (id) => {
+        dispatch(userSlice.actions.setUserProcess("edit/information"));
+        navigate("/users/" + id + "/edit");
+    };
+
+    const handleShow = (id) => {
+        dispatch(userSlice.actions.setUserProcess("create"));
+        navigate("/users/" + id + "/information");
+    };
+
+    const handleToggleActive = (id, isActive) => {
+        setSelectedUser(id);
+        if (isActive) {
+            setShowModal(modalStates.ACTIVATED);
+        } else {
+            setShowModal(modalStates.DEACTIVATED);
+        }
+    };
+
+    const handleCreate = () => {
+        navigate("/users/create");
+    };
+
+    // --- PaginatedSortableTable column configuration ---
+    const columns = [
+        {
+            key: "id",
+            label: "ID",
+        },
+        {
+            key: "name",
+            label: "Name",
+        },
+        {
+            key: "role_id",
+            label: "Role",
+            render: (_, row) => roleNames[row.role_id],
+        },
+        {
+            key: "actions",
+            label: "Actions",
+            render: (_, row) => (
+                <div className="action-gap">
+                    <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleDelete(row.id)}
+                        className="mr-2"
+                    >
+                        <Trash /> Delete
+                    </Button>
+                    <Button
+                        variant="warning"
+                        size="sm"
+                        onClick={() => handleEdit(row.id)}
+                        className="mr-2"
+                    >
+                        <PencilSquare /> Edit
+                    </Button>
+                    <Button
+                        variant="success"
+                        size="sm"
+                        onClick={() => handleShow(row.id)}
+                        className="mr-2"
+                    >
+                        <Display /> Show
+                    </Button>
+                    <Button
+                        variant={row.is_active ? "secondary" : "success"}
+                        size="sm"
+                        onClick={() => handleToggleActive(row.id, row.is_active)}
+                    >
+                        {row.is_active ? <ToggleOff /> : <ToggleOn />}{" "}
+                        {row.is_active ? "Deactivate" : "Activate"}
+                    </Button>
+                </div>
+            ),
+        },
+    ];
+
+    // --- Modal rendering ---
+    const returnModal = () => {
+        if (showModal === modalStates.CORRECT) return null;
+
+        let title = "";
+        let body = "";
+        let buttonText = "";
+        let buttonVariant = "secondary";
+        let newActiveState = true;
+
+        if (showModal === modalStates.DELETE) {
+            title = `Delete user ${selectedUser}?`;
+            body = `Are you sure you want to delete user ${selectedUser}?`;
+            buttonText = "Delete";
+            buttonVariant = "danger";
+        } else if (showModal === modalStates.ACTIVATED) {
+            title = `Deactivate user ${selectedUser}?`;
+            body = `Are you sure you want to deactivate user ${selectedUser}?`;
+            buttonText = "Deactivate";
+            buttonVariant = "warning";
+            newActiveState = false;
+        } else if (showModal === modalStates.DEACTIVATED) {
+            title = `Activate user ${selectedUser}?`;
+            body = `Are you sure you want to activate user ${selectedUser}?`;
+            buttonText = "Activate";
+            buttonVariant = "success";
+            newActiveState = true;
+        }
+
+        return (
+            <Modal show onHide={() => setShowModal(modalStates.CORRECT)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>{title}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>{body}</Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowModal(modalStates.CORRECT)}>
+                        Close
+                    </Button>
+                    <Button
+                        variant={buttonVariant}
+                        onClick={() => {
+                            if (showModal === modalStates.DELETE) {
+                                dispatch(deleteUser(selectedUser))
+                                    .then(() => {
+                                        setRefreshTableFlag(!refreshTableFlag);
+                                    });
+                            } else {
+                                const payload = {
+                                    user: { is_active: newActiveState },
+                                    userId: selectedUser,
+                                };
+                                dispatch(updateUser(payload))
+                                    .then(() => {
+                                        setRefreshTableFlag(!refreshTableFlag);
+                                    });
+                            }
+                            setShowModal(modalStates.CORRECT);
+                        }}
+                    >
+                        {buttonText}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        );
+    };
+
+    // --- show loading screen until both users and roles are loaded ---
+    if (!usersData || !usersData.items || !usersData.count || !roles) {
         return (
             <>
                 <Topbar />
                 <LoadingScreen />
             </>
-        )
+        );
     }
-
-    const roleNames = roles.reduce((acc, role) => {
-        acc[role.id] = role.name
-        return acc
-    }, {})
-
-
-    const sortData = (data) => {
-        return [...data].sort((a, b) => {
-            const aValue = a[sortColumn] || ''
-            const bValue = b[sortColumn] || ''
-            if (sortDirection === 'asc') {
-                return aValue > bValue ? 1 : aValue < bValue ? -1 : 0
-            } else {
-                return aValue < bValue ? 1 : aValue > bValue ? -1 : 0
-            }
-        })
-    }
-
-    const paginateData = (data, page, perPage) => {
-        const startIndex = (page - 1) * perPage
-        const endIndex = startIndex + perPage
-        return data.slice(startIndex, endIndex)
-    }
-
-    const handleSort = (col) => {
-        if (sortColumn === col) {
-            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
-        } else {
-            setSortColumn(col)
-            setSortDirection('asc')
-        }
-    }
-
-    const handleDelete = (id) => {
-        setSelectedUser(id)
-        setShowModal(modalStates.DELETE)
-    }
-
-    const handleEdit = (id) => {
-        dispatch(userSlice.actions.setUserProcess("edit/information"))
-        navigate('/users/' + id + '/edit') 
-    }
-
-    const handleShow = (id) => {
-        dispatch(userSlice.actions.setUserProcess("create"))
-        navigate('/users/' + id + '/information') 
-    }
-
-    const handleNewUser = () => {
-        navigate('/users/create')
-    }
-
-    const handleToggleActive = (id, isActive) => {
-        setSelectedUser(id)
-        const action = isActive ? setShowModal(modalStates.ACTIVATED) : setShowModal(modalStates.DEACTIVATED)
-    }
-
-    const returnModal = () => {
-        if (showModal !== modalStates.CORRECT) {
-            let title = ''
-            let body = ''
-            let buttonText = ''
-            let buttonType = ''
-            let active = true
-            if (showModal === modalStates.DELETE) {
-                title = 'Delete user ' + selectedUser + '?'
-                body = 'Are you sure you want to delete user ' + selectedUser + '?'
-                buttonText = 'Delete'
-                buttonType = 'danger'
-            } else if (showModal === modalStates.ACTIVATED) {
-                title = 'Deactivate user ' + selectedUser + '?'
-                body = 'Are you sure you want to deactivate user ' + selectedUser + '?'
-                buttonText = 'Deactivate'
-                buttonType = 'warning'
-                active = false
-            } else if (showModal === modalStates.DEACTIVATED) {
-                title = 'Activate user ' + selectedUser + '?'
-                body = 'Are you sure you want to activate user ' + selectedUser + '?'
-                buttonText = 'Activate'
-                buttonType = 'success'
-            }
-
-            return (
-                <Modal show={true} onHide={() => setShowModal(modalStates.CORRECT)}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>{title}</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>{body}</Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={() => {
-                            setShowModal(modalStates.CORRECT)
-                        }}>Close</Button>
-                        <Button variant={buttonType} onClick={() => {
-                            setShowModal(modalStates.CORRECT)
-                            if (showModal === modalStates.DELETE) {
-                                dispatch(deleteUser(selectedUser)).then(() => {
-                                    dispatch(getUsers())
-                                })
-                            } else {
-                                const user = { "user": { is_active: active }, "userId": selectedUser }
-                                dispatch(updateUser(user)).then(() => {
-                                    dispatch(getUsers())
-                                })
-                            }
-                        }}>{buttonText}</Button>
-                    </Modal.Footer>
-                </Modal>
-            )
-        }
-    }
-
-    const sortedData = sortData(users)
-    const paginatedData = paginateData(sortedData, activePage, itemsPerPage)
 
     return (
         <>
             <Topbar />
-            <div xs={10} id="page-content-wrapper" style={{ padding: "10px" }}>
-
+            <div id="page-content-wrapper" style={{ padding: "10px" }}>
                 <h3 className="headline">Users Overview</h3>
 
                 <div className="mb-3">
-                    <Button variant="primary" onClick={handleNewUser}>
+                    <Button variant="primary" onClick={handleCreate}>
                         Create New User
                     </Button>
                 </div>
 
-                <div className="mb-3 dropdown-table d-flex justify-content-start">
-                    <Dropdown as={ButtonGroup}>
-                        <Dropdown.Toggle variant="secondary">
-                            Items per page: {itemsPerPage}
-                        </Dropdown.Toggle>
-
-                        <Dropdown.Menu>
-                            {[10, 25, 50].map((size) => (
-                                <Dropdown.Item
-                                    key={size}
-                                    onClick={() => {
-                                        setItemsPerPage(size)
-                                        setActivePage(1)
-                                    }}
-                                >
-                                    {size}
-                                </Dropdown.Item>
-                            ))}
-                        </Dropdown.Menu>
-                    </Dropdown>
-                </div>
-
-                <Table striped bordered hover>
-                    <thead>
-                        <tr>
-                            {['id', 'name', 'role'].map((col, colIndex) => (
-                                <th
-                                    key={`col-${colIndex}`}
-                                    onClick={() => handleSort(col)}
-                                    style={{ cursor: 'pointer' }}
-                                >
-                                    {col.charAt(0).toUpperCase() + col.slice(1)}
-                                    {' '}
-                                    {sortColumn === col ? (
-                                        sortDirection === 'asc' ? <ArrowUp color="blue" /> : <ArrowDown color="blue" />
-                                    ) : (
-                                        <ArrowUp color="grey" />
-                                    )}
-                                </th>
-                            ))}
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {paginatedData.map((user) => (
-                            <tr key={user.id}>
-                                <td>{user.id}</td>
-                                <td>{user.name}</td>
-                                <td>{roleNames[user.role_id]}</td>
-                                <td className="action-gap">
-                                    <Button
-                                        variant="danger"
-                                        size="sm"
-                                        onClick={() => handleDelete(user.id)}
-                                        className="mr-2"
-                                    >
-                                        <Trash /> Delete
-                                    </Button>
-                                    <Button
-                                        variant="warning"
-                                        size="sm"
-                                        onClick={() => handleEdit(user.id)}
-                                        className="mr-2"
-                                    >
-                                        <PencilSquare /> Edit
-                                    </Button>
-                                    <Button
-                                        variant="success"
-                                        size="sm"
-                                        onClick={() => handleShow(user.id)}
-                                        className="mr-2"
-                                    >
-                                        <Display /> Show
-                                    </Button>
-                                    <Button
-                                        variant={user.is_active ? "secondary" : "success"}
-                                        size="sm"
-                                        onClick={() => handleToggleActive(user.id, user.is_active)}
-                                    >
-                                        {user.is_active ? <ToggleOff /> : <ToggleOn />} {user.is_active ? "Deactivate" : "Activate"}
-                                    </Button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </Table>
-
-                <div className="d-flex justify-content-center mt-3">
-                    <Pagination>
-                        <Pagination.Prev
-                            onClick={() => setActivePage(prevPage => Math.max(prevPage - 1, 1))}
-                            disabled={activePage === 1}
-                        />
-                        {[...Array(Math.ceil(users.length / itemsPerPage))].map((_, pageIndex) => (
-                            <Pagination.Item
-                                key={pageIndex}
-                                active={pageIndex + 1 === activePage}
-                                onClick={() => setActivePage(pageIndex + 1)}
-                            >
-                                {pageIndex + 1}
-                            </Pagination.Item>
-                        ))}
-                        <Pagination.Next
-                            onClick={() => setActivePage(prevPage => Math.min(prevPage + 1, Math.ceil(users.length / itemsPerPage)))}
-                            disabled={activePage === Math.ceil(users.length / itemsPerPage)}
-                        />
-                    </Pagination>
-                </div>
+                <PaginatedSortableTable
+                    columns={columns}
+                    fetchData={fetchData}
+                    data={usersData.items}
+                    totalCount={usersData.count}
+                    loading={false}
+                    initialItemsPerPage={initialItemsPerPage}
+                    initialSortColumn={initialSortColumn}
+                    initialSortDirection={initialSortDirection}
+                    loadingText={"Loading User Data ..."}
+                    excludeSortingColumns={["actions"]}
+                    refreshFlag={refreshTableFlag}
+                />
             </div>
-
             {returnModal()}
         </>
-    )
+    );
 }

@@ -2,17 +2,26 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {
     apiWithAuth,
     getUsersApi,
+    getUsersCountApi,
     getUserApi,
     createUserApi,
     updateUserApi,
     deleteUserApi,
-    getRolesApi
+    getRolesApi,
+    // Collabs
+    getCollaboratorsApi,
+    createCollaboratorApi,
+    deleteCollaboratorApi,
 } from "../../api/studyAlignApi";
 import { LOADING, IDLE } from "../apiStates";
 
 const initialState = {
-    users: null,
+    users: {
+        items: null,
+        count: null,
+    },
     user: null,
+    collaborators: null,
     userState: null,
     roles: null,
     api: IDLE,
@@ -40,14 +49,20 @@ export const getRoles = createAsyncThunk(
 
 export const getUsers = createAsyncThunk(
     'getUsers',
-    async (arg, { dispatch, getState, rejectWithValue, requestId}) => {
+    async (args, { dispatch, getState, rejectWithValue, requestId}) => {
         const { api, currentRequestId } = getState().users
         if (api !== LOADING || requestId !== currentRequestId) {
             return
         }
         try {
-            const response = await apiWithAuth(getUsersApi, arg, dispatch)
-            return response
+            const [usersResponse, countResponse] = await Promise.all([
+                apiWithAuth(getUsersApi, args, dispatch),
+                apiWithAuth(getUsersCountApi, args, dispatch)
+            ]);
+            return {
+                users: usersResponse,
+                count: countResponse
+            };
         } catch (err) {
             return rejectWithValue(err)
         }
@@ -118,16 +133,70 @@ export const deleteUser = createAsyncThunk(
     }
 );
 
+export const getCollaborators = createAsyncThunk(
+    'getCollaborators',
+    async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().users
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(getCollaboratorsApi, studyId, dispatch)
+            return response
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
+export const createCollaborator = createAsyncThunk(
+    'createCollaborator',
+    async (collaborator, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().users
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(createCollaboratorApi, collaborator, dispatch)
+            return response
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
+export const deleteCollaborator = createAsyncThunk(
+    'deleteCollaborator',
+    async (collaboratorId, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().users
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(deleteCollaboratorApi, collaboratorId, dispatch)
+            return response
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
 // reducers
 export const userSlice = createSlice({
     name: 'users',
     initialState,
     reducers: {
         // REDUCERS THAT DO NOT DEPEND ON API CALLS GO HERE
-        resetAllUsers: (state, _action) => {
-            state.users = null
+        resetAllUsers: (state, _) => {
+            state.users = {
+                items: null,
+                count: null,
+            }
         },
-        resetUser: (state, _action) => {
+        resetCollaborators: (state, _) => {
+            state.collaborators = null
+        },
+        resetUser: (state, _) => {
             state.user = null
         },
         setUserProcess: (state, action) => {
@@ -141,12 +210,23 @@ export const userSlice = createSlice({
                 state.currentRequestId = action.meta.requestId
             })
             .addCase(getUsers.fulfilled, (state, action) => {
-                const { requestId } = action.meta
                 state.api = IDLE
                 state.status = action.payload.status
                 state.currentRequestId = undefined
-                state.users = action.payload.body
+                state.users = {
+                    items: action.payload.users.body,
+                    count: action.payload.count.body,
+                };
             })
+            // .addCase(getUsers.rejected, (state, _) => {
+            //     state.api = IDLE
+            //     state.currentRequestId = undefined
+            //     state.users = {
+            //         items: null,
+            //         count: 0
+            //     }
+            // })
+            //
             .addCase(getUser.pending, (state, action) => {
                 state.api = LOADING
                 state.currentRequestId = action.meta.requestId
@@ -202,6 +282,35 @@ export const userSlice = createSlice({
                 state.currentRequestId = undefined
                 state.roles = action.payload.body
             })
+            //
+            .addCase(getCollaborators.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(getCollaborators.fulfilled, (state, action) => {
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
+                state.collaborators = action.payload.body
+            })
+            .addCase(createCollaborator.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(createCollaborator.fulfilled, (state, action) => {
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
+            })
+            .addCase(deleteCollaborator.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(deleteCollaborator.fulfilled, (state, action) => {
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
+            })
     },
 });
 
@@ -221,6 +330,15 @@ export const selectUser = (state) => {
 
 export const selectUserState = (state) => {
     return state.users.userState;
+}
+
+export const selectCollaborators = (state) => {
+    return state.users.collaborators;
+}
+
+// export api status
+export const selectUserApiStatus = (state) => {
+    return state.users.api;
 }
 
 export default userSlice.reducer;

@@ -49,15 +49,26 @@ class StudyAlignLib {
                 url = url + "?" + encodedParams;
             }
             xhr.open(options.method, url);
+            // For Exports
+            if (options.responseType) {
+                xhr.responseType = options.responseType;
+            }
             if (options.onload) {
                 xhr.onload = options.onload;
             }
             else {
                 xhr.onload = () => {
                     if (xhr.status >= 200 && xhr.status < 300) {
+                        let body;
+                        if (options.responseType === "blob") {
+                            body = xhr.response;
+                        }
+                        else {
+                            body = xhr.response ? JSON.parse(xhr.response) : "";
+                        }
                         resolve({
                             status: xhr.status,
-                            body: xhr.response ? JSON.parse(xhr.response) : ""
+                            body: body
                         });
                     }
                     else {
@@ -173,8 +184,19 @@ class StudyAlignLib {
         this.setHeaders(options, true);
         return this.request(options);
     }
-    getUsers() {
-        return this.basicRead("users");
+    getUsersCount() {
+        return this.basicRead("users/count");
+    }
+    getUsers(offset = 0, limit = 100, orderBy = "id", direction = "asc", search = "") {
+        const options = {
+            method: "GET",
+            path: "users",
+            headers: {},
+            params: { offset: offset, limit: limit, order_by: orderBy, direction: direction, search: search },
+            asQuery: true
+        };
+        this.setHeaders(options);
+        return this.request(options);
     }
     getUser(userId) {
         return this.basicRead("users/" + userId);
@@ -231,11 +253,18 @@ class StudyAlignLib {
         return this.request(options);
     }
     getParticipantsCount(studyId, participant_state, paused, proceed) {
+        const params = { participant_state, paused, proceed };
+        // Remove undefined parameters
+        Object.keys(params).forEach(key => {
+            if (params[key] === undefined) {
+                delete params[key];
+            }
+        });
         const options = {
             method: "GET",
             path: "studies/" + studyId + "/participants/count",
             headers: {},
-            params: { participant_state: participant_state, paused: paused, proceed: proceed },
+            params: params,
             asQuery: true
         };
         this.setHeaders(options);
@@ -486,7 +515,8 @@ class StudyAlignLib {
             path: "interactions/export",
             headers: {},
             params: { study_id: studyId },
-            asQuery: true
+            asQuery: true,
+            responseType: "blob"
         };
         this.setHeaders(options);
         return this.request(options);

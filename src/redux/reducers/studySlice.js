@@ -16,7 +16,11 @@ import {
     duplicateStudyApi,
     generateProceduresApi,
     generateParticipantsApi,
+    //
     getParticipantsApi,
+    getParticipantsCountApi,
+    getProcedureStepPushApi,
+    endParticipantPauseApi,
     // populateSurveyParticipantsApi, // DEPRECATED
     addParticipantsApi,
 } from "../../api/studyAlignApi";
@@ -29,7 +33,10 @@ const initialState = {
     studyProcedure: null, // Procedure Config State
     procedureOverview: null, // Procedure Config Overview State
     studyExport: null,
-    participants: null,
+    participants: {
+        items: null,
+        count: null,
+    },
     api: IDLE,
     error: null,
     status: null,
@@ -85,16 +92,54 @@ export const getStudySetupInfo = createAsyncThunk(
     }
 );
 
-export const getParticipants = createAsyncThunk(
-    'getParticipants',
-    async (studyId, { dispatch, getState, rejectWithValue, requestId}) => {
+export const pushParticipantNextStep = createAsyncThunk(
+    'pushParticipantNextStep',
+    async (participantToken, { dispatch, getState, rejectWithValue, requestId}) => {
         const { api, currentRequestId } = getState().studies
         if (api !== LOADING || requestId !== currentRequestId) {
             return
         }
         try {
-            const response = await apiWithAuth(getParticipantsApi, studyId, dispatch)
+            const response = await apiWithAuth(getProcedureStepPushApi, participantToken, dispatch)
             return response
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
+export const endParticipantPause = createAsyncThunk(
+    'endParticipantPause',
+    async (participantToken, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const response = await apiWithAuth(endParticipantPauseApi, participantToken, dispatch)
+            return response
+        } catch (err) {
+            return rejectWithValue(err)
+        }
+    }
+);
+
+export const getParticipants = createAsyncThunk(
+    'getParticipants',
+    async (args, { dispatch, getState, rejectWithValue, requestId}) => {
+        const { api, currentRequestId } = getState().studies
+        if (api !== LOADING || requestId !== currentRequestId) {
+            return
+        }
+        try {
+            const [participantsResponse, countResponse] = await Promise.all([
+                apiWithAuth(getParticipantsApi, args, dispatch),
+                apiWithAuth(getParticipantsCountApi, args, dispatch)
+            ]);
+            return {
+                participants: participantsResponse,
+                count: countResponse
+            };
         } catch (err) {
             return rejectWithValue(err)
         }
@@ -354,7 +399,10 @@ export const studySlice = createSlice({
             state.studies = null
         },
         resetParticipants: (state, _action) => {
-            state.participants = null
+            state.participants = {
+                items: null,
+                count: null,
+            }
         },
     },
     extraReducers: (builder) => {
@@ -469,11 +517,34 @@ export const studySlice = createSlice({
                 state.currentRequestId = action.meta.requestId
             })
             .addCase(getParticipants.fulfilled, (state, action) => {
-                const { requestId } = action.meta
                 state.api = IDLE
                 state.status = action.payload.status
                 state.currentRequestId = undefined
-                state.participants = action.payload.body
+                state.participants = {
+                    items: action.payload.participants.body,
+                    count: action.payload.count.body
+                }
+            })
+            //
+            // push participant next step
+            .addCase(pushParticipantNextStep.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(pushParticipantNextStep.fulfilled, (state, action) => {
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
+            })
+            // end participant pause
+            .addCase(endParticipantPause.pending, (state, action) => {
+                state.api = LOADING
+                state.currentRequestId = action.meta.requestId
+            })
+            .addCase(endParticipantPause.fulfilled, (state, action) => {
+                state.api = IDLE
+                state.status = action.payload.status
+                state.currentRequestId = undefined
             })
             //
             // Procedure Config Cases
@@ -630,6 +701,11 @@ export const selectStudyProcedureOverview = (state) => {
 
 export const selectParticipants = (state) => {
     return state.studies.participants
+}
+
+// api status
+export const selectApiStatus = (state) => {
+    return state.studies.api
 }
 
 export default studySlice.reducer;

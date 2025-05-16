@@ -33,7 +33,7 @@ import ProcedureObject, { ProcedureTypes } from "./ProcedureObject";
 import styles from "./CreateProcedure.module.scss";
 
 // ---------------------------------------------------------------------------------------------------
-// Sector: Empty Procedure Order --------------------------------------------------------------
+// Sector: Empty Procedure Order: Start --------------------------------------------------------------
 
 export const CreateProcedureContext = createContext()
 
@@ -92,7 +92,7 @@ export const CreateProcedureContextProvider = ({ children }) => {
     )
 }
 
-// Sector: Empty Procedure Order --------------------------------------------------------------
+// Sector: Empty Procedure Order: End --------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------
 
 

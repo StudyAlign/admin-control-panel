@@ -18,21 +18,36 @@ export async function apiWithAuth(apiMethod, args, dispatch) {
         console.log("apiWithAuth:", apiMethod, args)
         return Promise.resolve(response)
     } catch (err) {
-        if (err.status === 401 || err.status === 403) { //unauthorized or forbidden
-            try {
-                console.log("Refreshing access token...")
-                const tokenResponse = await userRefreshTokenApi()
-                updateAccessTokenApi(tokenResponse.body);
-                const response = await apiMethod(args)
-                return Promise.resolve(response)
-            } catch (err) {
-                console.log("refreshing failed, logout")
-                dispatch(authSlice.actions.logout())
+        switch (err.status) {
+            case 401: //unauthorized
+                try {
+                    console.log("Unauthorized, Refreshing access token...")
+                    const tokenResponse = await userRefreshTokenApi()
+                    updateAccessTokenApi(tokenResponse.body);
+                    const response = await apiMethod(args)
+                    return Promise.resolve(response)
+                } catch (err) {
+                    console.log("401 error, logout user")
+                    dispatch(authSlice.actions.logout())
+                    return Promise.reject(err)
+                }
+            case 403: //forbidden
+                try {
+                    console.log("Forbidden, Refreshing access token...")
+                    const tokenResponse = await userRefreshTokenApi()
+                    updateAccessTokenApi(tokenResponse.body);
+                    const response = await apiMethod(args)
+                    return Promise.resolve(response)
+                } catch (err) {
+                    // navigate to generic error page
+                    console.log("403 error, redirect to error page")
+                    dispatch(authSlice.actions.setError(err))
+                    return Promise.reject(err)
+                }
+            default:
+                //dispatch(authSlice.actions.setError(err))
                 return Promise.reject(err)
-            }
         }
-        //dispatch(authSlice.actions.logout())
-        return Promise.reject(err)
     }
 }
 
@@ -50,8 +65,16 @@ export function userRefreshTokenApi() {
     return sal.userRefreshToken();
 }
 
-export function getUsersApi() {
-    return sal.getUsers();
+export function getUsersApi(args) {
+    return sal.getUsers(
+        args.offset, args.limit,
+        args.orderBy, args.direction,
+        args.search
+    );
+}
+
+export function getUsersCountApi() {
+    return sal.getUsersCount();
 }
 
 export function getUserApi(userId) {
@@ -72,6 +95,20 @@ export function deleteUserApi(userId) {
 
 export function getRolesApi() {
     return sal.getRoles();
+}
+
+// Collaborators
+
+export function getCollaboratorsApi(studyId) {
+    return sal.getCollaborators(studyId);
+}
+
+export function createCollaboratorApi(collaborator) {
+    return sal.createCollaborator(collaborator);
+}
+
+export function deleteCollaboratorApi(collaboratorId) {
+    return sal.deleteCollaborator(collaboratorId);
 }
 
 // Studies
@@ -173,8 +210,25 @@ export function getParticipantByIdApi(participantId) {
     return sal.getParticipantById(participantId);
 }
 
-export function getParticipantsApi(studyId) {
-    return sal.getParticipants(studyId);
+export function getParticipantsApi(args) {
+    return sal.getParticipants(
+        args.studyId,
+        args.offset, args.limit,
+        args.orderBy, args.direction
+    );
+}
+
+export function getParticipantsCountApi(args) {
+    return sal.getParticipantsCount(
+        args.studyId,
+        args.participant_state,
+        args.paused,
+        args.proceed
+    );
+}
+
+export function getProcedureStepPushApi(participantToken) {
+    return sal.procedureStepPush(participantToken);
 }
 
 export function endParticipantPauseApi(participantToken) {
@@ -308,8 +362,24 @@ export function deletePauseApi(pauseId) {
 
 // Other calls
 
-export function getInteractions(args) {
-    return sal.getInteractions(args.studyId, args.type, args.offset, args.limit);
+export function getInteractionsApi(args) {
+    return sal.getInteractions(
+        args.studyId, args.type,
+        args.offset, args.limit,
+        args.orderBy, args.direction
+    );
+}
+
+export function getInteractionCountApi(args) {
+    return sal.getInteractionCount(args.studyId, args.type);
+}
+
+export function getInteractionCountsApi(args) {
+    return sal.getInteractionCounts(args.studyId);
+}
+
+export function getInteractionExportApi(args) {
+    return sal.getInteractionExport( args.studyId );
 }
 
 export function storeTokensApi(tokens) {

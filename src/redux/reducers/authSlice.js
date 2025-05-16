@@ -93,7 +93,13 @@ export const authSlice = createSlice({
             state.tokens = null
             state.user = null
             state.isAuthenticated = false
-        }
+        },
+        setError(state, action) {
+            state.error = action.payload
+        },
+        clearError(state) {
+            state.error = null;
+        },
     },
     extraReducers: (builder) => {
         builder
