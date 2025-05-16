@@ -425,7 +425,7 @@ export default function CreateIntegrations(props) {
                 <>
                     <Row>
                         <p> You are not using a questionnaire system in your procedure. </p>
-                        <p> Go to the next page and chek out your study! </p>
+                        <p> Go to the next page and check out your study! </p>
                     </Row>
 
                     <Row className='mt-3' xs="auto">
