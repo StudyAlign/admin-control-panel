@@ -26,6 +26,10 @@ Jannek Sekowski and Niklas Markert contributed to the StudyAlign admin frontend!
 
 Thank you so much, without your effort it would not be that great.
 
+You can find these talented guys here at GitHub:
+
+Jannek Sekowski: https://github.com/jannek-skwi
+Niklas Markert: https://github.com/nmarkert
 
 ## Misc:
 
