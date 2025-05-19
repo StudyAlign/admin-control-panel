@@ -15,12 +15,19 @@ Modify docker-compose.prod.yml according to your needs, e.g. change paths to bac
 On your server then execute `docker compose -f docker-compose.prod.yml up -d`. Docker compose builds the frontend
 and serves it via a nginx at port 8003.
 
-
 ## Project Conventions:
 
 - 1 Branch per issue: `issue/ID-short-description-maxthreewords`
 
------
+
+## Credits:
+
+Jannek Sekowski and Niklas Markert contributed to the StudyAlign admin frontend! 
+
+Thank you so much, without your effort it would not be that great.
+
+
+## Misc:
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), using the [Redux](https://redux.js.org/) and [Redux Toolkit](https://redux-toolkit.js.org/) template.
 
