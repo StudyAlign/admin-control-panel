@@ -101,8 +101,7 @@ export default function CreateInformation() {
                         <Col>
                             <Form.Group className="mb-3" controlId="formStartDate">
                                 <Form.Label>Start Date</Form.Label>
-                                <Form.Control required type="date" placeholder="Start Date" value={startDate} onChange={handleStartDate}
-                                    min={(new Date()).toISOString().split('T')[0]}/>
+                                <Form.Control required type="date" placeholder="Start Date" value={startDate} onChange={handleStartDate} />
                             </Form.Group>
                         </Col>
                         <Col>

@@ -204,8 +204,10 @@ export default function CreateIntegrations(props) {
     const LimeSurveyInstructions = () => {
         const [copySuccess, setCopySuccess] = useState(false)
         let timeoutId
-    
-        const url = "https://hciaitools.uni-bayreuth.de/studies-dev/{PASSTHRU:SAL_ID}/proceed/{PASSTHRU:SAL_TOKEN}"
+
+        const backendUrl = process.env.REACT_APP_STUDY_ALIGN_URL;
+
+        const url = backendUrl + "/{PASSTHRU:SAL_ID}/proceed/{PASSTHRU:SAL_TOKEN}"
         const copy1 = "SAL_TOKEN"
         const copy2 = "SAL_ID"
         const end = "Please click on the following link"
@@ -295,8 +297,10 @@ export default function CreateIntegrations(props) {
     const QualtricsInstructions = () => {
         const [copySuccess, setCopySuccess] = useState(false)
         let timeoutId
-    
-        const code = 'Please click on the following link: <a href="https://hciaitools.uni-bayreuth.de/studies-dev/${e://Field/SAL_ID}/proceed/${e://Field/SAL_TOKEN}" rel="nofollow">https://hciaitools.uni-bayreuth.de/studies-dev/${e://Field/SAL_ID}/proceed/${e://Field/SAL_TOKEN}</a><br />'
+
+        const backendUrl = process.env.REACT_APP_STUDY_ALIGN_URL;
+
+        const code = 'Please click on the following link: <a href="' + backendUrl + '/${e://Field/SAL_ID}/proceed/${e://Field/SAL_TOKEN}" rel="nofollow">' + backendUrl + '/${e://Field/SAL_ID}/proceed/${e://Field/SAL_TOKEN}</a><br />'
         const copy1 = "SAL_TOKEN"
         const copy2 = "SAL_ID"
     

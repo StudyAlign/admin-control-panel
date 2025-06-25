@@ -142,8 +142,7 @@ export default function EditInformation(props) {
                         <Col>
                             <Form.Group className="mb-3" controlId="formStartDate">
                                 <Form.Label>Start Date</Form.Label>
-                                <Form.Control disabled={disabled} required type="date" placeholder="Start Date" value={startDate} onChange={handleStartDate}
-                                    min={disabled ? null : (new Date()).toISOString().split('T')[0]} />
+                                <Form.Control disabled={disabled} required type="date" placeholder="Start Date" value={startDate} onChange={handleStartDate} />
                             </Form.Group>
                         </Col>
                         <Col>
